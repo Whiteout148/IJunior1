@@ -14,7 +14,7 @@ namespace _3_vryad
             int row = 3;
 
             int rowNumber = album / row;
-            int remainder = album % 3;
+            int remainder = album % row;
 
             Console.WriteLine($"Количество рядов {rowNumber} остаток фотографий {remainder}");
 
