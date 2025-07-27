@@ -16,15 +16,17 @@ namespace @switch
             string tea = "капучино";
             string coffee = "индийский чай";
 
-            Console.WriteLine($"Имя: {name}\nФамилия: {surname}\nБудете пить {tea}? или же кофе {coffee}");
+            Console.WriteLine($"Имя: {name}\nФамилия: {surname}\nБудете пить {tea}? или же кофе {coffee}?");
 
-            name = "Владимир";
-            surname = "Буянов";
+            string lateName = name;
+            name = surname;
+            surname = lateName;
 
-            tea = "Индийский чай";
-            coffee = "капучино";
+            string lateDrinkName = tea;
+            tea = coffee;
+            coffee = lateDrinkName;
 
-            Console.WriteLine($"\nИмя: {name}\nФамилия: {surname}\nБудете пить {tea}? или же кофе {coffee}");
+            Console.WriteLine($"\nИмя: {name}\nФамилия: {surname}\nБудете пить {tea}? или же кофе {coffee}?");
 
             Console.ReadKey();
         }
