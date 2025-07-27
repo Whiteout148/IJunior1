@@ -10,21 +10,18 @@ namespace ConsoleApp2
     {
         static void Main(string[] args)
         {
-            string name;
-            string surname;
-            int age;
-            string favouriteDrink;
+            int gold;
+            int amethysts;
+            int amethystsPrice = 10;
 
-            Console.Write("Введите имя: ");
-            name = Console.ReadLine();
-            Console.Write("\nВведите фамилию: ");
-            surname = Console.ReadLine();
-            Console.Write("\nВведите возраст: ");
-            age = Convert.ToInt32(Console.ReadLine());
-            Console.Write("\nВведите любимый напиток: ");
-            favouriteDrink = Console.ReadLine();
+            Console.WriteLine("Введите количество золото: ");
+            gold = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine("Введите количество аметистов которые хотите купить: ");
+            amethysts = Convert.ToInt32(Console.ReadLine());
+            int resultPriсe = amethysts * amethystsPrice;
+            gold -= resultPriсe;
 
-            Console.WriteLine($"\nИмя {name}, Фамилия {surname}, возраст {age}, любимый напиток {favouriteDrink}");
+            Console.WriteLine($"Вы купили {amethysts} аметистов по цене {resultPriсe}. у вас осталось {gold} золото");
 
             Console.ReadKey();
         }
