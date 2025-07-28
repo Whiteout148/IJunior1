@@ -6,16 +6,16 @@ namespace WhilesPractice1
     {
         static void Main()
         {
-            int firstNumber = 5;
+            int initialNumber = 5;
             int lastNumber = 789;
 
-            Console.WriteLine(firstNumber);
+            Console.WriteLine(initialNumber);
 
-            while (firstNumber < lastNumber)
+            while (initialNumber < lastNumber)
             {
-                firstNumber += 7;
+                initialNumber += 7;
 
-                Console.WriteLine(firstNumber);
+                Console.WriteLine(initialNumber);
             }
         }
     }
