@@ -9,13 +9,9 @@ namespace WhilesPractice1
             int initialNumber = 5;
             int lastNumber = 789;
 
-            Console.WriteLine(initialNumber);
-
-            while (initialNumber < lastNumber)
+            for(int i = initialNumber; i <= lastNumber; i += 7)
             {
-                initialNumber += 7;
-
-                Console.WriteLine(initialNumber);
+                Console.WriteLine(i);
             }
         }
     }
