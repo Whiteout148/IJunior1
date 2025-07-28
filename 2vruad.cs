@@ -6,13 +6,13 @@ namespace _3_vryad
     {
         static void Main(string[] args)
         {
-            int album = 52;
-            int row = 3;
+            int PhotoAlbum = 52;
+            int rowWithPhotographs = 3;
 
-            int rowNumber = album / row;
-            int remainder = album % row;
+            int rowInPhotographsNumber = PhotoAlbum / rowWithPhotographs;
+            int remainderPhotographs = PhotoAlbum % rowWithPhotographs;
 
-            Console.WriteLine($"Количество рядов {rowNumber} остаток фотографий {remainder}");
+            Console.WriteLine($"Количество рядов в ряду {rowInPhotographsNumber} остаток фотографий {remainderPhotographs}");
 
             Console.ReadLine();
         }
