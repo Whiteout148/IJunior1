@@ -6,25 +6,16 @@ namespace WhilesPractice1
     {
         static void Main()
         {
-            bool isWork = true;
-            string messageForExit = "exit";
+            int firstNumber = 5;
+            int lastNumber = 789;
 
-            while (isWork)
+            Console.WriteLine(firstNumber);
+
+            while (firstNumber < lastNumber)
             {
-                Console.WriteLine($"Введите слово {messageForExit} для выхода");
+                firstNumber += 7;
 
-                Console.ReadKey();
-                string userMessage = Console.ReadLine();
-
-                if(userMessage == messageForExit)
-                {
-                    Console.WriteLine("Выход из программы...");
-                    isWork = false;
-                }
-                else
-                {
-                    continue;
-                }
+                Console.WriteLine(firstNumber);
             }
         }
     }
