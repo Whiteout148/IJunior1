@@ -6,19 +6,20 @@ namespace WhilesPractice1
     {
         static void Main()
         {
-            bool isOpenTheProgram = true;
+            bool isWork = true;
+            string messageForExit = "exit";
 
-            while (isOpenTheProgram)
+            while (isWork)
             {
-                Console.WriteLine("Введите слово exit для выхода");
+                Console.WriteLine($"Введите слово {messageForExit} для выхода");
 
                 Console.ReadKey();
                 string userMessage = Console.ReadLine();
 
-                if(userMessage == "exit")
+                if(userMessage == messageForExit)
                 {
                     Console.WriteLine("Выход из программы...");
-                    isOpenTheProgram = false;
+                    isWork = false;
                 }
                 else
                 {
