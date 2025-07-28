@@ -8,17 +8,17 @@ namespace XDproject
         {
             int patient;
             int patientReceptionTimeWithMinutes = 10;
-            int oneHour = patientReceptionTimeWithMinutes * 6;
+            int minutesPerHour = 60;
 
             Console.WriteLine("Введите количество пациентов");
             patient = Convert.ToInt32(Console.ReadLine());
 
             int allPatientsReceptionTime = patient * patientReceptionTimeWithMinutes;
-            int HoursRemaining = allPatientsReceptionTime / oneHour;
-            int minutesRemaining = allPatientsReceptionTime % oneHour;
+            int hoursRemaining = allPatientsReceptionTime / minutesPerHour;
+            int minutesRemaining = allPatientsReceptionTime % minutesPerHour;
 
             Console.WriteLine($"Время прибытие одного пациента: {patientReceptionTimeWithMinutes}" +
-                $"\nвам стоят в очереди {HoursRemaining} часов {minutesRemaining} минут.");
+                $"\nвам стоят в очереди {hoursRemaining} часов {minutesRemaining} минут.");
 
             Console.ReadLine();
         }
