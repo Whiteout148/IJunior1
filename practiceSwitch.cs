@@ -10,7 +10,17 @@ namespace KurwaTSIKLI
             string userInput;
             string phoneNumber = "7034340583";
             string mail = "vladimirkovsky@gmail.com";
+
             int accessCode;
+            int initialNumberInCode = 100;
+            int lastNumberInCode = 998;
+
+            const string CommandForGetMail = "1";
+            const string CommandForGetPhoneNumber = "2";
+            const string CommandForGetRandomCode = "3";
+            const string CommandForClearConsol = "4";
+            const string CommandForExit = "5";
+
 
             Random random = new Random();
 
@@ -26,39 +36,45 @@ namespace KurwaTSIKLI
                 Console.WriteLine("\n5 - Выход из программы");
 
                 userInput = Console.ReadLine();
+
                 switch(userInput)
                 {
-                    case "1":
+                    case CommandForGetMail:
                         Console.WriteLine($"Ваша электронная почта: {mail}");
+
                         break;
-                    case "2":
+
+                    case CommandForGetPhoneNumber:
                         Console.WriteLine($"Ваш номер телефона: {phoneNumber}");
+
                         break;
-                    case "3":
-                        accessCode = random.Next(100, 999);
+
+                    case CommandForGetRandomCode:
+                        accessCode = random.Next(initialNumberInCode, lastNumberInCode + 1);
 
                         Console.WriteLine($"Ваш код доступа: {accessCode}");
+
                         break;
-                    case "4":
+
+                    case CommandForClearConsol:
                         Console.Clear();
+
                         break;
-                    case "5":
+
+                    case CommandForExit:
                         Console.Clear();
-                        Console.WriteLine("Выход из программы");
-                        Thread.Sleep(400);
-                        Console.Clear();
-                        Console.WriteLine("Выход из программы.");
-                        Thread.Sleep(400);
-                        Console.Clear();
-                        Console.WriteLine("Выход из программы..");
-                        Thread.Sleep(400);
-                        Console.Clear();
-                        Console.WriteLine("Выход из программы...");
-                        Thread.Sleep(300);
-                        Console.Clear();
+                        Console.WriteLine("Вы вышли из программы");
+
                         isWorking = false;
+
+                        break;
+
+                    default:
+                        Console.WriteLine("Неверный ввод команды!");
+
                         break;
                 }
+
                 Console.ReadKey();
                 Console.Clear();
             }
