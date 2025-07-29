@@ -25,8 +25,6 @@ namespace KurwaTSIKLI
 
             Console.WriteLine($"рандомное число: {randomNumber}");
             Console.WriteLine($"сумма чисел кратных {firstMultiplicationNumber} или {secondMultiplicationNumber}: {sum}");
-
-            Console.WriteLine("");
         }
     }
 }
