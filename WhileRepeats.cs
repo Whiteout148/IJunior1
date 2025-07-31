@@ -1,5 +1,7 @@
 ﻿using System;
+using System.ComponentModel.Design;
 using System.Text;
+using System.Threading;
 
 namespace WhilesPractice1
 {
@@ -10,144 +12,184 @@ namespace WhilesPractice1
             Console.OutputEncoding = Encoding.Unicode;
             Console.InputEncoding = Encoding.Unicode;
 
-            const string CommandForExit = "Выход";
-            const string CommandForDollarUsd = "USD";
-            const string CommandForRuble = "RUB";
-            const string CommandForLira = "TL";
+            const string UsdName = "USD";
+            const string Rubname = "RUB";
+            const string TlName = "TL";
+
+            const string CommandUsdToRub = "1";
+            const string CommandUsdToTl = "2";
+            const string CommandRubToUsd = "3";
+            const string CommandRubToTl = "4";
+            const string CommandTlToUsd = "5";
+            const string CommandTlToRub = "6";
+            const string CommandForExit = "7";
+
             string userInput;
 
             bool isWork = true;
 
-            float rubleBalance;
-            float dollarBalance;
-            float liraBalance;
+            float rubBalance;
+            float usdBalance;
+            float tlBalance;
 
             float desiredMoney;
 
-            float dollarRubleCourse = 82f;
-            float liraDollarCouse = 40f;
-            float rubleLiraCouse = 2f;
+            float UsdToRubCourse = 80.31f;
+            float UsdToTlCourse = 40.53f;
+
+            float RubToUsdCourse = 0.0125f;
+            float rubToTlCouse = 0.504f;
+
+            float TlToUsdCourse = 0.0247f;
+            float TlToRubCourse = 1.98f;
 
             Console.WriteLine($"Добро пожаловать в нашу программу по конвертации валют");
             Console.WriteLine($"\nВведите ваш баланс из всех доступных валют:");
-            Console.WriteLine($"\nСколько у вас {CommandForDollarUsd}?");
-            dollarBalance = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine($"\nВведите баланс валюты: {UsdName}");
+            usdBalance = Convert.ToInt32(Console.ReadLine());
 
-            Console.WriteLine($"\nСколько у вас {CommandForRuble}?");
-            liraBalance = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine($"\nВведите баланс валюты: {Rubname}");
+            rubBalance = Convert.ToInt32(Console.ReadLine());
 
-            Console.WriteLine($"\nСколько у вас {CommandForLira}?");
-            rubleBalance = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine($"\nВведите баланс валюты: {TlName}");
+            tlBalance = Convert.ToInt32(Console.ReadLine());
 
             while (isWork)
             {
-                Console.WriteLine($"\nБаланс {CommandForDollarUsd}: {dollarBalance}");
-                Console.WriteLine($"\nБаланс {CommandForRuble}: {rubleBalance}");
-                Console.WriteLine($"\nБаланс {CommandForLira}: {liraBalance}");
+                Console.WriteLine($"\nБаланс {UsdName}: {usdBalance}");
+                Console.WriteLine($"\nБаланс {Rubname}: {rubBalance}");
+                Console.WriteLine($"\nБаланс {TlName}: {tlBalance}");
 
-                Console.WriteLine("\nКакую валюту хотите конвертировать?");
-                Console.WriteLine($"\nкоманда {CommandForDollarUsd} на Пиндос доллар");
-                Console.WriteLine($"\nкоманда {CommandForRuble} на Российский рубль");
-                Console.WriteLine($"\nкоманда {CommandForLira} на Турецкий лир");
-                Console.WriteLine($"\nкоманда {CommandForExit} на выход из программы");
+                Console.WriteLine($"\nКурс {UsdName} к {Rubname}: {UsdToRubCourse}\nкоманда {CommandUsdToRub} для обмена");
+                Console.WriteLine($"\nКурс {UsdName} к {TlName}: {UsdToTlCourse}\nкоманда {CommandUsdToTl} для обмена");
+                Console.WriteLine($"\nКурс {Rubname} к {UsdName}: {RubToUsdCourse}\nкоманда {CommandRubToUsd} для обмена");
+                Console.WriteLine($"\nКурс {Rubname} к {TlName}: {rubToTlCouse}\nкоманда {CommandRubToTl} для обмена");
+                Console.WriteLine($"\nКурс {TlName} к {UsdName}: {TlToUsdCourse}\nкоманда {CommandTlToUsd} для обмена");
+                Console.WriteLine($"\nКурс {TlName} к {Rubname}: {TlToRubCourse}\nкоманда {CommandTlToRub} для обмена");
+                Console.WriteLine($"\nКоманда {CommandForExit} для выхода");
+                Console.WriteLine("\n\nВведите нужную вам команду\n");
+
                 userInput = Console.ReadLine();
 
-                switch (userInput)
+                switch(userInput)
                 {
-                    case CommandForDollarUsd:
-                        Console.WriteLine($"\nСколько {CommandForDollarUsd} хотите конвертировать?");
+                    case CommandUsdToRub:
+                        Console.WriteLine("Введите желаемое количество денег: ");
                         desiredMoney = Convert.ToSingle(Console.ReadLine());
 
-                        if (desiredMoney > dollarBalance)
+                        if (desiredMoney > usdBalance)
                         {
-                            Console.WriteLine("Желаемое количество денег превышает баланс");
+                            Console.WriteLine($"Желаемое количество денег превышает баланс валюты: {usdBalance}");
                         }
                         else
                         {
-                            Console.WriteLine($"В какую валюту хотите конвертировать? {CommandForRuble}/{CommandForLira}");
-                            userInput = Console.ReadLine();
+                            usdBalance -= desiredMoney;
+                            desiredMoney *= UsdToRubCourse;
+                            rubBalance += desiredMoney;
 
-                            if (userInput == CommandForRuble)
-                            {
-                                dollarBalance -= desiredMoney;
-                                desiredMoney *= dollarRubleCourse;
-                                rubleBalance += desiredMoney;
-
-                                Console.WriteLine($"\nНа баланс {CommandForRuble} зачисленно {desiredMoney}");
-                            }
-                            else if (userInput == CommandForLira)
-                            {
-                                dollarBalance -= desiredMoney;
-                                desiredMoney *= liraDollarCouse;
-                                liraBalance += desiredMoney;
-
-                                Console.WriteLine($"\nНа баланс {CommandForLira} зачисленно {desiredMoney}");
-                            }
+                            Console.WriteLine($"На баланс валюты: {Rubname} зачисленно {desiredMoney}");
                         }
                         break;
 
-                    case CommandForRuble:
-                        Console.WriteLine($"\nСколько {CommandForRuble} хотите конвертировать?");
+                    case CommandUsdToTl:
+                        Console.WriteLine("Введите желаемое количество денег: ");
                         desiredMoney = Convert.ToSingle(Console.ReadLine());
 
-                        if (desiredMoney > rubleBalance)
+                        if(desiredMoney > usdBalance)
                         {
-                            Console.WriteLine("Желаемое количество денег превышает баланс");
+                            Console.WriteLine($"Желаемое количество денег превышает баланс валюты: {usdBalance}");
                         }
                         else
                         {
-                            Console.WriteLine($"В какую валюту хотите конвертировать? {CommandForDollarUsd}/{CommandForLira}");
-                            userInput = Console.ReadLine();
+                            usdBalance -= desiredMoney;
+                            desiredMoney *= UsdToTlCourse;
+                            tlBalance += desiredMoney;
 
-                            if(userInput == CommandForDollarUsd)
-                            {
-                                rubleBalance -= desiredMoney;
-                                desiredMoney /= dollarRubleCourse;
-                                dollarBalance += desiredMoney;
-
-                                Console.WriteLine($"\nНа баланс {CommandForDollarUsd} зачисленно {desiredMoney}");
-                            }
-                            else if(userInput == CommandForLira)
-                            {
-                                rubleBalance -= desiredMoney;
-                                desiredMoney /= rubleLiraCouse;
-                                liraBalance += desiredMoney;
-
-                                Console.WriteLine($"\nНа баланс {CommandForLira} зачисленно {desiredMoney}");
-                            }
+                            Console.WriteLine($"На баланс валюты: {TlName} зачисленно {desiredMoney}");
                         }
                         break;
 
-                    case CommandForLira:
-                        Console.WriteLine($"\nСколько {CommandForLira} хотите конвертировать?");
+                    case CommandRubToUsd:
+                        Console.WriteLine("Введите желаемое количество денег: ");
                         desiredMoney = Convert.ToSingle(Console.ReadLine());
 
-                        if(desiredMoney > liraBalance)
+                        if(desiredMoney > rubBalance)
                         {
-                            Console.WriteLine("Желаемое количество денег превышает баланс");
+                            Console.WriteLine($"Желаемое количество денег превышает баланс валюты: {rubBalance}");
                         }
                         else
                         {
-                            Console.WriteLine($"В какую валюту хотите конвертировать? {CommandForDollarUsd}/{CommandForRuble}");
-                            userInput = Console.ReadLine();
+                            rubBalance -= desiredMoney;
+                            desiredMoney *= RubToUsdCourse;
+                            usdBalance += desiredMoney;
 
-                            if(userInput == CommandForDollarUsd)
-                            {
-                                liraBalance -= desiredMoney;
-                                desiredMoney /= liraDollarCouse;
-                                dollarBalance += desiredMoney;
-
-                                Console.WriteLine($"\nНа баланс {CommandForDollarUsd} зачисленно {desiredMoney}");
-                            }
-                            else if(userInput == CommandForRuble)
-                            {
-                                liraBalance -= desiredMoney;
-                                desiredMoney *= rubleLiraCouse;
-                                rubleLiraCouse += desiredMoney;
-
-                                Console.WriteLine($"\nНа баланс {CommandForRuble} зачисленно {desiredMoney}");
-                            }
+                            Console.WriteLine($"На баланс валюты: {UsdName} зачисленно {desiredMoney}");
                         }
+                        break;
+
+                    case CommandRubToTl:
+                        Console.WriteLine("Введите желаемое количество денег: ");
+                        desiredMoney = Convert.ToSingle(Console.ReadLine());
+
+                        if(desiredMoney > rubBalance)
+                        {
+                            Console.WriteLine($"Желаемое количество денег превышает баланс валюты: {rubBalance}");
+                        }
+                        else
+                        {
+                            rubBalance -= desiredMoney;
+                            desiredMoney *= rubToTlCouse;
+                            tlBalance += desiredMoney;
+
+                            Console.WriteLine($"На баланс валюты: {TlName} зачисленно {desiredMoney}");
+                        }
+                        break;
+
+                    case CommandTlToUsd:
+                        Console.WriteLine("Введите желаемое количество денег: ");
+                        desiredMoney = Convert.ToSingle(Console.ReadLine());
+
+                        if(desiredMoney > tlBalance)
+                        {
+                            Console.WriteLine($"Желаемое количество денег превышает баланс валюты: {tlBalance}");
+                        }
+                        else
+                        {
+                            tlBalance -= desiredMoney;
+                            desiredMoney *= TlToUsdCourse;
+                            usdBalance += desiredMoney;
+
+                            Console.WriteLine($"На баланс валюты: {UsdName} зачисленно {desiredMoney}");
+                        }
+                        break;
+
+                    case CommandTlToRub:
+                        Console.WriteLine("Введите желаемое количество денег: ");
+                        desiredMoney = Convert.ToSingle(Console.ReadLine());
+
+                        if (desiredMoney > tlBalance)
+                        {
+                            Console.WriteLine($"Желаемое количество денег превышает баланс валюты: {tlBalance}");
+                        }
+                        else
+                        {
+                            tlBalance -= desiredMoney;
+                            desiredMoney *= TlToRubCourse;
+                            rubBalance += desiredMoney;
+
+                            Console.WriteLine($"На баланс валюты: {Rubname} зачисленно {desiredMoney}");
+                        }
+                        break;
+                    case CommandForExit:
+                        Console.Clear();
+                        Console.WriteLine("Выход из программы...");
+                        Thread.Sleep(1000);
+                        isWork = false;
+                        Console.Clear();
+                        break;
+
+                    default:
+                        Console.WriteLine("Нету такой команды!");
                         break;
                 }
 
