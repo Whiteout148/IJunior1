@@ -14,7 +14,7 @@ namespace WhilesPractice1
 
             const string UsdName = "USD";
             const string Rubname = "RUB";
-            const string TlName = "TL";
+            const string TrylName = "Try";
 
             const string CommandUsdToRub = "1";
             const string CommandUsdToTl = "2";
@@ -34,14 +34,14 @@ namespace WhilesPractice1
 
             float desiredMoney;
 
-            float UsdToRubCourse = 80.31f;
-            float UsdToTlCourse = 40.53f;
+            float usdToRubCourse = 80.31f;
+            float usdToTlCourse = 40.53f;
 
-            float RubToUsdCourse = 0.0125f;
+            float rubToUsdCourse = 0.0125f;
             float rubToTlCouse = 0.504f;
 
-            float TlToUsdCourse = 0.0247f;
-            float TlToRubCourse = 1.98f;
+            float tryToUsdCourse = 0.0247f;
+            float tryToRubCourse = 1.98f;
 
             Console.WriteLine($"Добро пожаловать в нашу программу по конвертации валют");
             Console.WriteLine($"\nВведите ваш баланс из всех доступных валют:");
@@ -51,21 +51,21 @@ namespace WhilesPractice1
             Console.WriteLine($"\nВведите баланс валюты: {Rubname}");
             rubBalance = Convert.ToInt32(Console.ReadLine());
 
-            Console.WriteLine($"\nВведите баланс валюты: {TlName}");
+            Console.WriteLine($"\nВведите баланс валюты: {TrylName}");
             tlBalance = Convert.ToInt32(Console.ReadLine());
 
             while (isWork)
             {
                 Console.WriteLine($"\nБаланс {UsdName}: {usdBalance}");
                 Console.WriteLine($"\nБаланс {Rubname}: {rubBalance}");
-                Console.WriteLine($"\nБаланс {TlName}: {tlBalance}");
+                Console.WriteLine($"\nБаланс {TrylName}: {tlBalance}");
 
-                Console.WriteLine($"\nКурс {UsdName} к {Rubname}: {UsdToRubCourse}\nкоманда {CommandUsdToRub} для обмена");
-                Console.WriteLine($"\nКурс {UsdName} к {TlName}: {UsdToTlCourse}\nкоманда {CommandUsdToTl} для обмена");
-                Console.WriteLine($"\nКурс {Rubname} к {UsdName}: {RubToUsdCourse}\nкоманда {CommandRubToUsd} для обмена");
-                Console.WriteLine($"\nКурс {Rubname} к {TlName}: {rubToTlCouse}\nкоманда {CommandRubToTl} для обмена");
-                Console.WriteLine($"\nКурс {TlName} к {UsdName}: {TlToUsdCourse}\nкоманда {CommandTlToUsd} для обмена");
-                Console.WriteLine($"\nКурс {TlName} к {Rubname}: {TlToRubCourse}\nкоманда {CommandTlToRub} для обмена");
+                Console.WriteLine($"\nКурс {UsdName} к {Rubname}: {usdToRubCourse}\nкоманда {CommandUsdToRub} для обмена");
+                Console.WriteLine($"\nКурс {UsdName} к {TrylName}: {usdToTlCourse}\nкоманда {CommandUsdToTl} для обмена");
+                Console.WriteLine($"\nКурс {Rubname} к {UsdName}: {rubToUsdCourse}\nкоманда {CommandRubToUsd} для обмена");
+                Console.WriteLine($"\nКурс {Rubname} к {TrylName}: {rubToTlCouse}\nкоманда {CommandRubToTl} для обмена");
+                Console.WriteLine($"\nКурс {TrylName} к {UsdName}: {tryToUsdCourse}\nкоманда {CommandTlToUsd} для обмена");
+                Console.WriteLine($"\nКурс {TrylName} к {Rubname}: {tryToRubCourse}\nкоманда {CommandTlToRub} для обмена");
                 Console.WriteLine($"\nКоманда {CommandForExit} для выхода");
                 Console.WriteLine("\n\nВведите нужную вам команду\n");
 
@@ -84,7 +84,7 @@ namespace WhilesPractice1
                         else
                         {
                             usdBalance -= desiredMoney;
-                            desiredMoney *= UsdToRubCourse;
+                            desiredMoney *= usdToRubCourse;
                             rubBalance += desiredMoney;
 
                             Console.WriteLine($"На баланс валюты: {Rubname} зачисленно {desiredMoney}");
@@ -102,10 +102,10 @@ namespace WhilesPractice1
                         else
                         {
                             usdBalance -= desiredMoney;
-                            desiredMoney *= UsdToTlCourse;
+                            desiredMoney *= usdToTlCourse;
                             tlBalance += desiredMoney;
 
-                            Console.WriteLine($"На баланс валюты: {TlName} зачисленно {desiredMoney}");
+                            Console.WriteLine($"На баланс валюты: {TrylName} зачисленно {desiredMoney}");
                         }
                         break;
 
@@ -120,7 +120,7 @@ namespace WhilesPractice1
                         else
                         {
                             rubBalance -= desiredMoney;
-                            desiredMoney *= RubToUsdCourse;
+                            desiredMoney *= rubToUsdCourse;
                             usdBalance += desiredMoney;
 
                             Console.WriteLine($"На баланс валюты: {UsdName} зачисленно {desiredMoney}");
@@ -141,7 +141,7 @@ namespace WhilesPractice1
                             desiredMoney *= rubToTlCouse;
                             tlBalance += desiredMoney;
 
-                            Console.WriteLine($"На баланс валюты: {TlName} зачисленно {desiredMoney}");
+                            Console.WriteLine($"На баланс валюты: {TrylName} зачисленно {desiredMoney}");
                         }
                         break;
 
@@ -156,7 +156,7 @@ namespace WhilesPractice1
                         else
                         {
                             tlBalance -= desiredMoney;
-                            desiredMoney *= TlToUsdCourse;
+                            desiredMoney *= tryToUsdCourse;
                             usdBalance += desiredMoney;
 
                             Console.WriteLine($"На баланс валюты: {UsdName} зачисленно {desiredMoney}");
@@ -174,7 +174,7 @@ namespace WhilesPractice1
                         else
                         {
                             tlBalance -= desiredMoney;
-                            desiredMoney *= TlToRubCourse;
+                            desiredMoney *= tryToRubCourse;
                             rubBalance += desiredMoney;
 
                             Console.WriteLine($"На баланс валюты: {Rubname} зачисленно {desiredMoney}");
