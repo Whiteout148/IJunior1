@@ -10,8 +10,6 @@ namespace WhilesPractice1
             string userInput;
             string secretMessage;
 
-            int attempts = 3;
-
             Console.Write("Введите секретное сообщение:");
             secretMessage = Console.ReadLine();
 
@@ -20,27 +18,27 @@ namespace WhilesPractice1
 
             Console.WriteLine("Пароль создан!");
 
-            while (attempts != 0)
+            for (int i = 3; i > 0; i--)
             {
-                Console.WriteLine($"\nВведите пароль");
+                Console.WriteLine("\nВведите пароль чтобы получить кодовое сообщение");
                 userInput = Console.ReadLine();
 
-                if (userInput == password)
+                if(i != 0)
                 {
-                    Console.WriteLine("Пароль верный!");
-                    Console.WriteLine($"Секретное сообщение: {secretMessage}");
-                }
-                else
-                {
-                    attempts--;
-                    if(attempts == 0)
+                    if (userInput == password)
                     {
-                        Console.WriteLine("Попытки закончились, программма закрывается");
+                        Console.WriteLine($"\nПароль верный! кодовое сообщение: {secretMessage}");
+                        break;
                     }
                     else
                     {
-                        Console.Write($"Неверный пароль! попробуйте снова, осталось попыток: {attempts}");
+                        Console.WriteLine($"Неверный пароль! осталось попыток: {i - 1}");
                     }
+                }
+                else
+                {
+                    Console.WriteLine("Все попытки закончились, программа закрывается...");
+                    break;
                 }
             }
         }
