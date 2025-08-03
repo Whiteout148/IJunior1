@@ -23,24 +23,17 @@ namespace WhilesPractice1
                 Console.WriteLine("\nВведите пароль чтобы получить кодовое сообщение");
                 userInput = Console.ReadLine();
 
-                if(i != 0)
+                if(userInput == password)
                 {
-                    if (userInput == password)
-                    {
-                        Console.WriteLine($"\nПароль верный! кодовое сообщение: {secretMessage}");
-                        break;
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Неверный пароль! осталось попыток: {i - 1}");
-                    }
+                    Console.WriteLine($"Пароль верный! кодовое сообщение: {secretMessage}");
                 }
                 else
                 {
-                    Console.WriteLine("Все попытки закончились, программа закрывается...");
-                    break;
+                    Console.WriteLine($"Пароль не верный! осталось попыток: {i}");
                 }
             }
+
+            Console.WriteLine("закончились попытки");
         }
     }
 }
