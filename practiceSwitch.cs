@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 
 namespace KurwaTSIKLI
 {
@@ -7,25 +6,31 @@ namespace KurwaTSIKLI
     {
         static void Main()
         {
-            Random random = new Random();
+            string userSymbol;
+            string userName;
 
-            int lastPossibleRandomNumber = 100;
-            int randomNumber = random.Next(1, lastPossibleRandomNumber + 1);
-            int firstNumberToDivide = 3;
-            int secondNumberToDivide = 5;
-            int sum = 0;
+            int x;
+            int y;
 
-            for (int i = 1; i <= randomNumber; i++)
+            Console.WriteLine("Введите имя: ");
+            userName = Console.ReadLine();
+
+            Console.WriteLine("\nВведите символ: ");
+            userSymbol = Console.ReadLine();
+
+            Console.WriteLine("\n\n\n");
+
+            for(x = 0; x < userName.Length + 2; x++)
             {
-                if (i % firstNumberToDivide == 0 || i % secondNumberToDivide == 0)
-                {
-                    Console.WriteLine($"Добавлено число: {i}");
-                    sum += i;
-                }
+                Console.Write(userSymbol);
+            }
+            Console.WriteLine("\n" + userSymbol + userName + userSymbol);
+            for (x = 0; x < userName.Length + 2; x++)
+            {
+                Console.Write(userSymbol);
             }
 
-            Console.WriteLine($"рандомное число: {randomNumber}");
-            Console.WriteLine($"сумма чисел кратных {firstNumberToDivide} или {secondNumberToDivide}: {sum}");
+            Console.ReadKey();
         }
     }
 }
