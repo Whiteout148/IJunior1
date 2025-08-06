@@ -10,8 +10,10 @@ namespace WhilesPractice1
 
             int minValue = 50;
             int maxValue = 150;
+            int minValueRandomNumber = 10;
+            int maxValueRandomNumber = 25;
 
-            int randomNumber = random.Next(minValue, maxValue + 1);
+            int randomNumber = random.Next(minValueRandomNumber, maxValueRandomNumber + 1);
 
             Console.WriteLine("Рандомное число: " + randomNumber);
             Console.WriteLine("Числа, кратные " + randomNumber + " в диапазоне от " + minValue + " до " + maxValue + ":");
