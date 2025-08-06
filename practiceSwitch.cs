@@ -1,36 +1,32 @@
 ﻿using System;
 
-namespace KurwaTSIKLI
+class Program
 {
-    internal class practiceSwitch
+    static void Main()
     {
-        static void Main()
+        Console.Write("Введите символ: ");
+        char symbol = Console.ReadKey().KeyChar;
+        Console.WriteLine(); 
+
+        Console.Write("Введите имя: ");
+        string name = Console.ReadLine();
+
+        int walls = 2;
+        int lineLength = name.Length + walls;
+        int strokeLenght = 3;
+
+        for (int i = 0; i < strokeLenght; i++)
         {
-            string userSymbol;
-            string userName;
-
-            int x;
-            int y;
-
-            Console.WriteLine("Введите имя: ");
-            userName = Console.ReadLine();
-
-            Console.WriteLine("\nВведите символ: ");
-            userSymbol = Console.ReadLine();
-
-            Console.WriteLine("\n\n\n");
-
-            for(x = 0; x < userName.Length + 2; x++)
+            if (i == 1)
             {
-                Console.Write(userSymbol);
+                Console.Write(symbol);
+                Console.Write(name);
+                Console.WriteLine(symbol);
             }
-            Console.WriteLine("\n" + userSymbol + userName + userSymbol);
-            for (x = 0; x < userName.Length + 2; x++)
+            else
             {
-                Console.Write(userSymbol);
+                Console.WriteLine(new string(symbol, lineLength));
             }
-
-            Console.ReadKey();
         }
     }
 }
