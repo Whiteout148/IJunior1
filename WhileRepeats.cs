@@ -6,34 +6,22 @@ namespace WhilesPractice1
     {
         static void Main()
         {
-            string password;
-            string userInput;
-            string secretMessage;
+            Random random = new Random();
 
-            Console.Write("Введите секретное сообщение:");
-            secretMessage = Console.ReadLine();
+            int minValue = 50;
+            int maxValue = 150;
 
-            Console.Write("Создайте пароль:");
-            password = Console.ReadLine();
+            int randomNumber = random.Next(minValue, maxValue + 1);
 
-            Console.WriteLine("Пароль создан!");
+            Console.WriteLine("Рандомное число: " + randomNumber);
 
-            for (int i = 3; i > 0; i--)
+            for (int i = minValue;i <= maxValue; i++)
             {
-                Console.WriteLine("\nВведите пароль чтобы получить кодовое сообщение");
-                userInput = Console.ReadLine();
-
-                if(userInput == password)
+                if(i % randomNumber == 0)
                 {
-                    Console.WriteLine($"Пароль верный! кодовое сообщение: {secretMessage}");
-                }
-                else
-                {
-                    Console.WriteLine($"Пароль не верный! осталось попыток: {i}");
+                    Console.WriteLine(i);
                 }
             }
-
-            Console.WriteLine("закончились попытки");
         }
     }
 }
