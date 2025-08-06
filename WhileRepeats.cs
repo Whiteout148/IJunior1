@@ -10,22 +10,23 @@ namespace WhilesPractice1
 
             int minValue = 50;
             int maxValue = 150;
-            int minValueRandomNumber = 10;
-            int maxValueRandomNumber = 25;
 
-            int randomNumber = random.Next(minValueRandomNumber, maxValueRandomNumber + 1);
+            int minValueForRandomNumber = 10;
+            int maxValueForRandomNumber = 25;
+
+            int randomNumber = random.Next(minValueForRandomNumber, maxValueForRandomNumber + 1);
+
+            int quantityOfMultiplyNumbers = 0;
 
             Console.WriteLine("Рандомное число: " + randomNumber);
-            Console.WriteLine("Числа, кратные " + randomNumber + " в диапазоне от " + minValue + " до " + maxValue + ":");
 
-            for (int i = minValue; i <= maxValue; i++)
+            for (int i = randomNumber; i <= maxValue; i += randomNumber)
             {
-                if (i % randomNumber == 0)
-                {
-                    Console.WriteLine(i);
-                }
+                quantityOfMultiplyNumbers++;
+                Console.WriteLine(i);
             }
 
+            Console.WriteLine($"Количество кратных чисел в диапазоне от {minValue} до {maxValue} будет: {quantityOfMultiplyNumbers}");
             Console.ReadKey();
         }
     }
