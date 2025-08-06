@@ -6,27 +6,17 @@ class Program
     {
         Console.Write("Введите символ: ");
         char symbol = Console.ReadKey().KeyChar;
-        Console.WriteLine(); 
+        Console.WriteLine();
 
         Console.Write("Введите имя: ");
         string name = Console.ReadLine();
 
-        int walls = 2;
-        int lineLength = name.Length + walls;
-        int strokeLenght = 3;
+        string middleLine = symbol + name + symbol;
+ 
+        string frameLine = new string(symbol, middleLine.Length);
 
-        for (int i = 0; i < strokeLenght; i++)
-        {
-            if (i == 1)
-            {
-                Console.Write(symbol);
-                Console.Write(name);
-                Console.WriteLine(symbol);
-            }
-            else
-            {
-                Console.WriteLine(new string(symbol, lineLength));
-            }
-        }
+        Console.WriteLine(frameLine);
+        Console.WriteLine(middleLine);
+        Console.WriteLine(frameLine);
     }
 }
