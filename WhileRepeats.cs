@@ -14,14 +14,17 @@ namespace WhilesPractice1
             int randomNumber = random.Next(minValue, maxValue + 1);
 
             Console.WriteLine("Рандомное число: " + randomNumber);
+            Console.WriteLine("Числа, кратные " + randomNumber + " в диапазоне от " + minValue + " до " + maxValue + ":");
 
-            for (int i = minValue;i <= maxValue; i++)
+            for (int i = minValue; i <= maxValue; i++)
             {
-                if(i % randomNumber == 0)
+                if (i % randomNumber == 0)
                 {
                     Console.WriteLine(i);
                 }
             }
+
+            Console.ReadKey();
         }
     }
 }
