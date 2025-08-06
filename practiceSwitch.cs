@@ -4,19 +4,28 @@ class Program
 {
     static void Main()
     {
-        Console.Write("Введите символ: ");
-        char symbol = Console.ReadKey().KeyChar;
-        Console.WriteLine();
+        Random random = new Random();
 
-        Console.Write("Введите имя: ");
-        string name = Console.ReadLine();
+        int minValue = 25;
+        int maxValue = 625;
 
-        string middleLine = symbol + name + symbol;
- 
-        string frameLine = new string(symbol, middleLine.Length);
+        int randomNumber = random.Next(minValue, maxValue + 1);
+        int degreeNumber = 4;
+        int degree = 2;
+        int result;
+        
+        for(int i = 0; i < degreeNumber; i++)
+        {
+            degreeNumber++;
+            result = degree *= degree;
 
-        Console.WriteLine(frameLine);
-        Console.WriteLine(middleLine);
-        Console.WriteLine(frameLine);
+            Console.WriteLine(result);
+
+            if(degree > randomNumber)
+            {
+                Console.WriteLine($"Рандомное число: {randomNumber} степень: {degree}");
+                break;
+            }
+        }
     }
 }
