@@ -22,7 +22,7 @@ namespace WhilesPractice1
 
             for (int i = randomNumber; i <= maxValue; i += randomNumber)
             {
-                if(i >= 50)
+                if(i >= minValue)
                 {
                     quantityOfMultiplyNumbers++;
                     Console.WriteLine(i);
