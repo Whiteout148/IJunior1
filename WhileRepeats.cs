@@ -22,8 +22,11 @@ namespace WhilesPractice1
 
             for (int i = randomNumber; i <= maxValue; i += randomNumber)
             {
-                quantityOfMultiplyNumbers++;
-                Console.WriteLine(i);
+                if(i >= 50)
+                {
+                    quantityOfMultiplyNumbers++;
+                    Console.WriteLine(i);
+                }
             }
 
             Console.WriteLine($"Количество кратных чисел в диапазоне от {minValue} до {maxValue} будет: {quantityOfMultiplyNumbers}");
