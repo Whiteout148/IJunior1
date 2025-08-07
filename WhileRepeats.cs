@@ -211,6 +211,10 @@ namespace WhilesPractice1
                     Console.WriteLine("Босс проиграл а игрок выиграл!");
                     break;
                 }
+                if(playerHealth <= 0 && bossHealth <= 0)
+                {
+                    Console.WriteLine("Ничья");
+                }
 
                 Console.Clear();
             }
