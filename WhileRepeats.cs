@@ -7,12 +7,12 @@ namespace WhilesPractice1
     {
         static void Main()
         {
-            Random random = new Random();
+            const string CommandForPunch = "Punch";
+            const string CommandForFireBall = "Fireball";
+            const string CommandForExplode = "Explode";
+            const string CommandForMedKit = "Medkit";
 
-            const string ActionPunch = "Punch";
-            const string ActionFireBall = "Fireball";
-            const string ActionExplode = "Explode";
-            const string ActionMedKit = "Medkit";
+            Random random = new Random();
 
             int playerHealth = 500;
 
@@ -56,15 +56,15 @@ namespace WhilesPractice1
                 Console.WriteLine($"Ваша энегрия: {playerEnergy}\n");
                 Console.WriteLine($"Доступные способности:\n");
                 Console.WriteLine("** Удар **");
-                Console.WriteLine($"Урон: {punchDamage} Затраты энергии: {energyForPunch}\n команда для юза: {ActionPunch}\n");
+                Console.WriteLine($"Урон: {punchDamage} Затраты энергии: {energyForPunch}\n команда для юза: {CommandForPunch}\n");
                 Console.WriteLine("** Огненный шар **");
-                Console.WriteLine($"Урон: {fireBallDamage} Затраты энергии: {energyForFireBall}\n команда для юза: {ActionFireBall}\n");
+                Console.WriteLine($"Урон: {fireBallDamage} Затраты энергии: {energyForFireBall}\n команда для юза: {CommandForFireBall}\n");
                 Console.WriteLine("** Взрыв **");
-                Console.WriteLine($"Урон: {explodeDamage} Затраты энергии: {energyForExplode}\n команда для юза: {ActionExplode}");
+                Console.WriteLine($"Урон: {explodeDamage} Затраты энергии: {energyForExplode}\n команда для юза: {CommandForExplode}");
                 Console.WriteLine("Важно: Взрыв доступен только тогда когда бы использован огненный шар");
                 Console.WriteLine("При повторном использовании взрыва нужно до этого опять использовать огненный шар\n");
                 Console.WriteLine("** аптечка **");
-                Console.WriteLine($"Восстановление здоровья: {medKitHealthGain} восстановление энергии: {medKitEnergyGain}\n команда для юза: {ActionMedKit}");
+                Console.WriteLine($"Восстановление здоровья: {medKitHealthGain} восстановление энергии: {medKitEnergyGain}\n команда для юза: {CommandForMedKit}");
                 Console.WriteLine($"Всего аптечек: {quantityOfMedkit}\n");
 
                 Console.WriteLine("Атакует босс...");
@@ -77,7 +77,7 @@ namespace WhilesPractice1
 
                 switch (userInput)
                 {
-                    case ActionPunch:
+                    case CommandForPunch:
                         if (playerEnergy >= energyForPunch)
                         {
                             bossHealth -= punchDamage;
@@ -91,7 +91,7 @@ namespace WhilesPractice1
                         }
                         break;
 
-                    case ActionFireBall:
+                    case CommandForFireBall:
                         if (playerEnergy >= energyForFireBall)
                         {
                             bossHealth -= fireBallDamage;
@@ -107,7 +107,7 @@ namespace WhilesPractice1
                         }
                         break;
 
-                    case ActionExplode:
+                    case CommandForExplode:
                         if (isUsingFireBall)
                         {
                             if(playerEnergy >= energyForExplode)
@@ -130,7 +130,7 @@ namespace WhilesPractice1
                         }
                         break;
 
-                    case ActionMedKit:
+                    case CommandForMedKit:
                         if (quantityOfMedkit > 0)
                         {
                             quantityOfMedkit--;
@@ -182,11 +182,11 @@ namespace WhilesPractice1
             {
                 Console.WriteLine("Игрок выиграл.");
             }
-            if (bossHealth > 0 && playerHealth <= 0)
+            else if (bossHealth > 0 && playerHealth <= 0)
             {
                 Console.WriteLine("Босс выиграл.");
             }
-            if (playerHealth <= 0 && bossHealth <= 0)
+            else if (playerHealth <= 0 && bossHealth <= 0)
             {
                 Console.WriteLine("Ничья.");
             }
