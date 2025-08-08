@@ -9,24 +9,24 @@ namespace WhilesPractice1
         {
             Random random = new Random();
 
-            const string UseNormalDamage = "1";
-            const string UseFireBall = "2";
-            const string UseExplode = "3";
-            const string UseMedKit = "4";
+            const string UsePunch = "Punch";
+            const string UseFireBall = "Fireball";
+            const string UseExplode = "Explode";
+            const string UseMedKit = "Medkit";
 
             int playerHealth = 500;
             int maxPlayerHealth = 500;
             int playerEnergy = 300;
             int maxPlayerEnergy = 300;
 
-            int normalAttackDamage = 10;
-            int energyForNormalAttack = 30;
+            int punchDamage = 10;
+            int energyForPunch = 20;
 
-            int fireBallDamage = 50;
-            int energyForFireBall = 70;
+            int fireBallDamage = 80;
+            int energyForFireBall = 40;
 
             int explodeDamage = 100;
-            int energyForExplode = 100;
+            int energyForExplode = 50;
 
             int quantityOfMedkit = 6;
             int medKitHealthGain = 50;
@@ -41,7 +41,7 @@ namespace WhilesPractice1
             int maxBossDamage = 70;
 
             int bossHealth = 1000;
-            int bossDamage = random.Next(5, 10 + 1);
+            int bossDamage = random.Next(minBossDamage, maxBossDamage + 1);
 
             string userInput;
 
@@ -49,13 +49,13 @@ namespace WhilesPractice1
 
             Console.WriteLine("** Бой с противником **");
 
-            while(bossHealth > 0 && playerHealth > 0)
+            while(playerHealth > 0 && bossHealth > 0)
             {
                 Console.WriteLine($"Здоровье босса: {bossHealth} ваше здоровье: {playerHealth}\n");
                 Console.WriteLine($"Ваша энегрия: {playerEnergy}\n");
                 Console.WriteLine($"Доступные способности:\n");
-                Console.WriteLine("** Обычная атака **");
-                Console.WriteLine($"Урон: {normalAttackDamage} Затраты энергии: {energyForNormalAttack}\n команда для юза: {UseNormalDamage}\n");
+                Console.WriteLine("** Удар **");
+                Console.WriteLine($"Урон: {punchDamage} Затраты энергии: {energyForPunch}\n команда для юза: {UsePunch}\n");
                 Console.WriteLine("** Огненный шар **");
                 Console.WriteLine($"Урон: {fireBallDamage} Затраты энергии: {energyForFireBall}\n команда для юза: {UseFireBall}\n");
                 Console.WriteLine("** Взрыв **");
@@ -66,7 +66,7 @@ namespace WhilesPractice1
                 Console.WriteLine($"Восстановление здоровья: {medKitHealthGain} восстановление энергии: {medKitEnergyGain}\n команда для юза: {UseMedKit}");
                 Console.WriteLine($"Всего аптечек: {quantityOfMedkit}\n");
 
-                Console.WriteLine("Первый атакует босс...");
+                Console.WriteLine("Атакует босс...");
                 Thread.Sleep(oneSecondWithMs);
 
                 playerHealth -= bossDamage;
@@ -77,27 +77,21 @@ namespace WhilesPractice1
 
                 switch (userInput)
                 {
-                    case UseNormalDamage:
-
-                        if (playerEnergy >= energyForNormalAttack)
+                    case UsePunch:
+                        if (playerEnergy >= energyForPunch)
                         {
-                            bossHealth -= normalAttackDamage;
-                            playerEnergy -= energyForNormalAttack;
+                            bossHealth -= punchDamage;
+                            playerEnergy -= energyForPunch;
 
-                            Console.WriteLine($"Вы нанесли боссу: {normalAttackDamage} потрачено энергии: {energyForNormalAttack}");
-                            Console.WriteLine("Ход за боссом...");
-                            Thread.Sleep(oneSecondWithMs);
+                            Console.WriteLine($"Вы нанесли боссу: {punchDamage} потрачено энергии: {energyForPunch}");
                         }
                         else
                         {
-                            Console.WriteLine("Не хватает энергии!\n ход за боссом...");
-                            Thread.Sleep(oneSecondWithMs);
+                            Console.WriteLine("Не хватает энергии!");
                         }
-
                         break;
 
                     case UseFireBall:
-
                         if (playerEnergy >= energyForFireBall)
                         {
                             bossHealth -= fireBallDamage;
@@ -105,20 +99,15 @@ namespace WhilesPractice1
 
                             isUsingFireBall = true;
 
-                            Console.WriteLine($"Вы нанесли боссу: {fireBallDamage} потрачено энергии: {energyForFireBall}");
-                            Console.WriteLine("Ход за боссом...");
-                            Thread.Sleep(oneSecondWithMs);
+                            Console.WriteLine($"Вы нанесли боссу: {fireBallDamage} потрачено энергии: {energyForFireBall}");     
                         }
                         else
                         {
-                            Console.WriteLine("Не хватает энергии!\n ход за боссом...");
-                            Thread.Sleep(oneSecondWithMs);
+                            Console.WriteLine("Не хватает энергии!");
                         }
-
                         break;
 
                     case UseExplode:
-
                         if (isUsingFireBall)
                         {
                             if(playerEnergy >= energyForExplode)
@@ -128,28 +117,20 @@ namespace WhilesPractice1
 
                                 isUsingFireBall = false;
 
-                                Console.WriteLine($"Вы нанесли боссу: {explodeDamage} потрачено энергии: {energyForExplode}");
-                                Console.WriteLine("Ход за боссом...");
-                                Thread.Sleep(oneSecondWithMs);
+                                Console.WriteLine($"Вы нанесли боссу: {explodeDamage} потрачено энергии: {energyForExplode}");    
                             }
                             else
                             {
                                 Console.WriteLine("Не хватает энергии!");
-                                Console.WriteLine("Ход за боссом...");
-                                Thread.Sleep(oneSecondWithMs);
                             }
                         }
                         else
                         {
-                            Console.WriteLine("Для использовании взрыва нужно сначала использовать огненный шар");
-                            Console.WriteLine("Ход за боссом...");
-                            Thread.Sleep(oneSecondWithMs);
+                            Console.WriteLine("Для использовании взрыва нужно сначала использовать огненный шар");  
                         }
-
                         break;
 
                     case UseMedKit:
-
                         if (quantityOfMedkit > 0)
                         {
                             quantityOfMedkit--;
@@ -178,46 +159,39 @@ namespace WhilesPractice1
                                 playerEnergy += medKitEnergyGain; 
                             }
 
-                            Console.WriteLine($"Прибавлено энергии: {actualEnergyGain}");
-
-                            Console.WriteLine("\nХод за боссом...");
-                            Thread.Sleep(oneSecondWithMs);
+                            Console.WriteLine($"Прибавлено энергии: {actualEnergyGain}");     
                         }
                         else
                         {
                             Console.WriteLine("У вас больше нету аптечек)");
-                            Console.WriteLine("Ход за боссом...");
-                            Thread.Sleep(oneSecondWithMs);
                         }
-
                         break;
 
                     default:
                         Console.WriteLine("\nНеверная команда!");
-                        Console.WriteLine("Ход за боссом...");
-                        Thread.Sleep(oneSecondWithMs);
-                        Console.Clear();
-                        continue;
                         break;
                 }
 
-                if(playerHealth <= 0 && bossHealth > 0)
-                {
-                    Console.WriteLine("Игрок проиграл а босс выиграл!");
-                    break;
-                }
-                if(bossHealth <= 0 && playerHealth > 0)
-                {
-                    Console.WriteLine("Босс проиграл а игрок выиграл!");
-                    break;
-                }
-                if(playerHealth <= 0 && bossHealth <= 0)
-                {
-                    Console.WriteLine("Ничья");
-                }
+                Console.WriteLine("Ход за боссом...");
+                Thread.Sleep(oneSecondWithMs);
 
                 Console.Clear();
             }
+
+            if (playerHealth > 0 && bossHealth <= 0)
+            {
+                Console.WriteLine("Игрок выиграл.");
+            }
+            if (bossHealth > 0 && playerHealth <= 0)
+            {
+                Console.WriteLine("Босс выиграл.");
+            }
+            if (playerHealth <= 0 && bossHealth <= 0)
+            {
+                Console.WriteLine("Ничья.");
+            }
+
+            Console.ReadKey();
         }
     }
 }
