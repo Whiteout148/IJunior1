@@ -9,12 +9,13 @@ namespace WhilesPractice1
         {
             Random random = new Random();
 
-            const string UsePunch = "Punch";
-            const string UseFireBall = "Fireball";
-            const string UseExplode = "Explode";
-            const string UseMedKit = "Medkit";
+            const string ActionPunch = "Punch";
+            const string ActionFireBall = "Fireball";
+            const string ActionExplode = "Explode";
+            const string ActionMedKit = "Medkit";
 
             int playerHealth = 500;
+
             int maxPlayerHealth = 500;
             int playerEnergy = 300;
             int maxPlayerEnergy = 300;
@@ -55,19 +56,18 @@ namespace WhilesPractice1
                 Console.WriteLine($"Ваша энегрия: {playerEnergy}\n");
                 Console.WriteLine($"Доступные способности:\n");
                 Console.WriteLine("** Удар **");
-                Console.WriteLine($"Урон: {punchDamage} Затраты энергии: {energyForPunch}\n команда для юза: {UsePunch}\n");
+                Console.WriteLine($"Урон: {punchDamage} Затраты энергии: {energyForPunch}\n команда для юза: {ActionPunch}\n");
                 Console.WriteLine("** Огненный шар **");
-                Console.WriteLine($"Урон: {fireBallDamage} Затраты энергии: {energyForFireBall}\n команда для юза: {UseFireBall}\n");
+                Console.WriteLine($"Урон: {fireBallDamage} Затраты энергии: {energyForFireBall}\n команда для юза: {ActionFireBall}\n");
                 Console.WriteLine("** Взрыв **");
-                Console.WriteLine($"Урон: {explodeDamage} Затраты энергии: {energyForExplode}\n команда для юза: {UseExplode}");
+                Console.WriteLine($"Урон: {explodeDamage} Затраты энергии: {energyForExplode}\n команда для юза: {ActionExplode}");
                 Console.WriteLine("Важно: Взрыв доступен только тогда когда бы использован огненный шар");
                 Console.WriteLine("При повторном использовании взрыва нужно до этого опять использовать огненный шар\n");
                 Console.WriteLine("** аптечка **");
-                Console.WriteLine($"Восстановление здоровья: {medKitHealthGain} восстановление энергии: {medKitEnergyGain}\n команда для юза: {UseMedKit}");
+                Console.WriteLine($"Восстановление здоровья: {medKitHealthGain} восстановление энергии: {medKitEnergyGain}\n команда для юза: {ActionMedKit}");
                 Console.WriteLine($"Всего аптечек: {quantityOfMedkit}\n");
 
                 Console.WriteLine("Атакует босс...");
-                Thread.Sleep(oneSecondWithMs);
 
                 playerHealth -= bossDamage;
                 
@@ -77,7 +77,7 @@ namespace WhilesPractice1
 
                 switch (userInput)
                 {
-                    case UsePunch:
+                    case ActionPunch:
                         if (playerEnergy >= energyForPunch)
                         {
                             bossHealth -= punchDamage;
@@ -91,7 +91,7 @@ namespace WhilesPractice1
                         }
                         break;
 
-                    case UseFireBall:
+                    case ActionFireBall:
                         if (playerEnergy >= energyForFireBall)
                         {
                             bossHealth -= fireBallDamage;
@@ -107,7 +107,7 @@ namespace WhilesPractice1
                         }
                         break;
 
-                    case UseExplode:
+                    case ActionExplode:
                         if (isUsingFireBall)
                         {
                             if(playerEnergy >= energyForExplode)
@@ -130,7 +130,7 @@ namespace WhilesPractice1
                         }
                         break;
 
-                    case UseMedKit:
+                    case ActionMedKit:
                         if (quantityOfMedkit > 0)
                         {
                             quantityOfMedkit--;
