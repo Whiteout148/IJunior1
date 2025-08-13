@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Threading;
+using System.Data;
+using System.Linq;
 
 namespace WhilesPractice1
 {
@@ -7,191 +8,50 @@ namespace WhilesPractice1
     {
         static void Main()
         {
-            const string CommandForPunch = "Punch";
-            const string CommandForFireBall = "Fireball";
-            const string CommandForExplode = "Explode";
-            const string CommandForMedKit = "Medkit";
+            int[] array = new int[30];
+            int maxRandomNumber = 100;
+            int neighbourIndex = 1;
+            int minRandomNumber = -100;
 
             Random random = new Random();
 
-            int playerHealth = 500;
-
-            int maxPlayerHealth = 500;
-            int playerEnergy = 300;
-            int maxPlayerEnergy = 300;
-
-            int punchDamage = 10;
-            int energyForPunch = 20;
-
-            int fireBallDamage = 80;
-            int energyForFireBall = 40;
-
-            int explodeDamage = 100;
-            int energyForExplode = 50;
-
-            int quantityOfMedkit = 6;
-            int medKitHealthGain = 50;
-            int medKitEnergyGain = 40;
-
-            int actualHealthGain;
-            int actualEnergyGain;
-
-            bool isUsingFireBall = false;
-
-            int minBossDamage = 30;
-            int maxBossDamage = 70;
-
-            int bossHealth = 1000;
-            int bossDamage = random.Next(minBossDamage, maxBossDamage + 1);
-
-            string userInput;
-
-            int oneSecondWithMs = 1000;
-
-            Console.WriteLine("** Бой с противником **");
-
-            while(playerHealth > 0 && bossHealth > 0)
+            for(int i = 0; i < array.Length; i++)
             {
-                Console.WriteLine($"Здоровье босса: {bossHealth} ваше здоровье: {playerHealth}\n");
-                Console.WriteLine($"Ваша энегрия: {playerEnergy}\n");
-                Console.WriteLine($"Доступные способности:\n");
-                Console.WriteLine("** Удар **");
-                Console.WriteLine($"Урон: {punchDamage} Затраты энергии: {energyForPunch}\n команда для юза: {CommandForPunch}\n");
-                Console.WriteLine("** Огненный шар **");
-                Console.WriteLine($"Урон: {fireBallDamage} Затраты энергии: {energyForFireBall}\n команда для юза: {CommandForFireBall}\n");
-                Console.WriteLine("** Взрыв **");
-                Console.WriteLine($"Урон: {explodeDamage} Затраты энергии: {energyForExplode}\n команда для юза: {CommandForExplode}");
-                Console.WriteLine("Важно: Взрыв доступен только тогда когда бы использован огненный шар");
-                Console.WriteLine("При повторном использовании взрыва нужно до этого опять использовать огненный шар\n");
-                Console.WriteLine("** аптечка **");
-                Console.WriteLine($"Восстановление здоровья: {medKitHealthGain} восстановление энергии: {medKitEnergyGain}\n команда для юза: {CommandForMedKit}");
-                Console.WriteLine($"Всего аптечек: {quantityOfMedkit}\n");
+                array[i] = random.Next(minRandomNumber, maxRandomNumber);
+            }
 
-                Console.WriteLine("Атакует босс...");
-
-                playerHealth -= bossDamage;
-                
-                Console.WriteLine($"Босс нанес вам {bossDamage} урона, ваш ход: ");
-                Console.Write("Напишите команду для нужной способности: ");
-                userInput = Console.ReadLine();
-
-                switch (userInput)
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (i == 0)
                 {
-                    case CommandForPunch:
-                        if (playerEnergy >= energyForPunch)
-                        {
-                            bossHealth -= punchDamage;
-                            playerEnergy -= energyForPunch;
-
-                            Console.WriteLine($"Вы нанесли боссу: {punchDamage} потрачено энергии: {energyForPunch}");
-                        }
-                        else
-                        {
-                            Console.WriteLine("Не хватает энергии!");
-                        }
-                        break;
-
-                    case CommandForFireBall:
-                        if (playerEnergy >= energyForFireBall)
-                        {
-                            bossHealth -= fireBallDamage;
-                            playerEnergy -= energyForFireBall;
-
-                            isUsingFireBall = true;
-
-                            Console.WriteLine($"Вы нанесли боссу: {fireBallDamage} потрачено энергии: {energyForFireBall}");     
-                        }
-                        else
-                        {
-                            Console.WriteLine("Не хватает энергии!");
-                        }
-                        break;
-
-                    case CommandForExplode:
-                        if (isUsingFireBall)
-                        {
-                            if(playerEnergy >= energyForExplode)
-                            {
-                                bossHealth -= explodeDamage;
-                                playerEnergy -= energyForExplode;
-
-                                isUsingFireBall = false;
-
-                                Console.WriteLine($"Вы нанесли боссу: {explodeDamage} потрачено энергии: {energyForExplode}");    
-                            }
-                            else
-                            {
-                                Console.WriteLine("Не хватает энергии!");
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine("Для использовании взрыва нужно сначала использовать огненный шар");  
-                        }
-                        break;
-
-                    case CommandForMedKit:
-                        if (quantityOfMedkit > 0)
-                        {
-                            quantityOfMedkit--;
-
-                            if (playerHealth + medKitHealthGain > maxPlayerHealth)
-                            {
-                                actualHealthGain = maxPlayerHealth - playerHealth; 
-                                playerHealth = maxPlayerHealth;
-                            }
-                            else
-                            {
-                                actualHealthGain = medKitHealthGain;
-                                playerHealth += medKitHealthGain;
-                            }
-
-                            Console.Write($"Прибавлено здоровья: {actualHealthGain} ");
-
-                            if (playerEnergy + medKitEnergyGain > maxPlayerEnergy)
-                            {
-                                actualEnergyGain = maxPlayerEnergy - playerEnergy;
-                                playerEnergy = maxPlayerEnergy;
-                            }
-                            else
-                            {
-                                actualEnergyGain = medKitEnergyGain;
-                                playerEnergy += medKitEnergyGain; 
-                            }
-
-                            Console.WriteLine($"Прибавлено энергии: {actualEnergyGain}");     
-                        }
-                        else
-                        {
-                            Console.WriteLine("У вас больше нету аптечек)");
-                        }
-                        break;
-
-                    default:
-                        Console.WriteLine("\nНеверная команда!");
-                        break;
+                    if (array[i] > array[i + neighbourIndex])
+                    {
+                        Console.WriteLine(array[i]);
+                    }
                 }
-
-                Console.WriteLine("Ход за боссом...");
-                Thread.Sleep(oneSecondWithMs);
-
-                Console.Clear();
+                else if(i == array.Length - 1)
+                {
+                    if (array[i] > array[i - neighbourIndex])
+                    {
+                        Console.WriteLine(array[i]);
+                    }
+                }
+                else
+                {
+                    if (array[i] > array[i - neighbourIndex] && array[i] > array[i + neighbourIndex])
+                    {
+                        Console.WriteLine(array[i]);
+                    }
+                }
             }
 
-            if (playerHealth > 0 && bossHealth <= 0)
+            Console.WriteLine();
+            Console.WriteLine("Весь массив: ");
+
+            for (int i = 0; i < array.Length; i++)
             {
-                Console.WriteLine("Игрок выиграл.");
+                Console.Write(array[i] + " | ");
             }
-            else if (bossHealth > 0 && playerHealth <= 0)
-            {
-                Console.WriteLine("Босс выиграл.");
-            }
-            else if (playerHealth <= 0 && bossHealth <= 0)
-            {
-                Console.WriteLine("Ничья.");
-            }
-
-            Console.ReadKey();
         }
     }
 }
