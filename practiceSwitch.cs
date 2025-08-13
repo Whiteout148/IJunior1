@@ -8,8 +8,11 @@ class Program
         Random random = new Random();
 
         int maxRandomNumber = 10;
-        int sumOfSecondRow = 0;
+        int sumOfSecondShelf = 0;
         int productOfFirstColumn = 1;
+
+        int secondShelf = 1;
+        int firstColumn = 0;
 
         for (int i = 0; i < array.GetLength(0); i++)
         {
@@ -18,20 +21,22 @@ class Program
                 array[i, j] = random.Next(0, maxRandomNumber + 1);
                 Console.Write(array[i, j] + " | ");
             }
+
             Console.WriteLine();
         }
 
         for (int j = 0; j < array.GetLength(1); j++)
         {
-            sumOfSecondRow += array[1, j];
+            sumOfSecondShelf += array[secondShelf, j];
         }
 
         for (int i = 0; i < array.GetLength(0); i++)
         {
-            productOfFirstColumn *= array[i, 0];
+            productOfFirstColumn *= array[i, firstColumn];
         }
 
-        Console.WriteLine("Сумма второй строки: " + sumOfSecondRow);
+        Console.WriteLine("Сумма второй строки: " + sumOfSecondShelf);
         Console.WriteLine("Произведение первого столбца: " + productOfFirstColumn);
+        Console.ReadKey();
     }
 }
