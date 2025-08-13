@@ -6,21 +6,46 @@ namespace XDproject
     {
         static void Main()
         {
-            int patient;
-            int patientReceptionTimeWithMinutes = 10;
-            int minutesPerHour = 60;
+            Random random = new Random();
 
-            Console.WriteLine("Введите количество пациентов");
-            patient = Convert.ToInt32(Console.ReadLine());
+            int[,] array = new int[10, 10];
 
-            int allPatientsReceptionTime = patient * patientReceptionTimeWithMinutes;
-            int hoursRemaining = allPatientsReceptionTime / minutesPerHour;
-            int minutesRemaining = allPatientsReceptionTime % minutesPerHour;
+            int maxNumber = 0;
+            int maxRandomNumber = 1000;
 
-            Console.WriteLine($"Время прибытие одного пациента: {patientReceptionTimeWithMinutes}" +
-                $"\nвам стоят в очереди {hoursRemaining} часов {minutesRemaining} минут.");
+            for (int i = 0; i < array.GetLength(0); i++)
+            {
+                for (int j = 0; j < array.GetLength(1); j++)
+                {
+                    array[i, j] = random.Next(0, maxRandomNumber + 1);
 
-            Console.ReadLine();
+                    if (maxNumber < array[i, j])
+                    {
+                        maxNumber = array[i, j];
+                    }
+
+                    Console.Write(array[i, j] + " | ");
+                }
+
+                Console.WriteLine();
+            }
+
+            Console.WriteLine("\nМаксимальное число: " + maxNumber + "\n");
+
+            for (int i = 0;i < array.GetLength(0); i++)
+            {
+                for(int j = 0;j < array.GetLength(1); j++)
+                {
+                    if (array[i, j] == maxNumber)
+                    {
+                        array[i, j] = 0;
+                    }
+
+                    Console.Write(array[i, j] + " | ");
+                }
+
+                Console.WriteLine();
+            }
         }
     }
 }
