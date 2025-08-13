@@ -4,28 +4,34 @@ class Program
 {
     static void Main()
     {
+        int[,] array = new int[3, 3];
         Random random = new Random();
 
-        int minValue = 25;
-        int maxValue = 625;
+        int maxRandomNumber = 10;
+        int sumOfSecondRow = 0;
+        int productOfFirstColumn = 1;
 
-        int randomNumber = random.Next(minValue, maxValue + 1);
-        int degreeNumber = 4;
-        int degree = 2;
-        int result;
-        
-        for(int i = 0; i < degreeNumber; i++)
+        for (int i = 0; i < array.GetLength(0); i++)
         {
-            degreeNumber++;
-            result = degree *= degree;
-
-            Console.WriteLine(result);
-
-            if(degree > randomNumber)
+            for (int j = 0; j < array.GetLength(1); j++)
             {
-                Console.WriteLine($"Рандомное число: {randomNumber} степень: {degree}");
-                break;
+                array[i, j] = random.Next(0, maxRandomNumber + 1);
+                Console.Write(array[i, j] + " | ");
             }
+            Console.WriteLine();
         }
+
+        for (int j = 0; j < array.GetLength(1); j++)
+        {
+            sumOfSecondRow += array[1, j];
+        }
+
+        for (int i = 0; i < array.GetLength(0); i++)
+        {
+            productOfFirstColumn *= array[i, 0];
+        }
+
+        Console.WriteLine("Сумма второй строки: " + sumOfSecondRow);
+        Console.WriteLine("Произведение первого столбца: " + productOfFirstColumn);
     }
 }
