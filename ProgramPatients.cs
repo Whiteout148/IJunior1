@@ -19,35 +19,54 @@ namespace XDproject
                 for (int j = 0; j < numbers.GetLength(1); j++)
                 {
                     numbers[i, j] = random.Next(0, maxRandomNumber + 1);
+                }
+            }
 
-                    if (maxNumber < numbers[i, j])
-                    {
-                        maxNumber = numbers[i, j];
-                    }
-
+            for (int i = 0; i < numbers.GetLength(0); i++)
+            {
+                for (int j = 0; j < numbers.GetLength(1); j++)
+                {
                     Console.Write(numbers[i, j] + " | ");
                 }
 
                 Console.WriteLine();
             }
 
-            Console.WriteLine("\nМаксимальное число: " + maxNumber + "\n");
+            Console.WriteLine("\nНачальное состояние.\n");
 
-            for(int i = 0; i < numbers.GetLength(0); i++)
+            for (int i = 0; i < numbers.GetLength(0); i++)
             {
-                for(int j = 0;j < numbers.GetLength(1); j++)
+                for (int j = 0; j < numbers.GetLength(1); j++)
+                {
+                    if (maxNumber < numbers[i, j])
+                    {
+                        maxNumber = numbers[i, j];
+                    }
+                }
+            }
+
+            for (int i = 0; i < numbers.GetLength(0); i++)
+            {
+                for (int j = 0; j < numbers.GetLength(1); j++)
                 {
                     if (numbers[i, j] == maxNumber)
                     {
                         numbers[i, j] = resetMaxNumber;
                     }
+                }    
+            }
 
+            for (int i = 0; i < numbers.GetLength(0); i++)
+            {
+                for (int j = 0; j < numbers.GetLength(1); j++)
+                {
                     Console.Write(numbers[i, j] + " | ");
                 }
 
                 Console.WriteLine();
             }
-            
+
+            Console.WriteLine("Состояние при замене всех чисел");
             Console.ReadKey();
         }
     }
