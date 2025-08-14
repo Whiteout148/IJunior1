@@ -9,40 +9,42 @@ namespace WhilesPractice1
         static void Main()
         {
             int[] array = new int[30];
-            int maxRandomNumber = 100;
-            int neighbourIndex = 1;
             int minRandomNumber = -100;
+            int maxRandomNumber = 100;
+
+            int firstElement = 0;
+            int lastElement = array.Length - 1;
+
+            int leftNeighbourIndex = array[lastElement - 1];
+            int rightNeighbourIndex = array[firstElement + 1];
 
             Random random = new Random();
 
+
             for(int i = 0; i < array.Length; i++)
             {
-                array[i] = random.Next(minRandomNumber, maxRandomNumber);
+                array[i] = random.Next(minRandomNumber, maxRandomNumber + 1);
             }
 
-            for (int i = 0; i < array.Length; i++)
+            if (array[firstElement] > array[rightNeighbourIndex])
             {
-                if (i == 0)
+                Console.WriteLine(array[firstElement]);
+            }
+            
+            for (int i = 1; i < array.Length - 1; i++)
+            {
+                rightNeighbourIndex = i + 1;
+                leftNeighbourIndex = i - 1;
+
+                if (array[i] > array[leftNeighbourIndex] && array[i] > array[rightNeighbourIndex])
                 {
-                    if (array[i] > array[i + neighbourIndex])
-                    {
-                        Console.WriteLine(array[i]);
-                    }
+                    Console.WriteLine(array[i]);
                 }
-                else if(i == array.Length - 1)
-                {
-                    if (array[i] > array[i - neighbourIndex])
-                    {
-                        Console.WriteLine(array[i]);
-                    }
-                }
-                else
-                {
-                    if (array[i] > array[i - neighbourIndex] && array[i] > array[i + neighbourIndex])
-                    {
-                        Console.WriteLine(array[i]);
-                    }
-                }
+            }
+
+            if (array[lastElement] > array[leftNeighbourIndex])
+            {
+                Console.WriteLine(array[lastElement]);
             }
 
             Console.WriteLine();
