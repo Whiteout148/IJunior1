@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Principal;
 
 namespace XDproject
 {
@@ -6,67 +7,52 @@ namespace XDproject
     {
         static void Main()
         {
+            int[] numbers = new int[30];
+
+            int biggiestRepeats = 0;
+            int currentRepeats = 0;
+            int biggiestRepeatNumber = 0;
+            int numberWithBiggiestRepeats = 0;
+
+            int maxRandomElement = 10;
+            int minRandomElement = -10;
+
             Random random = new Random();
 
-            int[,] numbers = new int[10, 10];
-
-            int maxNumber = int.MinValue;
-            int maxRandomNumber = 10;
-            int resetMaxNumber = 0;
-
-            for (int i = 0; i < numbers.GetLength(0); i++)
+            for (int i = 0; i < numbers.Length; i++)
             {
-                for (int j = 0; j < numbers.GetLength(1); j++)
-                {
-                    numbers[i, j] = random.Next(0, maxRandomNumber + 1);
-                }
+                numbers[i] = random.Next(minRandomElement, maxRandomElement + 1);
             }
 
-            for (int i = 0; i < numbers.GetLength(0); i++)
+            for (int i = 1; i < numbers.Length - 1; i++)
             {
-                for (int j = 0; j < numbers.GetLength(1); j++)
+                int nextElementIndex = i + 1;
+                int lastElementIndex = i - 1;
+
+                if (numbers[i] == numbers[nextElementIndex])
                 {
-                    Console.Write(numbers[i, j] + " | ");
-                }
+                    currentRepeats++;
 
-                Console.WriteLine();
-            }
-
-            Console.WriteLine("\nНачальное состояние.\n");
-
-            for (int i = 0; i < numbers.GetLength(0); i++)
-            {
-                for (int j = 0; j < numbers.GetLength(1); j++)
-                {
-                    if (maxNumber < numbers[i, j])
+                    if(biggiestRepeats < currentRepeats)
                     {
-                        maxNumber = numbers[i, j];
+                        biggiestRepeats = currentRepeats;
+                        biggiestRepeatNumber = numbers[i];
                     }
                 }
-            }
-
-            for (int i = 0; i < numbers.GetLength(0); i++)
-            {
-                for (int j = 0; j < numbers.GetLength(1); j++)
+                else
                 {
-                    if (numbers[i, j] == maxNumber)
-                    {
-                        numbers[i, j] = resetMaxNumber;
-                    }
-                }    
-            }
-
-            for (int i = 0; i < numbers.GetLength(0); i++)
-            {
-                for (int j = 0; j < numbers.GetLength(1); j++)
-                {
-                    Console.Write(numbers[i, j] + " | ");
+                    currentRepeats = 0;
                 }
-
-                Console.WriteLine();
             }
 
-            Console.WriteLine("Состояние при замене всех чисел");
+            Console.WriteLine($"число: {biggiestRepeatNumber} повторяется {biggiestRepeats + 1} количество раз");
+            Console.WriteLine("Весь массив: ");
+
+            for (int i = 0;i < numbers.Length;i++)
+            {
+                Console.WriteLine(numbers[i]);
+            }
+
             Console.ReadKey();
         }
     }
