@@ -6,53 +6,35 @@ class Program
 {
     static void Main()
     {
-        const int CommandForAddNumber = 1;
-        const int CommandForCheckSum = 2;
-        const int CommandForExit = 3;
+        const int CommandForCheckSum = 1;
+        const int CommandForExit = 2;
 
         int sum = 0;
 
-        int userNumber;
+        int userInput;
         int userNumbersSum = 0;
 
-        int[] numbers = new int[1];
+        int[] numbers = new int[0];
         int[] tempNumbers;
 
         bool isWork = true;
 
-        int oneSecondWithMs = 3000;
-
         while (isWork)
         {
             Console.WriteLine("** Программа для вычисление всех написанных чисел **\n");
-            Console.WriteLine($"Команда для добавление числа в сумму: {CommandForAddNumber}");
+            Console.WriteLine("\nВаши числа: ");
+
+            for (int i = 0; i < numbers.Length; i++)
+            {
+                Console.WriteLine(numbers[i]);
+            }
+
             Console.WriteLine($"Команда для показа суммы всех чисел: {CommandForCheckSum}");
             Console.WriteLine($"Команда для выхода из программы: {CommandForExit}");
+            userInput = Convert.ToInt32(Console.ReadLine());
 
-            switch(Convert.ToInt32(Console.ReadLine()))
+            switch (userInput)
             {
-                case CommandForAddNumber:
-                    Console.Write("Введите число которое хотите добавить: ");
-                    userNumber = Convert.ToInt32(Console.ReadLine());
-                    userNumbersSum++;
-                    tempNumbers = new int[userNumbersSum];
-
-                    for (int i = 0; i < numbers.Length; i++)
-                    {
-                        tempNumbers[i] = numbers[i];
-                    }
-
-                    tempNumbers[tempNumbers.Length - 1] = userNumber;
-                    numbers = tempNumbers;
-
-                    Console.WriteLine("Ваши числа: ");
-
-                    for (int i = 0; i < numbers.Length; i++)
-                    {
-                        Console.WriteLine(numbers[i]);
-                    }
-                    break;
-
                 case CommandForCheckSum:
                     Console.WriteLine("Ваши числа: \n");
 
@@ -66,13 +48,20 @@ class Program
                     break;
 
                 case CommandForExit:
-                    Console.WriteLine("Выход из программы.");
-                    Thread.Sleep(oneSecondWithMs);
                     isWork = false;
                     break;
 
                 default:
-                    Console.WriteLine("Нету такой команды.");
+                    userNumbersSum++;
+                    tempNumbers = new int[userNumbersSum];
+
+                    for (int i = 0; i < numbers.Length; i++)
+                    {
+                        tempNumbers[i] = numbers[i];
+                    }
+
+                    tempNumbers[tempNumbers.Length - 1] = userInput;
+                    numbers = tempNumbers;
                     break;
             }
 
