@@ -7,14 +7,14 @@ namespace XDproject
     {
         static void Main()
         {
-            int[] numbers = new int[30];
+            int[] numbers = new int[10];
 
             int biggiestRepeats = 0;
-            int currentRepeats = 0;
+            int currentRepeats = 1;
             int biggiestRepeatNumber = 0;
 
-            int maxRandomElement = 10;
-            int minRandomElement = -10;
+            int maxRandomElement = 3;
+            int minRandomElement = -3;
 
             Random random = new Random();
 
@@ -39,11 +39,11 @@ namespace XDproject
                 }
                 else
                 {
-                    currentRepeats = 0;
+                    currentRepeats = 1;
                 }
             }
 
-            Console.WriteLine($"число: {biggiestRepeatNumber} повторяется {biggiestRepeats + 1} количество раз");
+            Console.WriteLine($"число: {biggiestRepeatNumber} повторяется {biggiestRepeats} количество раз");
             Console.WriteLine("Весь массив: ");
 
             for (int i = 0;i < numbers.Length;i++)
