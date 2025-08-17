@@ -7,51 +7,39 @@ namespace XDproject
     {
         static void Main()
         {
-            int[] numbers = new int[10];
+            int[] numbers =
+            {
+                5, 2, 1, 6, 4, 8, 10
+            };
 
-            int biggiestRepeats = 0;
-            int currentRepeats = 1;
-            int biggiestRepeatNumber = 0;
-
-            int maxRandomElement = 3;
-            int minRandomElement = -3;
-
-            Random random = new Random();
+            Console.WriteLine("\nМассив до сортировки:\n");
 
             for (int i = 0; i < numbers.Length; i++)
-            {
-                numbers[i] = random.Next(minRandomElement, maxRandomElement + 1);
-            }
-
-            for (int i = 0; i < numbers.Length - 1; i++)
-            {
-                int nextElementIndex = i + 1;
-
-                if (numbers[i] == numbers[nextElementIndex])
-                {
-                    currentRepeats++;
-
-                    if(biggiestRepeats < currentRepeats)
-                    {
-                        biggiestRepeats = currentRepeats;
-                        biggiestRepeatNumber = numbers[i];
-                    }
-                }
-                else
-                {
-                    currentRepeats = 1;
-                }
-            }
-
-            Console.WriteLine($"число: {biggiestRepeatNumber} повторяется {biggiestRepeats} количество раз");
-            Console.WriteLine("Весь массив: ");
-
-            for (int i = 0;i < numbers.Length;i++)
             {
                 Console.WriteLine(numbers[i]);
             }
 
-            Console.ReadKey();
+            for (int i = 0; i < numbers.Length; i++)
+            {
+                for (int j = 0; j < numbers.Length - 1; j++)
+                {
+                    int nextNumberIndex = j + 1;
+
+                    if (numbers[nextNumberIndex] < numbers[j])
+                    {
+                        int tempElement = numbers[j];
+                        numbers[j] = numbers[nextNumberIndex];
+                        numbers[nextNumberIndex] = tempElement;
+                    }
+                }
+            }
+
+            Console.WriteLine("\nМассив после сортировки:\n");
+
+            for (int i = 0; i < numbers.Length; i++)
+            {
+                Console.WriteLine(numbers[i]);
+            }
         }
     }
 }
