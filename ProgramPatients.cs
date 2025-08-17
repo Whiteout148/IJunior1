@@ -12,7 +12,6 @@ namespace XDproject
             int biggiestRepeats = 0;
             int currentRepeats = 0;
             int biggiestRepeatNumber = 0;
-            int numberWithBiggiestRepeats = 0;
 
             int maxRandomElement = 10;
             int minRandomElement = -10;
@@ -24,10 +23,9 @@ namespace XDproject
                 numbers[i] = random.Next(minRandomElement, maxRandomElement + 1);
             }
 
-            for (int i = 1; i < numbers.Length - 1; i++)
+            for (int i = 0; i < numbers.Length - 1; i++)
             {
                 int nextElementIndex = i + 1;
-                int lastElementIndex = i - 1;
 
                 if (numbers[i] == numbers[nextElementIndex])
                 {
