@@ -7,10 +7,17 @@ namespace XDproject
     {
         static void Main()
         {
-            int[] numbers =
+            int[] numbers = new int[10];
+
+            Random random = new Random();
+
+            int minRandomNumber = -10;
+            int maxRandomNumber = 10;
+
+            for (int i = 0; i < numbers.Length; i++)
             {
-                5, 2, 1, 6, 4, 8, 10
-            };
+                numbers[i] = random.Next(minRandomNumber, maxRandomNumber + 1);
+            }
 
             Console.WriteLine("\nМассив до сортировки:\n");
 
