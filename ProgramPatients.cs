@@ -7,45 +7,16 @@ namespace XDproject
     {
         static void Main()
         {
-            int[] numbers = new int[10];
+            string message = "Привет как дела?";
+            string[] dividedMessageToWords = message.Split(' ');
 
-            Random random = new Random();
+            Console.WriteLine("\nСообщение:\n");
+            Console.WriteLine(message);
+            Console.WriteLine("\nСообщение разделенное на слова:\n");
 
-            int minRandomNumber = -10;
-            int maxRandomNumber = 10;
-
-            for (int i = 0; i < numbers.Length; i++)
+            for (int i = 0; i < dividedMessageToWords.Length; i++)
             {
-                numbers[i] = random.Next(minRandomNumber, maxRandomNumber + 1);
-            }
-
-            Console.WriteLine("\nМассив до сортировки:\n");
-
-            for (int i = 0; i < numbers.Length; i++)
-            {
-                Console.WriteLine(numbers[i]);
-            }
-
-            for (int i = 0; i < numbers.Length; i++)
-            {
-                for (int j = 0; j < numbers.Length - 1; j++)
-                {
-                    int nextNumberIndex = j + 1;
-
-                    if (numbers[nextNumberIndex] < numbers[j])
-                    {
-                        int tempElement = numbers[j];
-                        numbers[j] = numbers[nextNumberIndex];
-                        numbers[nextNumberIndex] = tempElement;
-                    }
-                }
-            }
-
-            Console.WriteLine("\nМассив после сортировки:\n");
-
-            for (int i = 0; i < numbers.Length; i++)
-            {
-                Console.WriteLine(numbers[i]);
+                Console.WriteLine(dividedMessageToWords[i]);
             }
         }
     }
