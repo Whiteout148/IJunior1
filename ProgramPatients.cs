@@ -1,44 +1,58 @@
 ﻿using System;
 
-namespace XDproject
+class Program
 {
-    internal class ProgramPatients
+    static void Main()
     {
-        static void Main()
+        string input = "(()(()))";
+
+        char openBracket = '(';
+        char closeBracket = ')';
+
+        int currentDepth = 0;
+        int maxDepth = 0;
+        bool isCorrect = true;
+
+        int length = input.Length;
+
+        for (int index = 0; index < length; index = index + 1)
         {
-            int[] numbers = { 1, 2, 3, 4, 5, 6, 7 };
+            char currentChar = input[index];
 
-            Console.WriteLine("Исходный массив:");
-
-            for (int i = 0; i < numbers.Length; i++)
+            if (currentChar == openBracket)
             {
-                Console.Write(numbers[i] + " | ");
-            }
+                currentDepth = currentDepth + 1;
 
-            Console.WriteLine("\n\nКакое количество раз хотите сдвинуть массив влево?");
-            int userSteps = Convert.ToInt32(Console.ReadLine());
-
-            userSteps = userSteps % numbers.Length;
-
-            for (int i = 0; i < userSteps; i++)
-            {
-                int first = numbers[0];
-
-                for (int j = 0; j < numbers.Length - 1; j++)
+                if (currentDepth > maxDepth)
                 {
-                    int toNextElementIndex = j + 1;
-                    numbers[j] = numbers[toNextElementIndex];
+                    maxDepth = currentDepth;
                 }
-
-                numbers[numbers.Length - 1] = first;
             }
 
-            Console.WriteLine("\nМассив после сдвига:\n");
-
-            for (int i = 0; i < numbers.Length; i++)
+            if (currentChar == closeBracket)
             {
-                Console.Write(numbers[i] + " | ");
+                currentDepth = currentDepth - 1;
+
+                if (currentDepth < 0)
+                {
+                    isCorrect = false;
+                }
             }
+        }
+
+        if (currentDepth != 0)
+        {
+            isCorrect = false;
+        }
+
+        if (isCorrect)
+        {
+            Console.WriteLine("Строка корректна.");
+            Console.WriteLine("Максимальная глубина вложенности: " + maxDepth);
+        }
+        else
+        {
+            Console.WriteLine("Строка некорректна.");
         }
     }
 }
