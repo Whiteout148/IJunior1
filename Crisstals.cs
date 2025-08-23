@@ -1,29 +1,48 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Домашка_кристалы
+internal class Crisstals
 {
-    internal class Crisstals
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        string userInput;
+
+        int resultNumber;
+
+        bool isWork = true;
+        bool isConverted = false;
+
+        while (isWork)
         {
-            int gold;
-            int amethysts;
-            int amethystsPrice = 10;
+            Console.WriteLine("Введите число для конвертации в int");
+            userInput = Console.ReadLine();
 
-            Console.WriteLine("Сколько у вас золото?");
-            gold = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("Введите количество аметистов которые хотите купить");
-            amethysts = Convert.ToInt32(Console.ReadLine());
+            isConverted = ReadInt(userInput, out resultNumber);
 
-            int resultPrice = amethysts * amethystsPrice;
-            gold -= resultPrice;
+            if (isConverted)
+            {
+                isWork = false;
+            }
+            
+            Console.ReadKey();
+            Console.Clear();
+        }
+    }
 
-            Console.WriteLine($"Вы купили {amethysts} аметистов за цену {resultPrice} золото и осталось у вас {gold} золото.");
-            Console.ReadLine();
+    static bool ReadInt(string userInput, out int resultNumber)
+    {
+        if (int.TryParse(userInput, out resultNumber))
+        {
+            Console.WriteLine("Конвертация удалась!");
+            Console.WriteLine("Ваше число: " + resultNumber);
+
+            return true;
+        }
+        else
+        {
+            Console.WriteLine("Не удалось конвертировать в int");
+
+            return false;
         }
     }
 }
+
