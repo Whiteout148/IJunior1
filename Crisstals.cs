@@ -8,40 +8,30 @@ internal class Crisstals
 
         int resultNumber;
 
-        bool isWork = true;
-        bool isConverted = false;
-
-        while (isWork)
-        {
-            Console.WriteLine("Введите число для конвертации в int");
-            userInput = Console.ReadLine();
-
-            isConverted = ReadInt(userInput, out resultNumber);
-
-            if (isConverted)
-            {
-                isWork = false;
-            }
-            
-            Console.ReadKey();
-            Console.Clear();
-        }
+        ReadInt(out userInput, out resultNumber);
     }
 
-    static bool ReadInt(string userInput, out int resultNumber)
+    static void ReadInt(out string userInput, out int resultNumber)
     {
-        if (int.TryParse(userInput, out resultNumber))
+        while (true)
         {
-            Console.WriteLine("Конвертация удалась!");
-            Console.WriteLine("Ваше число: " + resultNumber);
+            Console.Write("Введите число: ");
+            userInput = Console.ReadLine();
 
-            return true;
-        }
-        else
-        {
-            Console.WriteLine("Не удалось конвертировать в int");
+            if(int.TryParse(userInput, out resultNumber))
+            {
+                Console.WriteLine("Число удалось конвертировать");
+                Console.WriteLine("Ваше число: " + resultNumber);
 
-            return false;
+                break;
+            }
+            else
+            {
+                Console.WriteLine("Число не удалось конвертировать");
+            }
+
+            Console.ReadKey();
+            Console.Clear();
         }
     }
 }
