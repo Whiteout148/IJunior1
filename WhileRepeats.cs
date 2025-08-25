@@ -8,49 +8,47 @@ namespace WhilesPractice1
     {
         static void Main()
         {
-            int[] array = new int[30];
+            int maxHealth = 50;
 
-            int minRandomNumber = -100;
-            int maxRandomNumber = 100;
+            float procentWithHealth = 0.5f;
 
-            int firstElementIndex = 0;
-            int lastElementIndex = array.Length - 1;
+            int posX = 1;
+            int posY = 1;
 
-            Random random = new Random();
+            DrawBar(procentWithHealth, maxHealth, posX, posY, ConsoleColor.Red);
+        }
 
-            for(int i = 0; i < array.Length; i++)
+        static void DrawBar(float procentWithMaxValue, int maxValue, int positionX, int positionY, ConsoleColor color)
+        {
+            ConsoleColor defaultColor = Console.BackgroundColor;
+            char openBracket = '[';
+            char closeBracket = ']';
+
+            float activeBarLenght = procentWithMaxValue * maxValue;
+
+            string bar = " ";
+
+            Console.SetCursorPosition(positionX, positionY);
+
+            for (int i = 0; i < activeBarLenght; i++)
             {
-                array[i] = random.Next(minRandomNumber, maxRandomNumber + 1);
+                bar += " ";
             }
 
-            if (array[firstElementIndex] > array[firstElementIndex + 1])
-            {
-                Console.WriteLine(array[firstElementIndex]);
-            }
-            
-            for (int i = 1; i < array.Length - 1; i++)
-            {
-                int rightNeighbourIndex = i + 1;
-                int leftNeighbourIndex = i - 1;
+            Console.Write(openBracket);
+            Console.BackgroundColor = color;
+            Console.Write(bar);
 
-                if (array[i] > array[leftNeighbourIndex] && array[i] > array[rightNeighbourIndex])
-                {
-                    Console.WriteLine(array[i]);
-                }
+            bar = null;
+
+            for (float i = activeBarLenght; i < maxValue; i++)
+            {
+                bar += " ";
             }
 
-            if (array[lastElementIndex] > array[lastElementIndex - 1])
-            {
-                Console.WriteLine(array[lastElementIndex]);
-            }
-
-            Console.WriteLine();
-            Console.WriteLine("Весь массив: ");
-
-            for (int i = 0; i < array.Length; i++)
-            {
-                Console.Write(array[i] + " | ");
-            }
+            Console.BackgroundColor = defaultColor;
+            Console.Write(bar);
+            Console.Write(closeBracket);
         }
     }
 }
