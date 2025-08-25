@@ -8,7 +8,7 @@ namespace WhilesPractice1
     {
         static void Main()
         {
-            int maxHealth = 50;
+            float maxHealth = 50;
 
             float procentWithHealth = 0.5f;
 
@@ -18,11 +18,18 @@ namespace WhilesPractice1
             DrawBar(procentWithHealth, maxHealth, posX, posY, ConsoleColor.Red);
         }
 
-        static void DrawBar(float procentWithMaxValue, int maxValue, int positionX, int positionY, ConsoleColor color)
+        static void DrawBar(float procentWithMaxValue, float maxValue, int positionX, int positionY, ConsoleColor color)
         {
             ConsoleColor defaultColor = Console.BackgroundColor;
             char openBracket = '[';
             char closeBracket = ']';
+
+            float maxProcent = 1f;
+
+            if (procentWithMaxValue > 1)
+            {
+                procentWithMaxValue = maxProcent;
+            }
 
             float activeBarLenght = procentWithMaxValue * maxValue;
 
@@ -30,25 +37,26 @@ namespace WhilesPractice1
 
             Console.SetCursorPosition(positionX, positionY);
 
-            for (int i = 0; i < activeBarLenght; i++)
+            Console.Write(openBracket);
+
+            CreateBarPart(activeBarLenght, bar, ' ', ConsoleColor.Red);
+
+            CreateBarPart(maxValue, bar, ' ', ConsoleColor.Black, activeBarLenght);
+
+            Console.Write(closeBracket);
+        }
+
+        static string CreateBarPart(float maxValue, string bar, char symbol, ConsoleColor color, float startValue = 0)
+        {
+            for (float i = startValue; i < maxValue; i++)
             {
-                bar += " ";
+                bar += symbol;
             }
 
-            Console.Write(openBracket);
             Console.BackgroundColor = color;
             Console.Write(bar);
 
-            bar = null;
-
-            for (float i = activeBarLenght; i < maxValue; i++)
-            {
-                bar += " ";
-            }
-
-            Console.BackgroundColor = defaultColor;
-            Console.Write(bar);
-            Console.Write(closeBracket);
+            return bar;
         }
     }
 }
