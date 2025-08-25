@@ -4,35 +4,43 @@ internal class Crisstals
 {
     static void Main(string[] args)
     {
-        string userInput;
-
         int resultNumber;
 
-        ReadInt(out userInput, out resultNumber);
+        bool isConverted;
+
+        resultNumber = ReadInt(out isConverted);
+
+        Console.WriteLine("Число удалось конвертировать\nВаше число:");
+        Console.WriteLine(resultNumber);
     }
 
-    static void ReadInt(out string userInput, out int resultNumber)
+    static int ReadInt(out bool isConverted)
     {
-        while (true)
+        string userInput = "";
+
+        int resultNumber = 0;
+
+        isConverted = true;
+
+        while (isConverted = false)
         {
-            Console.Write("Введите число: ");
+            Console.WriteLine("Введите число для конвертации");
             userInput = Console.ReadLine();
 
-            if(int.TryParse(userInput, out resultNumber))
+            if (int.TryParse(userInput, out resultNumber))
             {
-                Console.WriteLine("Число удалось конвертировать");
-                Console.WriteLine("Ваше число: " + resultNumber);
-
-                break;
+                isConverted = true;
             }
             else
             {
-                Console.WriteLine("Число не удалось конвертировать");
+                Console.WriteLine("Не получилось конвертировать");
             }
 
             Console.ReadKey();
             Console.Clear();
         }
+
+        return resultNumber;
     }
 }
 
