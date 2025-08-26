@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http.Headers;
+using System.Net.NetworkInformation;
 using System.Threading;
 
 class Program
@@ -10,22 +11,12 @@ class Program
 
         int[] numbers = { 1, 2, 3, 4, 5 };
 
-        Console.WriteLine("\nМассив до рандома:\n");
-
-        for (int i = 0; i < numbers.Length; i++)
-        {
-            Console.Write(numbers[i]);
-        }
+        PrintArray(numbers, "Массив до рандома");
 
         Console.WriteLine();
         Shuffle(ref numbers, random);
 
-        Console.WriteLine("\nМассив после рандома:\n");
-
-        for (int i = 0; i < numbers.Length; i++)
-        {
-            Console.Write(numbers[i]);
-        }
+        PrintArray(numbers, "Массив после рандома");
     }
 
     static void Shuffle(ref int[] numbers, Random random)
@@ -37,6 +28,16 @@ class Program
             int tempElement = numbers[randomIndex];
             numbers[randomIndex] = numbers[i];
             numbers[i] = tempElement;
+        }
+    }
+
+    static void PrintArray(int[] numbers, string message)
+    {
+        Console.WriteLine($"\n{message}\n");
+
+        for (int i = 0; i < numbers.Length; i++)
+        {
+            Console.Write(numbers[i]);
         }
     }
 }
