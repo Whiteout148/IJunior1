@@ -6,67 +6,37 @@ class Program
 {
     static void Main()
     {
-        const int CommandForCheckSum = 1;
-        const int CommandForExit = 2;
+        Random random = new Random();
 
-        int sum = 0;
+        int[] numbers = { 1, 2, 3, 4, 5 };
 
-        int userInput;
-        int userNumbersSum = 0;
+        Console.WriteLine("\nМассив до рандома:\n");
 
-        int[] numbers = new int[0];
-        int[] tempNumbers;
-
-        bool isWork = true;
-
-        while (isWork)
+        for (int i = 0; i < numbers.Length; i++)
         {
-            Console.WriteLine("** Программа для вычисление всех написанных чисел **\n");
-            Console.WriteLine("\nВаши числа: ");
+            Console.Write(numbers[i]);
+        }
 
-            for (int i = 0; i < numbers.Length; i++)
-            {
-                Console.WriteLine(numbers[i]);
-            }
+        Console.WriteLine();
+        Shuffle(ref numbers, random);
 
-            Console.WriteLine($"Команда для показа суммы всех чисел: {CommandForCheckSum}");
-            Console.WriteLine($"Команда для выхода из программы: {CommandForExit}");
-            userInput = Convert.ToInt32(Console.ReadLine());
+        Console.WriteLine("\nМассив после рандома:\n");
 
-            switch (userInput)
-            {
-                case CommandForCheckSum:
-                    Console.WriteLine("Ваши числа: \n");
+        for (int i = 0; i < numbers.Length; i++)
+        {
+            Console.Write(numbers[i]);
+        }
+    }
 
-                    for (int i = 0; i < numbers.Length; i++)
-                    {
-                        Console.WriteLine(numbers[i]);
-                        sum += numbers[i];
-                    }
+    static void Shuffle(ref int[] numbers, Random random)
+    {
+        for (int i = 0; i < numbers.Length; i++)
+        {
+            int randomIndex = random.Next(0, numbers.Length - 1);
 
-                    Console.WriteLine("\nСумма всех чисел: " + sum);
-                    break;
-
-                case CommandForExit:
-                    isWork = false;
-                    break;
-
-                default:
-                    userNumbersSum++;
-                    tempNumbers = new int[userNumbersSum];
-
-                    for (int i = 0; i < numbers.Length; i++)
-                    {
-                        tempNumbers[i] = numbers[i];
-                    }
-
-                    tempNumbers[tempNumbers.Length - 1] = userInput;
-                    numbers = tempNumbers;
-                    break;
-            }
-
-            Console.ReadKey();
-            Console.Clear();
+            int tempElement = numbers[randomIndex];
+            numbers[randomIndex] = numbers[i];
+            numbers[i] = tempElement;
         }
     }
 }
