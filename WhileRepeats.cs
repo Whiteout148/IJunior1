@@ -10,15 +10,15 @@ namespace WhilesPractice1
         {
             float maxHealth = 50;
 
-            float procentWithHealth = 0.5f;
+            float percentWithHealth = 0.5f;
 
             int posX = 1;
             int posY = 1;
 
-            DrawBar(procentWithHealth, maxHealth, posX, posY, ConsoleColor.Red);
+            DrawBar(percentWithHealth, maxHealth, posX, posY, ConsoleColor.Red);
         }
 
-        static void DrawBar(float procentWithMaxValue, float maxValue, int positionX, int positionY, ConsoleColor color)
+        static void DrawBar(float percentWithMaxValue, float maxValue, int positionX, int positionY, ConsoleColor color)
         {
             ConsoleColor defaultColor = Console.BackgroundColor;
             char openBracket = '[';
@@ -26,12 +26,12 @@ namespace WhilesPractice1
 
             float maxProcent = 1f;
 
-            if (procentWithMaxValue > 1)
+            if (percentWithMaxValue > 1)
             {
-                procentWithMaxValue = maxProcent;
+                percentWithMaxValue = maxProcent;
             }
 
-            float activeBarLenght = procentWithMaxValue * maxValue;
+            float activeBarLenght = percentWithMaxValue * maxValue;
 
             string bar = " ";
 
@@ -39,24 +39,31 @@ namespace WhilesPractice1
 
             Console.Write(openBracket);
 
-            CreateBarPart(activeBarLenght, bar, ' ', ConsoleColor.Red);
+            bar = CreateBarPart(activeBarLenght, bar, ' ');
 
-            CreateBarPart(maxValue, bar, ' ', ConsoleColor.Black, activeBarLenght);
+            SetColorAndDraw(bar, color);
+
+            CreateBarPart(maxValue, bar, ' ', activeBarLenght);
+
+            SetColorAndDraw(bar, defaultColor);
 
             Console.Write(closeBracket);
         }
 
-        static string CreateBarPart(float maxValue, string bar, char symbol, ConsoleColor color, float startValue = 0)
+        static string CreateBarPart(float maxValue, string bar, char symbol, float startValue = 0)
         {
             for (float i = startValue; i < maxValue; i++)
             {
                 bar += symbol;
             }
 
+            return bar;
+        }
+
+        static void SetColorAndDraw(string bar, ConsoleColor color)
+        {
             Console.BackgroundColor = color;
             Console.Write(bar);
-
-            return bar;
         }
     }
 }
