@@ -11,19 +11,19 @@ class Program
 
         int[] numbers = { 1, 2, 3, 4, 5 };
 
-        PrintArray(numbers, "Массив до рандома");
+        PrintArrayAndMessage(numbers, "Массив до рандома");
 
         Console.WriteLine();
-        Shuffle(ref numbers, random);
+        Shuffle(numbers, random);
 
-        PrintArray(numbers, "Массив после рандома");
+        PrintArrayAndMessage(numbers, "Массив после рандома");
     }
 
-    static void Shuffle(ref int[] numbers, Random random)
+    static void Shuffle(int[] numbers, Random random)
     {
         for (int i = 0; i < numbers.Length; i++)
         {
-            int randomIndex = random.Next(0, numbers.Length - 1);
+            int randomIndex = random.Next(0, numbers.Length);
 
             int tempElement = numbers[randomIndex];
             numbers[randomIndex] = numbers[i];
@@ -31,7 +31,7 @@ class Program
         }
     }
 
-    static void PrintArray(int[] numbers, string message)
+    static void PrintArrayAndMessage(int[] numbers, string message)
     {
         Console.WriteLine($"\n{message}\n");
 
