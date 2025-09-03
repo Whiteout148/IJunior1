@@ -37,20 +37,13 @@ class Program
             Console.WriteLine($"Выход: {CommandExit}");
             Console.Write("Введите нужную команду: ");
             userInput = Console.ReadLine();
+            string message;
 
             switch (userInput)
             {
                 case CommandAddDossier:
-                    bool isAddDossier = AddDossier(ref jobs, ref fullNames);
-
-                    if (isAddDossier)
-                    {
-                        Console.WriteLine("Досье добавлено.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Ошибка! не удалось добавить досье");
-                    }
+                    message = GetMessageOfDelete(ref jobs, ref fullNames);
+                    Console.WriteLine(message);
                     break;
 
                 case CommandPrintAllDossier:
@@ -58,16 +51,8 @@ class Program
                     break;
 
                 case CommandDeleteDossier:
-                    bool isDeletedDossier = DeleteDossier(ref fullNames, ref jobs);
-
-                    if (isDeletedDossier)
-                    {
-                        Console.WriteLine("Досье удалено.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Ошибка! не удалось удалить досье");
-                    }    
+                    message = GetMessageOfDelete(ref jobs, ref fullNames);
+                    Console.WriteLine(message);
                     break;
 
                 case CommandFindWithSurname:
@@ -75,7 +60,6 @@ class Program
                     break;
 
                 case CommandExit:
-                    Console.WriteLine("Выход из программы");
                     isWork = false;
                     break;
 
@@ -87,6 +71,34 @@ class Program
 
             Console.ReadKey();
             Console.Clear();
+        }
+    }
+
+    static string GetMessageOfDelete(ref string[] jobs, ref string[] fullNames)
+    {
+        bool isDeleteDossier = DeleteDossier(ref jobs, ref fullNames);
+
+        if (isDeleteDossier)
+        {
+            return "Досье удалено.";
+        }
+        else
+        {
+            return "Ошибка! Не удалось удалить досье.";
+        }
+    }
+
+    static string GetMessageOfAdd(ref string[] jobs, ref string[] fullNames)
+    {
+        bool isAddDossier = AddDossier(ref jobs, ref fullNames);
+
+        if (isAddDossier)
+        {
+            return "Досье добавлено.";
+        }
+        else
+        {
+            return "Ошибка! Не удалось добавить досье.";
         }
     }
 
@@ -163,21 +175,14 @@ class Program
         return newArray;
     }
 
-    static void PrintDossier(string[] fullNames, string[] jobs, int index, int number = 0, char divider = ' ')
+    static void PrintDossier(string[] fullNames, string[] jobs, int index, char divider = ' ')
     {
         Console.Write($"Полное имя: {fullNames[index]} Должность: {jobs[index]} {divider} ");
     }
 
     static bool GetInformationAboutAvability(string[] array)
     {
-        if (array.Length <= 0)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        return array.Length > 0;
     }
 
     static void PrintAllDossiers(string[] fullNames, string[] jobs)
@@ -193,14 +198,14 @@ class Program
             for (int i = 0; i < fullNames.Length - 1; i++)
             {
                 Console.Write("Досье номер: " + dossierNumber + " ");
-                PrintDossier(fullNames, jobs, i, dossierNumber, '-');
+                PrintDossier(fullNames, jobs, i, '-');
 
                 dossierNumber++;
             }
 
             Console.Write("Досье номер: " + dossierNumber + " ");
 
-            PrintDossier(fullNames, jobs, fullNames.Length - 1, dossierNumber += 1);
+            PrintDossier(fullNames, jobs, fullNames.Length - 1);
         }
         else
         {
