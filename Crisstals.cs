@@ -41,7 +41,16 @@ class Program
             switch (userInput)
             {
                 case CommandAddDossier:
-                    fullNames = AddDossier(ref jobs, fullNames);
+                    bool isAddDossier = AddDossier(ref jobs, ref fullNames);
+
+                    if (isAddDossier)
+                    {
+                        Console.WriteLine("Досье добавлено.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Ошибка! не удалось добавить досье");
+                    }
                     break;
 
                 case CommandPrintAllDossier:
@@ -49,7 +58,16 @@ class Program
                     break;
 
                 case CommandDeleteDossier:
-                    fullNames = DeleteDossier(fullNames, ref jobs);
+                    bool isDeletedDossier = DeleteDossier(ref fullNames, ref jobs);
+
+                    if (isDeletedDossier)
+                    {
+                        Console.WriteLine("Досье удалено.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Ошибка! не удалось удалить досье");
+                    }    
                     break;
 
                 case CommandFindWithSurname:
@@ -72,7 +90,7 @@ class Program
         }
     }
 
-    static string[] AddDossier(ref string[] jobs, string[] fullName)
+    static bool AddDossier(ref string[] jobs, ref string[] fullName)
     {
         Console.Write("Введите фио: ");
         string userFullName = Console.ReadLine();
@@ -82,7 +100,7 @@ class Program
         fullName = AddElement(fullName, userFullName);
         jobs = AddElement(jobs, userJob);
 
-        return fullName;
+        return true;
     }
 
     static string[] AddElement(string[] array, string element)
@@ -99,53 +117,67 @@ class Program
         return tempArray;
     }
 
-    static string[] DeleteDossier(string[] fullNames, ref string[] jobs)
+    static bool DeleteDossier(ref string[] fullNames, ref string[] jobs)
     {
-        Console.Write("Введите индекс с нужным досье: ");
-        string userIndex = Console.ReadLine();
-        int resultIndex;
-        bool isConvert = ReadInt(out resultIndex, userIndex);
-        resultIndex = resultIndex - 1;
+        bool isHaveDossier = GetInformationAboutAvability(fullNames);
 
-        if (isConvert)
+        if (isHaveDossier)
         {
-            if (resultIndex > fullNames.Length - 1 || resultIndex < 0)
+            Console.Write("Введите индекс с нужным досье: ");
+            string userIndex = Console.ReadLine();
+            int resultIndex;
+            bool isConvert = int.TryParse(userIndex, out resultIndex);
+            resultIndex = resultIndex - 1;
+
+            if (isConvert)
             {
-                Console.WriteLine("Нету досье с таким индексом!");
-            }
-            else
-            {
-                fullNames = DeleteElement(fullNames, resultIndex);
-                jobs = DeleteElement(jobs, resultIndex);
+                if (resultIndex > fullNames.Length - 1 || resultIndex < 0)
+                {
+                    Console.WriteLine("Нету досье с таким индексом!");
+                }
+                else
+                {
+                    fullNames = DeleteElement(fullNames, resultIndex);
+                    jobs = DeleteElement(jobs, resultIndex);
+
+                    return true;
+                }
             }
         }
-        else
-        {
-            Console.WriteLine("Ошибка! нужно ввести целое число");
-        }
 
-        return fullNames;
+        return false;
     }
 
     static string[] DeleteElement(string[] array, int index)
     {
-        string tempElement = array[index];
-        array[index] = array[array.Length - 1];
-        array[array.Length - 1] = tempElement;
+        string[] newArray = new string[array.Length - 1];
 
-        string[] tempArray = new string[array.Length - 1];
-
-        for (int i = 0; i < tempArray.Length; i++)
+        for (int i = 0, j = 0; i < array.Length; i++)
         {
-            tempArray[i] = array[i];
+            if (i == index)
+                continue;
+
+            newArray[j++] = array[i];
         }
 
-        return tempArray;
+        return newArray;
     }
 
     static void PrintDossier(string[] fullNames, string[] jobs, int index, int number = 0, char divider = ' ')
     {
         Console.Write($"Полное имя: {fullNames[index]} Должность: {jobs[index]} {divider} ");
+    }
+
+    static bool GetInformationAboutAvability(string[] array)
+    {
+        if (array.Length <= 0)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 
     static void PrintAllDossiers(string[] fullNames, string[] jobs)
@@ -154,18 +186,26 @@ class Program
 
         int dossierNumber = 1;
 
-        for (int i = 0; i < fullNames.Length - 1; i++)
+        bool isHaveDossier = GetInformationAboutAvability(fullNames);
+
+        if (isHaveDossier)
         {
+            for (int i = 0; i < fullNames.Length - 1; i++)
+            {
+                Console.Write("Досье номер: " + dossierNumber + " ");
+                PrintDossier(fullNames, jobs, i, dossierNumber, '-');
+
+                dossierNumber++;
+            }
 
             Console.Write("Досье номер: " + dossierNumber + " ");
-            PrintDossier(fullNames, jobs, i, dossierNumber, '-');
 
-            dossierNumber++;
+            PrintDossier(fullNames, jobs, fullNames.Length - 1, dossierNumber += 1);
         }
-
-        Console.Write("Досье номер: " + dossierNumber + " ");
-
-        PrintDossier(fullNames, jobs, fullNames.Length - 1, dossierNumber += 1);
+        else
+        {
+            Console.WriteLine("У вас нету в наличии досье");
+        }
     }
 
     static void WriteWithSurname(string[] fullName, string[] jobs)
@@ -190,12 +230,7 @@ class Program
 
         if (isGetSurname == false)
         {
-            Console.WriteLine("Не сотрудников с такой фамилией");
+            Console.WriteLine("Нету сотрудников с такой фамилией");
         }
-    }
-
-    static bool ReadInt(out int result, string userInput)
-    {
-        return int.TryParse(userInput, out result);
     }
 }
