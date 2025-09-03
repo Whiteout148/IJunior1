@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Net.NetworkInformation;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -9,27 +10,24 @@ class Program
 {
     static void Main()
     {
-        const int CommandAddDossier = 1;
-        const int CommandPrintAllDossier = 2;
-        const int CommandDeleteDossier = 3;
-        const int CommandFindWithSurname = 4;
-        const int CommandExit = 5;
+        const string CommandAddDossier = "1";
+        const string CommandPrintAllDossier = "2";
+        const string CommandDeleteDossier = "3";
+        const string CommandFindWithSurname = "4";
+        const string CommandExit = "5";
 
         bool isWork = true;
 
-        string[] fios =
+        string[] fullNames =
         {
-            "Иванов Сергей Папиков",
+            "Галеев Артем Иванов",
             "Гордон Иван Владимиров",
-            "Галеев Алексей Павлович",
-            "Галеев Артем Иванов"
         };
 
-        string[] fiosJobs =
+        string[] jobs =
         {
             "Учитель",
             "Программист",
-            "Инженер"
         };
 
         string dossier = "";
@@ -39,13 +37,6 @@ class Program
         while (isWork)
         {
             Console.WriteLine("** Кадровый Учет **\n");
-            Console.WriteLine("Сотрудники:");
-            Console.WriteLine();
-            PrintArray(fios);
-            Console.WriteLine();
-            Console.WriteLine("Должности: ");
-            Console.WriteLine();
-            PrintArray(fiosJobs);
             Console.WriteLine();
             Console.WriteLine("Доступные команды:");
             Console.WriteLine($"Добавить досье: {CommandAddDossier}");
@@ -56,25 +47,22 @@ class Program
             Console.Write("Введите нужную команду: ");
             userInput = Console.ReadLine();
 
-            int result;
-            bool isTrueConvert = ReadInt(out result, userInput);
-
-            switch (result)
+            switch (userInput)
             {
                 case CommandAddDossier:
-                    dossier = AddDossier(fios, fiosJobs, dossier, divider);
+                    fullNames = AddDossier(ref jobs, fullNames);
                     break;
 
                 case CommandPrintAllDossier:
-                    PrintAllDossiers(dossier, divider);
+                    PrintAllDossiers(fullNames, jobs);
                     break;
 
                 case CommandDeleteDossier:
-                    dossier = DeleteDossier(dossier, divider);
+                    fullNames = DeleteDossier(fullNames, ref jobs);
                     break;
 
                 case CommandFindWithSurname:
-                    WriteWithSurname(fios, dossier, divider);
+                    WriteWithSurname(fullNames, jobs);
                     break;
 
                 case CommandExit:
@@ -83,8 +71,9 @@ class Program
                     break;
 
                 default:
-                    Console.WriteLine("Нету такой команды");
+                    Console.WriteLine("Нету Такой Команды");
                     break;
+
             }
 
             Console.ReadKey();
@@ -92,188 +81,130 @@ class Program
         }
     }
 
-    static string AddDossier(string[] fio, string[] fioJob, string dossier, char divider)
+    static string[] AddDossier(ref string[] jobs, string[] fullName)
     {
-        string userFullName;
-        string userJob;
+        Console.Write("Введите фио: ");
+        string userFullName = Console.ReadLine();
+        Console.Write("Введите работу: ");
+        string userJob = Console.ReadLine();
 
-        Console.WriteLine("Введите Фамилию Имя и Отчество сотрудника для добавление в досье");
-        userFullName = Console.ReadLine();
-        bool isTrueFullName;
-        int indexOfFullName = GetIndexAndElement(userFullName, fio, out isTrueFullName);
+        fullName = AddElement(fullName, userFullName);
+        jobs = AddElement(jobs, userJob);
 
-        if (isTrueFullName)
+        return fullName;
+    }
+
+    static string[] AddElement(string[] array, string element)
+    {
+        string[] tempArray = new string[array.Length + 1];
+
+        for (int i = 0; i < array.Length; i++)
         {
-            Console.WriteLine("Введите должность сотрудника");
-            userJob = Console.ReadLine();
-            bool isTrueJob;
-            int indexOfJob = GetIndexAndElement(userJob, fioJob, out isTrueJob);
+            tempArray[i] = array[i];
+        }
 
-            if (isTrueJob)
+        tempArray[tempArray.Length - 1] = element;
+
+        return tempArray;
+    }
+
+    static string[] DeleteDossier(string[] fullNames, ref string[] jobs)
+    {
+        Console.Write("Введите индекс с нужным досье: ");
+        string userIndex = Console.ReadLine();
+        int resultIndex;
+        bool isConvert = ReadInt(out resultIndex, userIndex);
+        resultIndex = resultIndex - 1;
+
+        if (isConvert)
+        {
+            if (resultIndex > fullNames.Length - 1 || resultIndex < 0)
             {
-                if (dossier == "")
-                {
-                    dossier += "Полное имя: " + fio[indexOfFullName] + " Должность: " + fioJob[indexOfJob];
-                }
-                else
-                {
-                    dossier += divider + " - Полное имя: " + fio[indexOfFullName] + " Должность: " + fioJob[indexOfJob];
-                }
-
-                Console.WriteLine("Добавлено досье:");
-                Console.WriteLine($"Ваш сотрудник: {fio[indexOfFullName]} по должности: {fioJob[indexOfJob]}");
+                Console.WriteLine("Нету досье с таким индексом!");
             }
             else
             {
-                Console.WriteLine("Нету такой должности");
+                fullNames = DeleteElement(fullNames, resultIndex);
+                jobs = DeleteElement(jobs, resultIndex);
             }
         }
         else
         {
-            Console.WriteLine("Такого сотрудника нету");
+            Console.WriteLine("Ошибка! нужно ввести целое число");
         }
 
-        return dossier;
+        return fullNames;
     }
 
-    static string DeleteDossier(string dossier, char divider)
+    static string[] DeleteElement(string[] array, int index)
     {
-        string[] dossiers = DivideStrokeToArray(dossier, divider);
+        string tempElement = array[index];
+        array[index] = array[array.Length - 1];
+        array[array.Length - 1] = tempElement;
 
-        Console.Write("Введите индекс досье которое хотите удалить: ");
-        int userIndex = Convert.ToInt32(Console.ReadLine());
-        userIndex = userIndex - 1;
+        string[] tempArray = new string[array.Length - 1];
 
-        if (userIndex > dossiers.Length - 1 || userIndex < 0)
+        for (int i = 0; i < tempArray.Length; i++)
         {
-            Console.WriteLine("Нету такого индекса досье");
-
-            return dossier;
+            tempArray[i] = array[i];
         }
-        else
-        {
-            string newDossier = "";
 
-            for (int i = 0; i < dossiers.Length; i++)
-            {
-                if (i == userIndex)
-                    continue;
-
-                if (string.IsNullOrWhiteSpace(dossiers[i]))
-                    continue;
-
-                if (i == 0)
-                {
-                    newDossier += dossiers[i];
-                }
-                else
-                {
-                    newDossier += divider + dossiers[i];
-                }
-            }
-
-            return newDossier;
-        }
+        return tempArray;
     }
 
-    static void PrintAllDossiers(string dossier, char divider)
+    static void PrintDossier(string[] fullNames, string[] jobs, int index, int number = 0, char divider = ' ')
     {
-        string[] dossiers = DivideStrokeToArray(dossier, divider);
+        Console.Write($"Полное имя: {fullNames[index]} Должность: {jobs[index]} {divider} ");
+    }
 
+    static void PrintAllDossiers(string[] fullNames, string[] jobs)
+    {
         Console.WriteLine("Все досье: \n");
 
-        for (int i = 0; i < dossiers.Length; i++)
-        {
-            int dossierNumber = i + 1;
+        int dossierNumber = 1;
 
-            Console.Write($"Досье Номер {dossierNumber} {dossiers[i]} ");
+        for (int i = 0; i < fullNames.Length - 1; i++)
+        {
+
+            Console.Write("Досье номер: " + dossierNumber + " ");
+            PrintDossier(fullNames, jobs, i, dossierNumber, '-');
+
+            dossierNumber++;
         }
+
+        Console.Write("Досье номер: " + dossierNumber + " ");
+
+        PrintDossier(fullNames, jobs, fullNames.Length - 1, dossierNumber += 1);
     }
 
-    static void WriteWithSurname(string[] fullName, string dossier, char divider)
+    static void WriteWithSurname(string[] fullName, string[] jobs)
     {
         string userInput;
         Console.WriteLine("Введите фамилию:");
         userInput = Console.ReadLine();
 
-        bool isGetInfoOfSurname = false;
+        bool isGetSurname = false;
 
-        string[] dividedDossier = DivideStrokeToArray(dossier, divider);
-
-        for (int i = 0; i < dividedDossier.Length; i++)
+        for (int i = 0; i < fullName.Length; i++)
         {
-            string[] divideDossierToWords = DivideStrokeToArray(dividedDossier[i], ' ');
+            string[] dividedFullNames = fullName[i].Split(' ');
 
-            bool isGetSurname = GetInfoOfUserElement(userInput, divideDossierToWords);
-
-            if (isGetSurname)
+            if (userInput == dividedFullNames[0])
             {
-                isGetInfoOfSurname = true;
-
-                Console.WriteLine($"Досье с фамилией {userInput}: {dividedDossier[i]}");
+                isGetSurname = true;
+                Console.Write("Досье с фамилией: " + dividedFullNames[0] + " ");
+                PrintDossier(fullName, jobs, i);
             }
         }
 
-
-        if (isGetInfoOfSurname == false)
+        if (isGetSurname == false)
         {
             Console.WriteLine("Не сотрудников с такой фамилией");
-        }
-    }
-
-    static int GetIndexAndElement(string userInfo, string[] array, out bool isTrueInfo)
-    {
-        int indexOfJob = FindIndexWithElement(userInfo, array);
-        isTrueInfo = GetInfoOfUserElement(userInfo, array);
-
-        return indexOfJob;
-    }
-
-    static int FindIndexWithElement(string Element, string[] array)
-    {
-        int index = 0;
-
-        for (int i = 0; i < array.Length; i++)
-        {
-            if (Element == array[i])
-            {
-                index = i;
-            }
-        }
-
-        return index;
-    }
-
-    static bool GetInfoOfUserElement(string userInfo, string[] Array)
-    {
-        for (int i = 0; i < Array.Length; i++)
-        {
-            if (userInfo == Array[i])
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    static void PrintArray(string[] array)
-    {
-        for (int i = 0; i < array.Length; i++)
-        {
-            Console.WriteLine(array[i]);
         }
     }
 
     static bool ReadInt(out int result, string userInput)
     {
         return int.TryParse(userInput, out result);
-    }
-
-    static string[] DivideStrokeToArray(string dossier, char divider)
-    {
-        string[] dividedDossier = dossier.Split(new[] { divider }, StringSplitOptions.RemoveEmptyEntries);
-
-        return dividedDossier;
     }
 }
