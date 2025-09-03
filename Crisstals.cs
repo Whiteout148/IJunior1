@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Net.Http.Headers;
-using System.Net.NetworkInformation;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Threading;
 
 class Program
 {
@@ -15,8 +9,6 @@ class Program
         const string CommandDeleteDossier = "3";
         const string CommandFindWithSurname = "4";
         const string CommandExit = "5";
-
-        bool isWork = true;
 
         string[] fullNames =
         {
@@ -30,9 +22,8 @@ class Program
             "Программист",
         };
 
-        string dossier = "";
+        bool isWork = true;
         string userInput;
-        char divider = '*';
 
         while (isWork)
         {
