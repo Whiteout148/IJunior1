@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 class Program
 {
@@ -37,13 +38,11 @@ class Program
             Console.WriteLine($"Выход: {CommandExit}");
             Console.Write("Введите нужную команду: ");
             userInput = Console.ReadLine();
-            string message;
 
             switch (userInput)
             {
                 case CommandAddDossier:
-                    message = GetMessageOfDelete(ref jobs, ref fullNames);
-                    Console.WriteLine(message);
+                    AddDossierAndWriteMessage(ref jobs, ref fullNames);
                     break;
 
                 case CommandPrintAllDossier:
@@ -51,12 +50,11 @@ class Program
                     break;
 
                 case CommandDeleteDossier:
-                    message = GetMessageOfDelete(ref jobs, ref fullNames);
-                    Console.WriteLine(message);
+                    DeleteDossierAndWriteMessage(ref jobs, ref fullNames);
                     break;
 
                 case CommandFindWithSurname:
-                    WriteWithSurname(fullNames, jobs);
+                    FindDossierWithSurname(fullNames, jobs);
                     break;
 
                 case CommandExit:
@@ -74,45 +72,40 @@ class Program
         }
     }
 
-    static string GetMessageOfDelete(ref string[] jobs, ref string[] fullNames)
+    static void DeleteDossierAndWriteMessage(ref string[] jobs, ref string[] fullNames)
     {
-        bool isDeleteDossier = DeleteDossier(ref jobs, ref fullNames);
+        bool isDeleteDossier = DeleteFullNameAndJob(ref jobs, ref fullNames);
 
-        if (isDeleteDossier)
-        {
-            return "Досье удалено.";
-        }
-        else
-        {
-            return "Ошибка! Не удалось удалить досье.";
-        }
+        Console.WriteLine(isDeleteDossier ? "Досье удалено" : "Не удалось удалить досье");
     }
 
-    static string GetMessageOfAdd(ref string[] jobs, ref string[] fullNames)
+    static void AddDossierAndWriteMessage(ref string[] jobs, ref string[] fullNames)
     {
-        bool isAddDossier = AddDossier(ref jobs, ref fullNames);
+        bool isAddDossier = AddFullNameAndJob(ref jobs, ref fullNames);
 
-        if (isAddDossier)
-        {
-            return "Досье добавлено.";
-        }
-        else
-        {
-            return "Ошибка! Не удалось добавить досье.";
-        }
+        Console.WriteLine(isAddDossier ? "Досье добавлено" : "Не удалось добавить досье");
     }
 
-    static bool AddDossier(ref string[] jobs, ref string[] fullName)
+    static bool AddFullNameAndJob(ref string[] jobs, ref string[] fullName)
     {
-        Console.Write("Введите фио: ");
+        Console.Write("Введите фио (3 слова 'Имя Фамилия Отчество' не больше не меньше): ");
         string userFullName = Console.ReadLine();
-        Console.Write("Введите работу: ");
+        Console.Write("Введите должность: ");
         string userJob = Console.ReadLine();
 
-        fullName = AddElement(fullName, userFullName);
-        jobs = AddElement(jobs, userJob);
+        string[] dividedFullName = userFullName.Split(' ');
 
-        return true;
+        if (dividedFullName.Length == 3)
+        {
+            fullName = AddElement(fullName, userFullName);
+            jobs = AddElement(jobs, userJob);
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     static string[] AddElement(string[] array, string element)
@@ -129,7 +122,7 @@ class Program
         return tempArray;
     }
 
-    static bool DeleteDossier(ref string[] fullNames, ref string[] jobs)
+    static bool DeleteFullNameAndJob(ref string[] fullNames, ref string[] jobs)
     {
         bool isHaveDossier = GetInformationAboutAvability(fullNames);
 
@@ -189,23 +182,16 @@ class Program
     {
         Console.WriteLine("Все досье: \n");
 
-        int dossierNumber = 1;
-
         bool isHaveDossier = GetInformationAboutAvability(fullNames);
 
         if (isHaveDossier)
         {
-            for (int i = 0; i < fullNames.Length - 1; i++)
+            for (int i = 0; i < fullNames.Length; i++)
             {
-                Console.Write("Досье номер: " + dossierNumber + " ");
-                PrintDossier(fullNames, jobs, i, '-');
-
-                dossierNumber++;
+                Console.Write("Досье номер: " + (i + 1) + " ");
+                char divider = (i == fullNames.Length - 1) ? ' ' : '-';
+                PrintDossier(fullNames, jobs, i, divider);
             }
-
-            Console.Write("Досье номер: " + dossierNumber + " ");
-
-            PrintDossier(fullNames, jobs, fullNames.Length - 1);
         }
         else
         {
@@ -213,7 +199,7 @@ class Program
         }
     }
 
-    static void WriteWithSurname(string[] fullName, string[] jobs)
+    static void FindDossierWithSurname(string[] fullName, string[] jobs)
     {
         string userInput;
         Console.WriteLine("Введите фамилию:");
@@ -225,7 +211,7 @@ class Program
         {
             string[] dividedFullNames = fullName[i].Split(' ');
 
-            if (userInput == dividedFullNames[0])
+            if (userInput.ToLower() == dividedFullNames[0].ToLower())
             {
                 isGetSurname = true;
                 Console.Write("Досье с фамилией: " + dividedFullNames[0] + " ");
