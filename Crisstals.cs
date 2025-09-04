@@ -42,7 +42,7 @@ class Program
             switch (userInput)
             {
                 case CommandAddDossier:
-                    AddDossierAndWriteMessage(ref jobs, ref fullNames);
+                    AddDossier(ref jobs, ref fullNames);
                     break;
 
                 case CommandPrintAllDossier:
@@ -50,7 +50,7 @@ class Program
                     break;
 
                 case CommandDeleteDossier:
-                    DeleteDossierAndWriteMessage(ref jobs, ref fullNames);
+                    DeleteDossier(ref fullNames, ref jobs);
                     break;
 
                 case CommandFindWithSurname:
@@ -72,14 +72,7 @@ class Program
         }
     }
 
-    static void DeleteDossierAndWriteMessage(ref string[] jobs, ref string[] fullNames)
-    {
-        bool isDeleteDossier = DeleteFullNameAndJob(ref jobs, ref fullNames);
-
-        Console.WriteLine(isDeleteDossier ? "Досье удалено" : "Не удалось удалить досье");
-    }
-
-    static void AddDossierAndWriteMessage(ref string[] jobs, ref string[] fullNames)
+    static void AddDossier(ref string[] jobs, ref string[] fullNames)
     {
         bool isAddDossier = AddFullNameAndJob(ref jobs, ref fullNames);
 
@@ -95,7 +88,9 @@ class Program
 
         string[] dividedFullName = userFullName.Split(' ');
 
-        if (dividedFullName.Length == 3)
+        int quantityOfWords = 3;
+
+        if (dividedFullName.Length == quantityOfWords)
         {
             fullName = AddElement(fullName, userFullName);
             jobs = AddElement(jobs, userJob);
@@ -122,7 +117,7 @@ class Program
         return tempArray;
     }
 
-    static bool DeleteFullNameAndJob(ref string[] fullNames, ref string[] jobs)
+    static void DeleteDossier(ref string[] fullNames, ref string[] jobs)
     {
         bool isHaveDossier = GetInformationAboutAvability(fullNames);
 
@@ -144,25 +139,27 @@ class Program
                 {
                     fullNames = DeleteElement(fullNames, resultIndex);
                     jobs = DeleteElement(jobs, resultIndex);
-
-                    return true;
                 }
             }
         }
-
-        return false;
+        else
+        {
+            Console.WriteLine("У вас нету досье");
+        }
     }
 
     static string[] DeleteElement(string[] array, int index)
     {
         string[] newArray = new string[array.Length - 1];
 
-        for (int i = 0, j = 0; i < array.Length; i++)
+        int newIndex = 0;
+
+        for (int i = 0; i < array.Length; i++)
         {
             if (i == index)
                 continue;
 
-            newArray[j++] = array[i];
+            newArray[newIndex++] = array[i];
         }
 
         return newArray;
