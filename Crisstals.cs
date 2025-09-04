@@ -107,10 +107,7 @@ class Program
     {
         string[] tempArray = new string[array.Length + 1];
 
-        for (int i = 0; i < array.Length; i++)
-        {
-            tempArray[i] = array[i];
-        }
+        CopyArrayRange(array, tempArray, array.Length);
 
         tempArray[tempArray.Length - 1] = element;
 
