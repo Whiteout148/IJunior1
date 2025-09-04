@@ -152,14 +152,17 @@ class Program
     {
         string[] newArray = new string[array.Length - 1];
 
-        for (int i = 0; i < index; i++)
-        {
-            newArray[i] = array[i];
-        }
+        CopyArrayRange(array, newArray, index);
+        CopyArrayRange(array, newArray, array.Length, index + 1, 1);
 
-        for (int i = index + 1; i < array.Length; i++)
+        return newArray;
+    }
+
+    static string[] CopyArrayRange(string[] array, string[] newArray, int maxLength, int minLenght = 0, int count = 0)
+    {
+        for (int i = minLenght; i < maxLength; i++)
         {
-            newArray[i - 1] = array[i];
+            newArray[i - count] = array[i];
         }
 
         return newArray;
