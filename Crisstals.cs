@@ -74,12 +74,12 @@ class Program
 
     static void AddDossier(ref string[] jobs, ref string[] fullNames)
     {
-        bool isAddDossier = AddFullNameAndJob(ref jobs, ref fullNames);
+        bool isAddDossier = IsAddFullName(ref jobs, ref fullNames);
 
         Console.WriteLine(isAddDossier ? "Досье добавлено" : "Не удалось добавить досье");
     }
 
-    static bool AddFullNameAndJob(ref string[] jobs, ref string[] fullName)
+    static bool IsAddFullName(ref string[] jobs, ref string[] fullName)
     {
         Console.Write("Введите фио (3 слова 'Имя Фамилия Отчество' не больше не меньше): ");
         string userFullName = Console.ReadLine();
@@ -119,7 +119,7 @@ class Program
 
     static void DeleteDossier(ref string[] fullNames, ref string[] jobs)
     {
-        bool isHaveDossier = GetInformationAboutAvability(fullNames);
+        bool isHaveDossier = IsHaveAnyDossier(fullNames);
 
         if (isHaveDossier)
         {
@@ -152,14 +152,14 @@ class Program
     {
         string[] newArray = new string[array.Length - 1];
 
-        int newIndex = 0;
-
-        for (int i = 0; i < array.Length; i++)
+        for (int i = 0; i < index; i++)
         {
-            if (i == index)
-                continue;
+            newArray[i] = array[i];
+        }
 
-            newArray[newIndex++] = array[i];
+        for (int i = index + 1; i < array.Length; i++)
+        {
+            newArray[i - 1] = array[i];
         }
 
         return newArray;
@@ -170,7 +170,7 @@ class Program
         Console.Write($"Полное имя: {fullNames[index]} Должность: {jobs[index]} {divider} ");
     }
 
-    static bool GetInformationAboutAvability(string[] array)
+    static bool IsHaveAnyDossier(string[] array)
     {
         return array.Length > 0;
     }
@@ -179,7 +179,7 @@ class Program
     {
         Console.WriteLine("Все досье: \n");
 
-        bool isHaveDossier = GetInformationAboutAvability(fullNames);
+        bool isHaveDossier = IsHaveAnyDossier(fullNames);
 
         if (isHaveDossier)
         {
@@ -206,7 +206,7 @@ class Program
 
         for (int i = 0; i < fullName.Length; i++)
         {
-            string[] dividedFullNames = fullName[i].Split(' ');
+            string[] dividedFullNames = fullName[i].Split();
 
             if (userInput.ToLower() == dividedFullNames[0].ToLower())
             {
