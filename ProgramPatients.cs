@@ -1,58 +1,52 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections;
+using System.ComponentModel;
 
 class Program
 {
     static void Main()
     {
-        string input = "(()(()))";
+        Dictionary<string, string> words = new Dictionary<string, string>();
 
-        char openBracket = '(';
-        char closeBracket = ')';
+        Console.WriteLine("Напишите нужное слово чтобы узнать значение: ");
+        words.Add("Монитор", "устройство для отображения информации.");
+        words.Add("Клавиатура", "устройство для ввода текста.");
+        words.Add("Мышь", "устройство для управления курсором.");
 
-        int currentDepth = 0;
-        int maxDepth = 0;
-        bool isCorrect = true;
-
-        int length = input.Length;
-
-        for (int index = 0; index < length; index = index + 1)
+        foreach (var key in words.Keys)
         {
-            char currentChar = input[index];
-
-            if (currentChar == openBracket)
-            {
-                currentDepth = currentDepth + 1;
-
-                if (currentDepth > maxDepth)
-                {
-                    maxDepth = currentDepth;
-                }
-            }
-
-            if (currentChar == closeBracket)
-            {
-                currentDepth = currentDepth - 1;
-
-                if (currentDepth < 0)
-                {
-                    isCorrect = false;
-                }
-            }
+            Console.WriteLine(key);
         }
 
-        if (currentDepth != 0)
-        {
-            isCorrect = false;
-        }
+        PrintMeaning(words);
+    }
 
-        if (isCorrect)
+    static void PrintMeaning(Dictionary<string, string> words)
+    {
+        string userInput = Console.ReadLine();
+        bool isGetWord = IsGetWordInvasion(words, userInput);
+
+        if (isGetWord)
         {
-            Console.WriteLine("Строка корректна.");
-            Console.WriteLine("Максимальная глубина вложенности: " + maxDepth);
+            Console.WriteLine($"Значение слова ({userInput}): {words[userInput]}");
         }
         else
         {
-            Console.WriteLine("Строка некорректна.");
+            Console.WriteLine("Нету такого слова в списке");
         }
+    }
+
+    static bool IsGetWordInvasion(Dictionary<string, string> words, string userInput)
+    {
+        foreach (var key in words.Keys)
+        {
+            if (userInput == key)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
