@@ -8,62 +8,129 @@ namespace WhilesPractice1
     {
         static void Main()
         {
-            float maxHealth = 50;
+            char[,] map =
+            {
+                { '#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#', },
+                { '#',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', },
+                {'#',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', },
+                {'#',' ',' ',' ',' ',' ','#',' ',' ',' ','c',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', },
+                {'#',' ',' ','c',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','a',' ',' ',' ',' ','#', },
+                { '#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', },
+                { '#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', },
+                { '#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','c',' ',' ','#', },
+                { '#',' ',' ',' ',' ',' ',' ','a',' ',' ',' ',' ',' ',' ','a',' ',' ',' ',' ',' ','#', },
+                { '#',' ',' ',' ','a',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', },
+                { '#',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#','#',' ',' ',' ',' ',' ',' ',' ','#', },
+                { '#',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', } ,
+                { '#',' ',' ',' ',' ',' ',' ','c',' ',' ','#',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', },
+                { '#',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ',' ','c',' ',' ',' ',' ','#', },
+                { '#',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' ','a',' ',' ','#', },
+                { '#',' ',' ',' ',' ','c',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', },
+                { '#',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', },
+                { '#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#', },
+            };
 
-            float percentWithHealth = 0.5f;
+            Console.CursorVisible = false;
 
-            int posX = 1;
-            int posY = 1;
+            bool isPlaying = true;
+            char player = '@';
 
-            DrawBar(percentWithHealth, maxHealth, posX, posY, ConsoleColor.Red);
+            int posX = 1, posY = 1;
+            int points = 0;
+
+            ConsoleKeyInfo pressedKey = new ConsoleKeyInfo('w', ConsoleKey.W, false, false, false);
+
+            while (isPlaying)
+            {
+                DrawMap(map);
+
+                HandleInput(pressedKey, ref posX, ref posY, map);
+                Console.SetCursorPosition(posY, posX);
+                Console.Write(player);
+                points = GetPointsWithGatherObjects(posX, posY, ref map, points);
+
+                pressedKey = Console.ReadKey();
+                Console.Clear();
+            }
         }
 
-        static void DrawBar(float percentWithMaxValue, float maxValue, int positionX, int positionY, ConsoleColor color)
+        static void HandleInput(ConsoleKeyInfo pressedKey, ref int posX, ref int posY, char[,] map)
         {
-            ConsoleColor defaultColor = Console.BackgroundColor;
-            char openBracket = '[';
-            char closeBracket = ']';
+            int[] direction = GetDirection(pressedKey);
 
-            float maxProcent = 1f;
+            int nextPositionX = posX + direction[0];
+            int nextPositionY = posY + direction[1];
 
-            if (percentWithMaxValue > 1)
+            if (map[nextPositionX, nextPositionY] != '#')
             {
-                percentWithMaxValue = maxProcent;
+                posX = nextPositionX;
+                posY = nextPositionY;
+            }
+        }
+
+        static int GetPointsWithGatherObjects(int posX, int posY, ref char[,] map, int points)
+        {
+            const char Fruit = 'a';
+            const char Candy = 'c';
+
+            int priceToCandy = 5;
+            int priceToFruit = 3;
+
+            int[] pointsCordinate = { 25, 0 };
+
+            switch (map[posX, posY])
+            {
+                case Fruit:
+                    points = AddPoint(points, priceToFruit, posX, posY, ref map);
+                    break;
+                
+                case Candy:
+                    points = AddPoint(points, priceToCandy, posX, posY, ref map);
+                    break;
             }
 
-            float activeBarLenght = percentWithMaxValue * maxValue;
+            Console.SetCursorPosition(pointsCordinate[0], pointsCordinate[1]);
+            Console.Write("Points: " + points);
 
-            string bar = " ";
-
-            Console.SetCursorPosition(positionX, positionY);
-
-            Console.Write(openBracket);
-
-            bar = CreateBarPart(activeBarLenght, bar, ' ');
-
-            SetColorAndDraw(bar, color);
-
-            CreateBarPart(maxValue, bar, ' ', activeBarLenght);
-
-            SetColorAndDraw(bar, defaultColor);
-
-            Console.Write(closeBracket);
+            return points;
         }
 
-        static string CreateBarPart(float maxValue, string bar, char symbol, float startValue = 0)
+        static int AddPoint(int points, int priceToAdd, int posX, int posY, ref char[,] map)
         {
-            for (float i = startValue; i < maxValue; i++)
+            points += priceToAdd;
+            map[posX, posY] = ' ';
+
+            return points;
+        }
+
+        static int[] GetDirection(ConsoleKeyInfo pressedKey)
+        {
+            int[] direction = { 0, 0 };
+
+            if (pressedKey.Key == ConsoleKey.W)
+                direction[0] -= 1;
+            if (pressedKey.Key == ConsoleKey.S)
+                direction[0] += 1;
+            if (pressedKey.Key == ConsoleKey.D)
+                direction[1] += 1;
+            if (pressedKey.Key == ConsoleKey.A)
+                direction[1] -= 1;
+
+            return direction;
+        }
+
+        static void DrawMap(char[,] map)
+        {
+            for (int i = 0; i < map.GetLength(0); i++)
             {
-                bar += symbol;
+                for (int j = 0; j < map.GetLength(1); j++)
+                {
+                    Console.Write(map[i, j]);
+                }
+
+                Console.WriteLine();
             }
-
-            return bar;
         }
 
-        static void SetColorAndDraw(string bar, ConsoleColor color)
-        {
-            Console.BackgroundColor = color;
-            Console.Write(bar);
-        }
     }
 }
