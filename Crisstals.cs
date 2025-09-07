@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 class Program
 {
@@ -11,17 +11,8 @@ class Program
         const string CommandFindWithSurname = "4";
         const string CommandExit = "5";
 
-        string[] fullNames =
-        {
-            "Галеев Артем Иванов",
-            "Гордон Иван Владимиров",
-        };
-
-        string[] jobs =
-        {
-            "Учитель",
-            "Программист",
-        };
+        List<string> fullNames = new List<string>();
+        List<string> jobs = new List<string>();
 
         bool isWork = true;
         string userInput;
@@ -42,11 +33,11 @@ class Program
             switch (userInput)
             {
                 case CommandAddDossier:
-                    AddDossier(ref jobs, ref fullNames);
+                    AddDossier(ref fullNames, ref jobs);
                     break;
 
                 case CommandPrintAllDossier:
-                    PrintAllDossiers(fullNames, jobs);
+                    PrintAllDossier(fullNames, jobs);
                     break;
 
                 case CommandDeleteDossier:
@@ -54,7 +45,7 @@ class Program
                     break;
 
                 case CommandFindWithSurname:
-                    FindDossierWithSurname(fullNames, jobs);
+                    FindWithSurname(fullNames, jobs);
                     break;
 
                 case CommandExit:
@@ -72,153 +63,108 @@ class Program
         }
     }
 
-    static void AddDossier(ref string[] jobs, ref string[] fullNames)
+    static void AddDossier(ref List<string> fullName, ref List<string> job)
     {
-        bool isAddDossier = IsAddFullName(ref jobs, ref fullNames);
+        string userFullName = GetUserMessage("Введите (Фамилия Имя Отчество):");
+        string userJob = GetUserMessage("Введите должность:");
 
-        Console.WriteLine(isAddDossier ? "Досье добавлено" : "Не удалось добавить досье");
-    }
+        string[] dividedFullName = userFullName.Split();
+        int dividedFullNameLenght = 3;
 
-    static bool IsAddFullName(ref string[] jobs, ref string[] fullName)
-    {
-        Console.Write("Введите фио (3 слова 'Имя Фамилия Отчество' не больше не меньше): ");
-        string userFullName = Console.ReadLine();
-        Console.Write("Введите должность: ");
-        string userJob = Console.ReadLine();
-
-        string[] dividedFullName = userFullName.Split(' ');
-
-        int quantityOfWords = 3;
-
-        if (dividedFullName.Length == quantityOfWords)
+        if (dividedFullName.Length == dividedFullNameLenght)
         {
-            fullName = AddElement(fullName, userFullName);
-            jobs = AddElement(jobs, userJob);
+            fullName.Add(userFullName);
+            job.Add(userJob);
 
-            return true;
+            Console.WriteLine("Досье добавлено!");
         }
         else
         {
-            return false;
+            Console.WriteLine("Неверно введено ФИО!");
         }
     }
 
-    static string[] AddElement(string[] array, string element)
+    static void DeleteDossier(ref List<string> fullName, ref List<string> job)
     {
-        string[] tempArray = new string[array.Length + 1];
+        string userIndex = GetUserMessage("Введите индекс нужного досье:");
+        int resultIndex;
 
-        CopyArrayRange(array, tempArray, array.Length);
-
-        tempArray[tempArray.Length - 1] = element;
-
-        return tempArray;
-    }
-
-    static void DeleteDossier(ref string[] fullNames, ref string[] jobs)
-    {
-        bool isHaveDossier = IsHaveAnyDossier(fullNames);
-
-        if (isHaveDossier)
+        if (int.TryParse(userIndex, out resultIndex))
         {
-            Console.Write("Введите индекс с нужным досье: ");
-            string userIndex = Console.ReadLine();
-            int resultIndex;
-            bool isConvert = int.TryParse(userIndex, out resultIndex);
             resultIndex = resultIndex - 1;
 
-            if (isConvert)
+            if (resultIndex < 0 || resultIndex >= fullName.Count)
             {
-                if (resultIndex > fullNames.Length - 1 || resultIndex < 0)
-                {
-                    Console.WriteLine("Нету досье с таким индексом!");
-                }
-                else
-                {
-                    fullNames = DeleteElement(fullNames, resultIndex);
-                    jobs = DeleteElement(jobs, resultIndex);
-                }
+                Console.WriteLine("Индекс находится за границей!");
+            }
+            else
+            {
+                fullName.RemoveAt(resultIndex);
+                job.RemoveAt(resultIndex);
+
+                Console.WriteLine("Досье удалено.");
             }
         }
         else
         {
-            Console.WriteLine("У вас нету досье");
+            Console.WriteLine("Введено не целое число!");
         }
     }
 
-    static string[] DeleteElement(string[] array, int index)
+    static string GetUserMessage(string message)
     {
-        string[] newArray = new string[array.Length - 1];
+        Console.WriteLine(message);
+        string userInput = Console.ReadLine();
 
-        CopyArrayRange(array, newArray, index);
-        CopyArrayRange(array, newArray, array.Length, index + 1, 1);
-
-        return newArray;
+        return userInput;
     }
 
-    static string[] CopyArrayRange(string[] array, string[] newArray, int maxLength, int minLenght = 0, int count = 0)
+    static void PrintDossier(List<string> fullName, List<string> job, int index, char divider = ' ')
     {
-        for (int i = minLenght; i < maxLength; i++)
+        Console.Write($"ФИО: {fullName[index]} Должность: {job[index]} {divider} ");
+    }
+
+    static void PrintAllDossier(List<string> fullNames, List<string> jobs)
+    {
+        for (int i = 0; i < fullNames.Count; i++)
         {
-            newArray[i - count] = array[i];
-        }
+            int dossierNumber = i + 1;
+            char divider = '-';
 
-        return newArray;
-    }
-
-    static void PrintDossier(string[] fullNames, string[] jobs, int index, char divider = ' ')
-    {
-        Console.Write($"Полное имя: {fullNames[index]} Должность: {jobs[index]} {divider} ");
-    }
-
-    static bool IsHaveAnyDossier(string[] array)
-    {
-        return array.Length > 0;
-    }
-
-    static void PrintAllDossiers(string[] fullNames, string[] jobs)
-    {
-        Console.WriteLine("Все досье: \n");
-
-        bool isHaveDossier = IsHaveAnyDossier(fullNames);
-
-        if (isHaveDossier)
-        {
-            for (int i = 0; i < fullNames.Length; i++)
+            if (i == fullNames.Count - 1)
             {
-                Console.Write("Досье номер: " + (i + 1) + " ");
-                char divider = (i == fullNames.Length - 1) ? ' ' : '-';
+                Console.Write($"Досье номер {dossierNumber} ");
+                PrintDossier(fullNames, jobs, i);
+            }
+            else
+            {
+                Console.Write($"Досье номер {dossierNumber} ");
                 PrintDossier(fullNames, jobs, i, divider);
             }
         }
-        else
-        {
-            Console.WriteLine("У вас нету в наличии досье");
-        }
     }
 
-    static void FindDossierWithSurname(string[] fullName, string[] jobs)
+    static void FindWithSurname(List<string> fullNames, List<string> jobs)
     {
-        string userInput;
-        Console.WriteLine("Введите фамилию:");
-        userInput = Console.ReadLine();
-
+        string userSurname = GetUserMessage("Введите фамилию: ");
         bool isGetSurname = false;
 
-        for (int i = 0; i < fullName.Length; i++)
+        for (int i = 0; i < fullNames.Count; i++)
         {
-            string[] dividedFullNames = fullName[i].Split();
+            string[] dividedFullName = fullNames[i].Split();
 
-            if (userInput.ToLower() == dividedFullNames[0].ToLower())
+            if (dividedFullName[0] == userSurname)
             {
+                Console.WriteLine($"Досье с фамилией ({userSurname})");
+                PrintDossier(fullNames, jobs, i);
+
                 isGetSurname = true;
-                Console.Write("Досье с фамилией: " + dividedFullNames[0] + " ");
-                PrintDossier(fullName, jobs, i);
             }
         }
 
         if (isGetSurname == false)
         {
-            Console.WriteLine("Нету сотрудников с такой фамилией");
+            Console.WriteLine("Нету сотрудника с такой фамилией!");
         }
     }
 }
