@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections;
-using System.ComponentModel;
 
 class Program
 {
@@ -10,9 +9,9 @@ class Program
         Dictionary<string, string> words = new Dictionary<string, string>();
 
         Console.WriteLine("Напишите нужное слово чтобы узнать значение: ");
-        words.Add("Монитор", "устройство для отображения информации.");
-        words.Add("Клавиатура", "устройство для ввода текста.");
-        words.Add("Мышь", "устройство для управления курсором.");
+        AddWord(words ,"Монитор", "устройство для отображения информации.");
+        AddWord(words ,"Клавиатура", "устройство для ввода текста.");
+        AddWord(words ,"Мышь", "устройство для управления курсором.");
 
         foreach (var key in words.Keys)
         {
@@ -22,12 +21,16 @@ class Program
         PrintMeaning(words);
     }
 
+    static void AddWord(Dictionary<string, string> words, string key, string value)
+    {
+        words.Add(key, value);
+    }
+
     static void PrintMeaning(Dictionary<string, string> words)
     {
         string userInput = Console.ReadLine();
-        bool isGetWord = IsGetWordInvasion(words, userInput);
 
-        if (isGetWord)
+        if (words.ContainsKey(userInput))
         {
             Console.WriteLine($"Значение слова ({userInput}): {words[userInput]}");
         }
@@ -35,18 +38,5 @@ class Program
         {
             Console.WriteLine("Нету такого слова в списке");
         }
-    }
-
-    static bool IsGetWordInvasion(Dictionary<string, string> words, string userInput)
-    {
-        foreach (var key in words.Keys)
-        {
-            if (userInput == key)
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 }
