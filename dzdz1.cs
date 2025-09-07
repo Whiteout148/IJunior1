@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace dzdzdz
 {
@@ -8,27 +9,35 @@ namespace dzdzdz
     {
         static void Main(string[] args)
         {
-            const string CommandForServe = "1";
+            const string CommandForPrintSum = "sum";
+            const string CommandForExit = "exit";
 
-            Queue<int> clientsSum = new Queue<int>();
+            List<int> numbers = new List<int>();
 
-            clientsSum.Enqueue(23);
-            clientsSum.Enqueue(59);
-            clientsSum.Enqueue(30);
+            bool isWork = true;
 
-            int balance = 0;
-
-            while (clientsSum.Count > 0)
+            while (isWork)
             {
-                Console.WriteLine("Баланс: " + balance);
-                Console.WriteLine("\nСумма клиента: " + clientsSum.Peek());
-
-                Console.WriteLine($"Введите команду: {CommandForServe} чтобы обслужить клиента.");
+                Console.WriteLine("** Программа для добавление элементов **");
+                Console.WriteLine($"Команда для получение суммы всех элементов: {CommandForPrintSum}");
+                Console.WriteLine($"Команда для выхода: {CommandForExit}");
+                Console.Write("Введите команду или целое число: ");
                 string userInput = Console.ReadLine();
 
-                if (userInput == CommandForServe)
+
+                switch (userInput)
                 {
-                    ServeClient(clientsSum, ref balance);
+                    case CommandForPrintSum:
+                        PrintSum(numbers);
+                        break;
+
+                    case CommandForExit:
+                        isWork = false;
+                        break;
+
+                    default:
+                        AddNumber(numbers, userInput);
+                        break;
                 }
 
                 Console.ReadKey();
@@ -36,19 +45,31 @@ namespace dzdzdz
             }
         }
 
-        static void ServeClient(Queue<int> clientsSum, ref int balance)
+        static List<int> AddNumber(List<int> numbers, string userInput)
         {
-            Console.WriteLine("Клиент Обслужен!");
-            balance = AddBalance(clientsSum, balance);
-            clientsSum.Dequeue();
+            int resultNumber;
+
+            if (int.TryParse(userInput, out resultNumber))
+            {
+                numbers.Add(resultNumber);
+                Console.WriteLine("Добавлено число: " + resultNumber);
+            }
+            else
+            {
+                Console.WriteLine("Неправильная команда");
+            }
+
+            return numbers;
         }
 
-        static int AddBalance(Queue<int> clientsSum, int balance)
+        static void PrintSum(List<int> numbers)
         {
-            balance += clientsSum.Peek();
-            Console.WriteLine($"На баланс добавлено: {clientsSum.Peek()} Баланс: {balance}");
+            int sum = 0;
 
-            return balance;
+            for (int i = 0; i < numbers.Count; i++)
+                sum += numbers[i];
+
+            Console.WriteLine("Cумма всех элементов: " + sum);
         }
     }
 }
