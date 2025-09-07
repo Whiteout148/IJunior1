@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.AccessControl;
 
 namespace dzdzdz
 {
@@ -9,97 +9,47 @@ namespace dzdzdz
     {
         static void Main(string[] args)
         {
-            Queue<string> clients = new Queue<string>();
+            const string CommandForServe = "1";
 
-            clients.Enqueue("Влад");
-            clients.Enqueue("Алексей");
-            clients.Enqueue("Иван");
-            clients.Enqueue("Роман");
+            Queue<int> clientsSum = new Queue<int>();
+
+            clientsSum.Enqueue(23);
+            clientsSum.Enqueue(59);
+            clientsSum.Enqueue(30);
 
             int balance = 0;
-            int purchaseSum = 0;
 
-            while (clients.Count > 0)
+            while (clientsSum.Count > 0)
             {
-                Random random = new Random();
+                Console.WriteLine("Баланс: " + balance);
+                Console.WriteLine("\nСумма клиента: " + clientsSum.Peek());
 
-                purchaseSum = SetPurchaseSum(purchaseSum);
-                PrintClientInfo(clients, purchaseSum);
+                Console.WriteLine($"Введите команду: {CommandForServe} чтобы обслужить клиента.");
+                string userInput = Console.ReadLine();
 
-                bool isServicedClient = IsServiced(ref balance, purchaseSum);
-
-                if (isServicedClient)
+                if (userInput == CommandForServe)
                 {
-                    clients.Dequeue();
+                    ServeClient(clientsSum, ref balance);
                 }
-                
+
                 Console.ReadKey();
                 Console.Clear();
             }
-
-            Console.WriteLine("Смена завершена!");
         }
 
-        static bool IsServiced(ref int balance, int purchaseSum)
+        static void ServeClient(Queue<int> clientsSum, ref int balance)
         {
-            const string CommandToAddBalance = "1";
-            const string CommandToPrintBalance = "2";
-
-            Console.WriteLine("Нужно перевести деньги клиента на ваш баланс, команда: " + CommandToAddBalance);
-            string userCommand = Console.ReadLine();
-
-            if (userCommand == CommandToAddBalance)
-            {
-                balance = AddBalance(purchaseSum, balance);
-                Console.WriteLine("Введите команду для показа баланса: " + CommandToPrintBalance);
-                userCommand = Console.ReadLine();
-
-                if (userCommand == CommandToPrintBalance)
-                {
-                    PrintBalance(ref balance);
-
-                    return true;
-                }
-                else
-                {
-                    Console.WriteLine("Такой команды нету.");
-                }
-            }
-            else
-            {
-                Console.WriteLine("Такой команды нету.");
-            }
-
-            return false;
+            Console.WriteLine("Клиент Обслужен!");
+            balance = AddBalance(clientsSum, balance);
+            clientsSum.Dequeue();
         }
 
-        static void PrintBalance(ref int balance)
+        static int AddBalance(Queue<int> clientsSum, int balance)
         {
-            Console.WriteLine("Ваш баланс: " + balance);
-        }
-
-        static int AddBalance(int purchaseSum, int balance)
-        {
-            balance += purchaseSum;
-
-            Console.WriteLine($"Добавлено: {purchaseSum} к балансу.");
+            balance += clientsSum.Peek();
+            Console.WriteLine($"На баланс добавлено: {clientsSum.Peek()} Баланс: {balance}");
 
             return balance;
-        }
-
-        static void PrintClientInfo(Queue<string> clients, int purchaseSum)
-        {
-            Console.WriteLine("Клиент: " + clients.Peek() + " Сумма покупок: " + purchaseSum);
-        }
-
-        static int SetPurchaseSum(int purchaseSum)
-        {
-            Random random = new Random();
-
-            int minValue = 10;
-            int maxValue = 50;
-
-            return random.Next(minValue, maxValue);
         }
     }
 }
