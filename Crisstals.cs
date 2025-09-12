@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 class Program
 {
     static void Main()
     {
-        const string CommandAddDossier = "1";
-        const string CommandPrintAllDossier = "2";
-        const string CommandDeleteDossier = "3";
-        const string CommandFindWithSurname = "4";
-        const string CommandExit = "5";
+        const string CommandAddEmployee = "1";
+        const string CommandDeleteEmployee = "2";
+        const string CommandExit = "3";
 
-        List<string> fullNames = new List<string>();
-        List<string> jobs = new List<string>();
+        Dictionary<string, List<string>> dossiers = new Dictionary<string, List<string>>();
 
         bool isWork = true;
         string userInput;
@@ -20,32 +18,25 @@ class Program
         while (isWork)
         {
             Console.WriteLine("** Кадровый Учет **\n");
+            Console.WriteLine("Сотрудники:");
+            Console.WriteLine();
+            PrintDossiers(dossiers);
             Console.WriteLine();
             Console.WriteLine("Доступные команды:");
-            Console.WriteLine($"Добавить досье: {CommandAddDossier}");
-            Console.WriteLine($"Посмотреть все досье: {CommandPrintAllDossier}");
-            Console.WriteLine($"Удалить досье: {CommandDeleteDossier}");
-            Console.WriteLine($"Искать по фамилии: {CommandFindWithSurname}");
+            Console.WriteLine($"Добавить сотрудника: {CommandAddEmployee}");
+            Console.WriteLine($"Удалить сотрудника: {CommandDeleteEmployee}");
             Console.WriteLine($"Выход: {CommandExit}");
             Console.Write("Введите нужную команду: ");
             userInput = Console.ReadLine();
 
             switch (userInput)
             {
-                case CommandAddDossier:
-                    AddDossier(ref fullNames, ref jobs);
+                case CommandAddEmployee:
+                    AddEmployee(dossiers);
                     break;
 
-                case CommandPrintAllDossier:
-                    PrintAllDossier(fullNames, jobs);
-                    break;
-
-                case CommandDeleteDossier:
-                    DeleteDossier(ref fullNames, ref jobs);
-                    break;
-
-                case CommandFindWithSurname:
-                    FindWithSurname(fullNames, jobs);
+                case CommandDeleteEmployee:
+                    DeleteDossier(dossiers);
                     break;
 
                 case CommandExit:
@@ -63,108 +54,92 @@ class Program
         }
     }
 
-    static void AddDossier(ref List<string> fullName, ref List<string> job)
+    static void AddEmployee(Dictionary<string, List<string>> dossier)
     {
-        string userFullName = GetUserMessage("Введите (Фамилия Имя Отчество):");
-        string userJob = GetUserMessage("Введите должность:");
+        string userJob = GetWordAfterMessage("Введите должность:");
+        string userFullName = GetWordAfterMessage("Введите имя сотрудника:");
 
-        string[] dividedFullName = userFullName.Split();
-        int dividedFullNameLenght = 3;
-
-        if (dividedFullName.Length == dividedFullNameLenght)
+        if (dossier.ContainsKey(userJob))
         {
-            fullName.Add(userFullName);
-            job.Add(userJob);
+            dossier[userJob].Add(userFullName);
 
-            Console.WriteLine("Досье добавлено!");
+            Console.WriteLine($"Добавлен сотрудник: {userFullName} к должности: {userJob}");
         }
         else
         {
-            Console.WriteLine("Неверно введено ФИО!");
+            List<string> fullNames = new List<string>();
+            dossier.Add(userJob, fullNames);
+            dossier[userJob].Add(userFullName);
+
+            Console.WriteLine($"Добавлен сотрудник: {userFullName} к должности: {userJob}");
         }
     }
 
-    static void DeleteDossier(ref List<string> fullName, ref List<string> job)
+    static void DeleteDossier(Dictionary<string, List<string>> dossiers)
     {
-        string userIndex = GetUserMessage("Введите индекс нужного досье:");
-        int resultIndex;
+        string userEmployeeJob = GetWordAfterMessage("Напишите должность сотрудника: ");
+        string userEmployee = GetWordAfterMessage("Напишите сотрудника: ");
 
-        if (int.TryParse(userIndex, out resultIndex))
+        bool isGetEmployee = false;
+        bool isGetJob = IsGetKeyInDictionary(dossiers, userEmployeeJob);
+
+        if (isGetJob)
         {
-            resultIndex = resultIndex - 1;
-
-            if (resultIndex < 0 || resultIndex >= fullName.Count)
+            for (int i = 0; i < dossiers[userEmployeeJob].Count; i++)
             {
-                Console.WriteLine("Индекс находится за границей!");
+                if (dossiers[userEmployeeJob][i] == userEmployee)
+                {
+                    dossiers[userEmployeeJob].RemoveAt(i);
+                    isGetEmployee = true;
+                }
             }
-            else
-            {
-                fullName.RemoveAt(resultIndex);
-                job.RemoveAt(resultIndex);
 
-                Console.WriteLine("Досье удалено.");
+            if (isGetEmployee == false)
+            {
+                Console.WriteLine("Сотрудник не найден");
             }
         }
         else
         {
-            Console.WriteLine("Введено не целое число!");
+            Console.WriteLine("Должность не найдена");
+        }
+
+        if (dossiers[userEmployeeJob].Count == 0)
+        {
+            dossiers.Remove(userEmployeeJob);
         }
     }
 
-    static string GetUserMessage(string message)
+    static bool IsGetKeyInDictionary(Dictionary<string, List<string>> dossier, string userKey)
+    {
+        foreach (var key in dossier.Keys)
+        {
+            if (userKey == key)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    static void PrintDossiers(Dictionary<string, List<string>> dossiers)
+    {
+        foreach (var dossier in dossiers)
+        {
+            Console.WriteLine("Должность: " + dossier.Key + "\n Сотрудники: ");
+
+            foreach (var name in dossier.Value)
+            {
+                Console.WriteLine(name);
+            }
+        }
+    }
+    static string GetWordAfterMessage(string message)
     {
         Console.WriteLine(message);
         string userInput = Console.ReadLine();
 
         return userInput;
-    }
-
-    static void PrintDossier(List<string> fullName, List<string> job, int index, char divider = ' ')
-    {
-        Console.Write($"ФИО: {fullName[index]} Должность: {job[index]} {divider} ");
-    }
-
-    static void PrintAllDossier(List<string> fullNames, List<string> jobs)
-    {
-        for (int i = 0; i < fullNames.Count; i++)
-        {
-            int dossierNumber = i + 1;
-            char divider = '-';
-
-            if (i == fullNames.Count - 1)
-            {
-                Console.Write($"Досье номер {dossierNumber} ");
-                PrintDossier(fullNames, jobs, i);
-            }
-            else
-            {
-                Console.Write($"Досье номер {dossierNumber} ");
-                PrintDossier(fullNames, jobs, i, divider);
-            }
-        }
-    }
-
-    static void FindWithSurname(List<string> fullNames, List<string> jobs)
-    {
-        string userSurname = GetUserMessage("Введите фамилию: ");
-        bool isGetSurname = false;
-
-        for (int i = 0; i < fullNames.Count; i++)
-        {
-            string[] dividedFullName = fullNames[i].Split();
-
-            if (dividedFullName[0] == userSurname)
-            {
-                Console.WriteLine($"Досье с фамилией ({userSurname})");
-                PrintDossier(fullNames, jobs, i);
-
-                isGetSurname = true;
-            }
-        }
-
-        if (isGetSurname == false)
-        {
-            Console.WriteLine("Нету сотрудника с такой фамилией!");
-        }
     }
 }
