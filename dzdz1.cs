@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace dzdzdz
 {
@@ -9,67 +8,49 @@ namespace dzdzdz
     {
         static void Main(string[] args)
         {
-            const string CommandForPrintSum = "sum";
-            const string CommandForExit = "exit";
+            string[] firstStroke = { "1", "2", "1" };
+            string[] secondStroke = { "3", "2" };
 
-            List<int> numbers = new List<int>();
+            List<string> result = UniteStrokesToList(firstStroke, secondStroke);
 
-            bool isWork = true;
-
-            while (isWork)
+            for (int i = 0; i < result.Count; i++)
             {
-                Console.WriteLine("** Программа для добавление элементов **");
-                Console.WriteLine($"Команда для получение суммы всех элементов: {CommandForPrintSum}");
-                Console.WriteLine($"Команда для выхода: {CommandForExit}");
-                Console.Write("Введите команду или целое число: ");
-                string userInput = Console.ReadLine();
+                Console.WriteLine(result[i]);
+            }
+        }
 
+        static List<string> UniteStrokesToList(string[] firstStroke, string[] secondStroke)
+        {
+            List<string> result = new List<string>();
 
-                switch (userInput)
+            AddStrokeToList(result, firstStroke);
+            AddStrokeToList(result, secondStroke);
+
+            DeleteSameElements(result);
+
+            return result;
+        }
+
+        static void AddStrokeToList(List<string> collection, string[] stroke)
+        {
+            for (int i = 0; i < stroke.Length; i++)
+            {
+                collection.Add(stroke[i]);
+            }
+        }
+
+        static void DeleteSameElements(List<string> collection)
+        {
+            for (int i = 0; i < collection.Count; i++)
+            {
+                for (int j = i + 1; j < collection.Count; j++)
                 {
-                    case CommandForPrintSum:
-                        PrintSum(numbers);
-                        break;
-
-                    case CommandForExit:
-                        isWork = false;
-                        break;
-
-                    default:
-                        AddNumber(numbers, userInput);
-                        break;
+                    if (collection[j] == collection[i])
+                    {
+                        collection.RemoveAt(j);
+                    }
                 }
-
-                Console.ReadKey();
-                Console.Clear();
             }
-        }
-
-        static List<int> AddNumber(List<int> numbers, string userInput)
-        {
-            int resultNumber;
-
-            if (int.TryParse(userInput, out resultNumber))
-            {
-                numbers.Add(resultNumber);
-                Console.WriteLine("Добавлено число: " + resultNumber);
-            }
-            else
-            {
-                Console.WriteLine("Неправильная команда");
-            }
-
-            return numbers;
-        }
-
-        static void PrintSum(List<int> numbers)
-        {
-            int sum = 0;
-
-            for (int i = 0; i < numbers.Count; i++)
-                sum += numbers[i];
-
-            Console.WriteLine("Cумма всех элементов: " + sum);
         }
     }
 }
