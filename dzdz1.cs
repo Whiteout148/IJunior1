@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace dzdzdz
 {
@@ -26,8 +27,6 @@ namespace dzdzdz
             AddStrokeToList(result, firstStroke);
             AddStrokeToList(result, secondStroke);
 
-            DeleteSameElements(result);
-
             return result;
         }
 
@@ -35,20 +34,13 @@ namespace dzdzdz
         {
             for (int i = 0; i < stroke.Length; i++)
             {
-                collection.Add(stroke[i]);
-            }
-        }
-
-        static void DeleteSameElements(List<string> collection)
-        {
-            for (int i = 0; i < collection.Count; i++)
-            {
-                for (int j = i + 1; j < collection.Count; j++)
+                if (collection.Contains(stroke[i]))
                 {
-                    if (collection[j] == collection[i])
-                    {
-                        collection.RemoveAt(j);
-                    }
+                    continue;
+                }
+                else
+                {
+                    collection.Add(stroke[i]);
                 }
             }
         }
