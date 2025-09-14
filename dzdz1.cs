@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace dzdzdz
@@ -9,40 +10,31 @@ namespace dzdzdz
     {
         static void Main(string[] args)
         {
-            string[] firstStroke = { "1", "2", "1" };
-            string[] secondStroke = { "3", "2" };
+            Player soldier = new Player("Василий", 30, 100, 150);
 
-            List<string> result = UniteStrokesToList(firstStroke, secondStroke);
+            soldier.ShowPlayerInfo();
+        }
+    }
 
-            for (int i = 0; i < result.Count; i++)
-            {
-                Console.WriteLine(result[i]);
-            }
+    class Player
+    {
+        private string _name;
+        private int _age;
+        private int _level;
+        private int _power;
+
+        public Player(string name, int age, int level, int power)
+        {
+            _name = name;
+            _age = age;
+            _level = level;
+            _power = power;
         }
 
-        static List<string> UniteStrokesToList(string[] firstStroke, string[] secondStroke)
+        public void ShowPlayerInfo()
         {
-            List<string> result = new List<string>();
-
-            AddStrokeToList(result, firstStroke);
-            AddStrokeToList(result, secondStroke);
-
-            return result;
-        }
-
-        static void AddStrokeToList(List<string> collection, string[] stroke)
-        {
-            for (int i = 0; i < stroke.Length; i++)
-            {
-                if (collection.Contains(stroke[i]))
-                {
-                    continue;
-                }
-                else
-                {
-                    collection.Add(stroke[i]);
-                }
-            }
+            Console.WriteLine("Игрок: " + _name);
+            Console.WriteLine($"Возраст: {_age} Уровень: {_level} Сила: {_power}");
         }
     }
 }
