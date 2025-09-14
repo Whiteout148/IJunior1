@@ -12,7 +12,7 @@ namespace dzdzdz
         {
             Player soldier = new Player("Василий", 30, 100, 150);
 
-            soldier.ShowPlayerInfo();
+            soldier.ShowInfo();
         }
     }
 
@@ -31,7 +31,7 @@ namespace dzdzdz
             _power = power;
         }
 
-        public void ShowPlayerInfo()
+        public void ShowInfo()
         {
             Console.WriteLine("Игрок: " + _name);
             Console.WriteLine($"Возраст: {_age} Уровень: {_level} Сила: {_power}");
