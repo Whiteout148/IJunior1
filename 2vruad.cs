@@ -1,20 +1,47 @@
 ﻿using System;
 
-namespace _3_vryad
+namespace dzdzdz
 {
-    internal class Program
+    internal class dzdz1
     {
         static void Main(string[] args)
         {
-            int photoAlbum = 52;
-            int rowWithPhotographs = 3;
+            Player fighter = new Player(3, 2, '@');
 
-            int rowInPhotographsNumber = photoAlbum / rowWithPhotographs;
-            int remainderPhotographs = photoAlbum % rowWithPhotographs;
+            Renderer render = new Renderer(fighter);
 
-            Console.WriteLine($"Количество рядов в ряду {rowInPhotographsNumber} остаток фотографий {remainderPhotographs}");
+            render.DrawPlayer();
+        }
+    }
 
-            Console.ReadLine();
+    class Player
+    {
+        public int PosX { get; private set; }
+        public int PosY { get; private set; }
+
+        public char PlayerSkin { get; private set; }
+
+        public Player(int posX, int posY, char playerSkin)
+        {
+            PosX = posX;
+            PosY = posY;
+            PlayerSkin = playerSkin;
+        }
+    }
+
+    class Renderer
+    {
+        public Player Player { get; private set; }
+
+        public Renderer(Player player)
+        {
+            Player = player;
+        }
+
+        public void DrawPlayer()
+        {
+            Console.SetCursorPosition(Player.PosX, Player.PosY);
+            Console.Write(Player.PlayerSkin);
         }
     }
 }
