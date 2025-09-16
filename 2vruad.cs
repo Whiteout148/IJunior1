@@ -31,17 +31,17 @@ namespace dzdzdz
 
     class Renderer
     {
-        public Player Player { get; private set; }
+        private Player _player;
 
         public Renderer(Player player)
         {
-            Player = player;
+            _player = player;
         }
 
         public void DrawPlayer()
         {
-            Console.SetCursorPosition(Player.PosX, Player.PosY);
-            Console.Write(Player.PlayerSkin);
+            Console.SetCursorPosition(_player.PosX, _player.PosY);
+            Console.Write(_player.PlayerSkin);
         }
     }
 }
