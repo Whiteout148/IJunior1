@@ -7,40 +7,35 @@ namespace dzdzdz
         static void Main(string[] args)
         {
             Player fighter = new Player(3, 2, '@');
+            Player businessMan = new Player(5, 6, '$');
 
-            Renderer render = new Renderer(fighter);
+            Renderer render = new Renderer();
 
-            render.DrawPlayer();
+            render.DrawPlayer(fighter);
+            render.DrawPlayer(businessMan);
         }
     }
 
     class Player
     {
-        public int PositionX { get; private set; }
-        public int PositionY { get; private set; }
-        public char Skin { get; private set; }
-
         public Player(int positionX, int positionY, char skin)
         {
             PositionX = positionX;
             PositionY = positionY;
             Skin = skin;
         }
+
+        public int PositionX { get; private set; }
+        public int PositionY { get; private set; }
+        public char Skin { get; private set; }
     }
 
     class Renderer
     {
-        private Player _player;
-
-        public Renderer(Player player)
+        public void DrawPlayer(Player player)
         {
-            _player = player;
-        }
-
-        public void DrawPlayer()
-        {
-            Console.SetCursorPosition(_player.PositionX, _player.PositionY);
-            Console.Write(_player.Skin);
+            Console.SetCursorPosition(player.PositionX, player.PositionY);
+            Console.Write(player.Skin);
         }
     }
 }
