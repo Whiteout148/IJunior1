@@ -16,16 +16,15 @@ namespace dzdzdz
 
     class Player
     {
-        public int PosX { get; private set; }
-        public int PosY { get; private set; }
+        public int PositionX { get; private set; }
+        public int PositionY { get; private set; }
+        public char Skin { get; private set; }
 
-        public char PlayerSkin { get; private set; }
-
-        public Player(int posX, int posY, char playerSkin)
+        public Player(int positionX, int positionY, char skin)
         {
-            PosX = posX;
-            PosY = posY;
-            PlayerSkin = playerSkin;
+            PositionX = positionX;
+            PositionY = positionY;
+            Skin = skin;
         }
     }
 
@@ -40,8 +39,8 @@ namespace dzdzdz
 
         public void DrawPlayer()
         {
-            Console.SetCursorPosition(_player.PosX, _player.PosY);
-            Console.Write(_player.PlayerSkin);
+            Console.SetCursorPosition(_player.PositionX, _player.PositionY);
+            Console.Write(_player.Skin);
         }
     }
 }
