@@ -34,7 +34,7 @@ namespace WhilesPractice1
             {
                 Console.WriteLine("База данных");
                 Console.WriteLine();
-                ShowPlayersInfo();
+                ShowPlayerInfo();
                 Console.WriteLine();
                 Console.WriteLine("Варианты команд:");
                 Console.WriteLine($"Добавить игрока: {AddPlayerCommand}");
@@ -69,135 +69,67 @@ namespace WhilesPractice1
                 Console.ReadKey();
                 Console.Clear();
             }
+
         }
 
         private void AddPlayer()
         {
-            string userName = GetUserMessage("Введите ник игрока:");
+            string userInput = GetUserMessage("Введите имя игрока: ");
 
-            if (IsContainsName(userName))
-            {
-                Console.WriteLine("Игрок с таким ником уже есть!");
-            }
-            else
-            {
-                string userId = GetUserMessage("Введите номер игрока:");
-
-                if (int.TryParse(userId, out int resultId))
-                {
-                    bool isGetId;
-                    GetIndexWithId(resultId, out isGetId);
-
-                    if (isGetId)
-                    {
-                        Console.WriteLine("Игрок с таким номером уже есть!");
-                    }
-                    else
-                    {
-                        _players.Add(new Player(userName, resultId));
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Введите целое число!");
-                }
-            }
-        }
-
-        private void UnBanPlayer()
-        {
-            int playerIndex;
-
-            if (TryGetPlayerIndex(out playerIndex))
-            {
-                _players[playerIndex].UnBan();
-            }
-            else
-            {
-                Console.WriteLine("Не получилось разбанить игрока.");
-            }
+            _players.Add(new Player(userInput));
         }
 
         private void BanPlayer()
         {
-            int playerIndex;
-            
-            if (TryGetPlayerIndex(out playerIndex))
+            if (TryGetPlayerId(out int id))
             {
-                _players[playerIndex].Ban();
-            }
-            else
-            {
-                Console.WriteLine("Не получилось забанить игрока.");
+                _players[id - 1].Ban();
+                Console.WriteLine("Игрок забанен");
             }
         }
+
         private void RemovePlayer()
         {
-            int playerIndex;
-
-            if (TryGetPlayerIndex(out playerIndex))
+            if (TryGetPlayerId(out int id))
             {
-                _players.RemoveAt(playerIndex);
-                Console.WriteLine("Игрок удален.");
-            }
-            else
-            {
-                Console.WriteLine("Не удалось удалить игрока.");
+                _players.RemoveAt(id - 1);
+                Console.WriteLine("Игрок удален");
             }
         }
 
-        private bool TryGetPlayerIndex(out int resultIndex)
+        public void UnBanPlayer()
         {
-            string userInput = GetUserMessage("Введите номер игрока:");
-
-            int resultId;
-            bool isGetId;
-
-            if (int.TryParse(userInput, out resultId))
+            if (TryGetPlayerId(out int id))
             {
-                resultIndex = GetIndexWithId(resultId, out isGetId);
+                _players[id - 1].UnBan();
+                Console.WriteLine("Игрок разбанен");
+            }
+        }
 
-                if (isGetId)
+        private bool TryGetPlayerId(out int id)
+        {
+            string userId = GetUserMessage("Введите номер игрока:");
+
+            if (int.TryParse(userId, out id))
+            {
+                if (id > _players.Count || id < 1)
+                {
+                    Console.WriteLine("Игрока с таким индексом нету в базе данных");
+                }
+                else
                 {
                     return true;
                 }
             }
             else
             {
-                Console.WriteLine("Введите целое число!");
-            }
-
-            resultIndex = 0;
-            return false;
-        }
-
-        private int GetIndexWithId(int userId, out bool isGetId)
-        {
-            for (int i = 0; i < _players.Count; i++)
-            {
-                if (_players[i].Id == userId)
-                {
-                    isGetId = true;
-                    return i;
-                }
-            }
-
-            isGetId = false;
-            return 0;
-        }
-
-        private bool IsContainsName(string userName)
-        {
-            for (int i = 0; i < _players.Count; i++)
-            {
-                if (userName == _players[i].Name)
-                    return true;
+                Console.WriteLine("Введите целое число");
             }
 
             return false;
         }
 
-        private void ShowPlayersInfo()
+        private void ShowPlayerInfo()
         {
             for (int i = 0; i < _players.Count; i++)
             {
@@ -214,14 +146,33 @@ namespace WhilesPractice1
 
     class Player
     {
+        private static int _idCounter = 1;
+
+        public Player(string name)
+        {
+            Id = _idCounter++;
+            Name = name;
+            IsBanned = false;
+        }
+
+        public bool IsBanned { get; private set; }
         public string Name { get; private set; }
         public int Id { get; private set; }
-        private bool _isBanned;
 
-        public Player(string name, int id)
+        public void Ban()
         {
-            Id = id;
-            Name = name;
+            if (IsBanned)
+                Console.WriteLine("Игрок уже забанен");
+            else
+                IsBanned = true;
+        }
+
+        public void UnBan()
+        {
+            if (IsBanned)
+                IsBanned = false;
+            else
+                Console.WriteLine("Игрок не забанен");
         }
 
         public void ShowInfo()
@@ -229,25 +180,9 @@ namespace WhilesPractice1
             Console.WriteLine($"Игрок: {Name} номер: {Id} забанен ли: {GetWordWithBanValue()}");
         }
 
-        public void Ban()
-        {
-            if (_isBanned)
-                Console.WriteLine("Игрок уже забанен!");
-            else
-                _isBanned = true;
-        }
-
-        public void UnBan()
-        {
-            if (_isBanned)
-                _isBanned = false;
-            else
-                Console.WriteLine("Игрок не забанен!");
-        }
-
         private string GetWordWithBanValue()
         {
-            return (_isBanned) ? "Да" : "Нет";
+            return (IsBanned) ? "Да" : "Нет";
         }
     }
 }
