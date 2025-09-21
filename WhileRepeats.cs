@@ -1,4 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.Tracing;
+using System.Net.Mail;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 
 namespace WhilesPractice1
 {
@@ -6,129 +11,243 @@ namespace WhilesPractice1
     {
         static void Main()
         {
-            char[,] map =
+            DataBases databases = new DataBases();
+
+            databases.Work();
+        }
+    }
+
+    class DataBases
+    {
+        private List<Player> _players = new List<Player>();
+
+        public void Work()
+        {
+            const string AddPlayerCommand = "1";
+            const string BanPlayerCommand = "2";
+            const string UnBanPlayerCommand = "3";
+            const string RemovePlayerCommand = "4";
+
+            bool isWork = true;
+
+            while (isWork)
             {
-                { '#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#', },
-                { '#',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', },
-                {'#',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', },
-                {'#',' ',' ',' ',' ',' ','#',' ',' ',' ','c',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', },
-                {'#',' ',' ','c',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','a',' ',' ',' ',' ','#', },
-                { '#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', },
-                { '#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', },
-                { '#',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','c',' ',' ','#', },
-                { '#',' ',' ',' ',' ',' ',' ','a',' ',' ',' ',' ',' ',' ','a',' ',' ',' ',' ',' ','#', },
-                { '#',' ',' ',' ','a',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', },
-                { '#',' ',' ',' ',' ',' ',' ',' ',' ',' ','#','#','#',' ',' ',' ',' ',' ',' ',' ','#', },
-                { '#',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', } ,
-                { '#',' ',' ',' ',' ',' ',' ','c',' ',' ','#',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', },
-                { '#',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ',' ','c',' ',' ',' ',' ','#', },
-                { '#',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' ','a',' ',' ','#', },
-                { '#',' ',' ',' ',' ','c',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', },
-                { '#',' ',' ',' ',' ',' ',' ',' ',' ',' ','#',' ',' ',' ',' ',' ',' ',' ',' ',' ','#', },
-                { '#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#', },
-            };
+                Console.WriteLine("База данных");
+                Console.WriteLine();
+                ShowPlayersInfo();
+                Console.WriteLine();
+                Console.WriteLine("Варианты команд:");
+                Console.WriteLine($"Добавить игрока: {AddPlayerCommand}");
+                Console.WriteLine($"Забанить игрока: {BanPlayerCommand}");
+                Console.WriteLine($"Разбанить игрока: {UnBanPlayerCommand}");
+                Console.WriteLine($"Удалить игрока: {RemovePlayerCommand}");
+                string userInput = GetUserMessage("Введите команду:");
 
-            Console.CursorVisible = false;
+                switch (userInput)
+                {
+                    case AddPlayerCommand:
+                        AddPlayer();
+                        break;
 
-            bool isPlaying = true;
-            char player = '@';
+                    case BanPlayerCommand:
+                        BanPlayer();
+                        break;
 
-            int posX = 1, posY = 1;
-            int points = 0;
+                    case UnBanPlayerCommand:
+                        UnBanPlayer();
+                        break;
 
-            ConsoleKeyInfo pressedKey = new ConsoleKeyInfo('w', ConsoleKey.W, false, false, false);
+                    case RemovePlayerCommand:
+                        RemovePlayer();
+                        break;
 
-            while (isPlaying)
-            {
-                DrawMap(map);
+                    default:
+                        Console.WriteLine("Неизвестная команда");
+                        break;
+                }
 
-                HandleInput(pressedKey, ref posX, ref posY, map);
-                Console.SetCursorPosition(posY, posX);
-                Console.Write(player);
-                points = GetPointsWithGatherObjects(posX, posY, ref map, points);
-
-                pressedKey = Console.ReadKey();
+                Console.ReadKey();
                 Console.Clear();
             }
         }
 
-        static void HandleInput(ConsoleKeyInfo pressedKey, ref int posX, ref int posY, char[,] map)
+        private void AddPlayer()
         {
-            int[] direction = GetDirection(pressedKey);
+            string userName = GetUserMessage("Введите ник игрока:");
 
-            int nextPositionX = posX + direction[0];
-            int nextPositionY = posY + direction[1];
-
-            if (map[nextPositionX, nextPositionY] != '#')
+            if (IsContainsName(userName))
             {
-                posX = nextPositionX;
-                posY = nextPositionY;
+                Console.WriteLine("Игрок с таким ником уже есть!");
             }
-        }
-
-        static int GetPointsWithGatherObjects(int posX, int posY, ref char[,] map, int points)
-        {
-            const char Fruit = 'a';
-            const char Candy = 'c';
-
-            int priceToCandy = 5;
-            int priceToFruit = 3;
-
-            int[] pointsCordinate = { 25, 0 };
-
-            switch (map[posX, posY])
+            else
             {
-                case Fruit:
-                    points = AddPoint(points, priceToFruit, posX, posY, ref map);
-                    break;
-                
-                case Candy:
-                    points = AddPoint(points, priceToCandy, posX, posY, ref map);
-                    break;
-            }
+                string userId = GetUserMessage("Введите номер игрока:");
 
-            Console.SetCursorPosition(pointsCordinate[0], pointsCordinate[1]);
-            Console.Write("Points: " + points);
-
-            return points;
-        }
-
-        static int AddPoint(int points, int priceToAdd, int posX, int posY, ref char[,] map)
-        {
-            points += priceToAdd;
-            map[posX, posY] = ' ';
-
-            return points;
-        }
-
-        static int[] GetDirection(ConsoleKeyInfo pressedKey)
-        {
-            int[] direction = { 0, 0 };
-
-            if (pressedKey.Key == ConsoleKey.W)
-                direction[0] -= 1;
-            if (pressedKey.Key == ConsoleKey.S)
-                direction[0] += 1;
-            if (pressedKey.Key == ConsoleKey.D)
-                direction[1] += 1;
-            if (pressedKey.Key == ConsoleKey.A)
-                direction[1] -= 1;
-
-            return direction;
-        }
-
-        static void DrawMap(char[,] map)
-        {
-            for (int i = 0; i < map.GetLength(0); i++)
-            {
-                for (int j = 0; j < map.GetLength(1); j++)
+                if (int.TryParse(userId, out int resultId))
                 {
-                    Console.Write(map[i, j]);
-                }
+                    bool isGetId;
+                    GetIndexWithId(resultId, out isGetId);
 
-                Console.WriteLine();
+                    if (isGetId)
+                    {
+                        Console.WriteLine("Игрок с таким номером уже есть!");
+                    }
+                    else
+                    {
+                        _players.Add(new Player(userName, resultId));
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Введите целое число!");
+                }
             }
         }
 
+        private void UnBanPlayer()
+        {
+            int playerIndex;
+
+            if (TryGetPlayerIndex(out playerIndex))
+            {
+                _players[playerIndex].UnBan();
+            }
+            else
+            {
+                Console.WriteLine("Не получилось разбанить игрока.");
+            }
+        }
+
+        private void BanPlayer()
+        {
+            int playerIndex;
+            
+            if (TryGetPlayerIndex(out playerIndex))
+            {
+                _players[playerIndex].Ban();
+            }
+            else
+            {
+                Console.WriteLine("Не получилось забанить игрока.");
+            }
+        }
+        private void RemovePlayer()
+        {
+            int playerIndex;
+
+            if (TryGetPlayerIndex(out playerIndex))
+            {
+                _players.RemoveAt(playerIndex);
+                Console.WriteLine("Игрок удален.");
+            }
+            else
+            {
+                Console.WriteLine("Не удалось удалить игрока.");
+            }
+        }
+
+        private bool TryGetPlayerIndex(out int resultIndex)
+        {
+            string userInput = GetUserMessage("Введите номер игрока:");
+
+            int resultId;
+            bool isGetId;
+
+            if (int.TryParse(userInput, out resultId))
+            {
+                resultIndex = GetIndexWithId(resultId, out isGetId);
+
+                if (isGetId)
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Введите целое число!");
+            }
+
+            resultIndex = 0;
+            return false;
+        }
+
+        private int GetIndexWithId(int userId, out bool isGetId)
+        {
+            for (int i = 0; i < _players.Count; i++)
+            {
+                if (_players[i].Id == userId)
+                {
+                    isGetId = true;
+                    return i;
+                }
+            }
+
+            isGetId = false;
+            return 0;
+        }
+
+        private bool IsContainsName(string userName)
+        {
+            for (int i = 0; i < _players.Count; i++)
+            {
+                if (userName == _players[i].Name)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private void ShowPlayersInfo()
+        {
+            for (int i = 0; i < _players.Count; i++)
+            {
+                _players[i].ShowInfo();
+            }
+        }
+
+        private string GetUserMessage(string message)
+        {
+            Console.WriteLine(message);
+            return Console.ReadLine();
+        }
+    }
+
+    class Player
+    {
+        public string Name { get; private set; }
+        public int Id { get; private set; }
+        private bool _isBanned;
+
+        public Player(string name, int id)
+        {
+            Id = id;
+            Name = name;
+        }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine($"Игрок: {Name} номер: {Id} забанен ли: {GetWordWithBanValue()}");
+        }
+
+        public void Ban()
+        {
+            if (_isBanned)
+                Console.WriteLine("Игрок уже забанен!");
+            else
+                _isBanned = true;
+        }
+
+        public void UnBan()
+        {
+            if (_isBanned)
+                _isBanned = false;
+            else
+                Console.WriteLine("Игрок не забанен!");
+        }
+
+        private string GetWordWithBanValue()
+        {
+            return (_isBanned) ? "Да" : "Нет";
+        }
     }
 }
