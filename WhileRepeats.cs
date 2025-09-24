@@ -11,110 +11,58 @@ namespace WhilesPractice1
     {
         static void Main()
         {
-            DataBases databases = new DataBases();
+            Table playTable = new Table();
 
-            databases.Work();
+            playTable.Work();
         }
     }
 
-    class DataBases
+    class Table
     {
-        private List<Player> _players = new List<Player>();
+        private Deck _deck = new Deck(8);
+        private Player _player = new Player();
 
         public void Work()
         {
-            const string AddPlayerCommand = "1";
-            const string BanPlayerCommand = "2";
-            const string UnBanPlayerCommand = "3";
-            const string RemovePlayerCommand = "4";
-
             bool isWork = true;
 
             while (isWork)
             {
-                Console.WriteLine("База данных");
+                Console.WriteLine("Карты в колоде:");
+                _deck.ShowCards();
                 Console.WriteLine();
-                ShowPlayerInfo();
+                Console.WriteLine("Карты у игрока: ");
+                _player.ShowCards();
                 Console.WriteLine();
-                Console.WriteLine("Варианты команд:");
-                Console.WriteLine($"Добавить игрока: {AddPlayerCommand}");
-                Console.WriteLine($"Забанить игрока: {BanPlayerCommand}");
-                Console.WriteLine($"Разбанить игрока: {UnBanPlayerCommand}");
-                Console.WriteLine($"Удалить игрока: {RemovePlayerCommand}");
-                string userInput = GetUserMessage("Введите команду:");
-
-                switch (userInput)
-                {
-                    case AddPlayerCommand:
-                        AddPlayer();
-                        break;
-
-                    case BanPlayerCommand:
-                        BanPlayer();
-                        break;
-
-                    case UnBanPlayerCommand:
-                        UnBanPlayer();
-                        break;
-
-                    case RemovePlayerCommand:
-                        RemovePlayer();
-                        break;
-
-                    default:
-                        Console.WriteLine("Неизвестная команда");
-                        break;
-                }
+                Console.WriteLine("Введите количество карт которые хотите передать игроку:");
+                PassCards();
 
                 Console.ReadKey();
                 Console.Clear();
             }
-
         }
 
-        private void AddPlayer()
+        private void PassCards()
         {
-            string userInput = GetUserMessage("Введите имя игрока: ");
+            int cardQuantity;
 
-            _players.Add(new Player(userInput));
-        }
-
-        private void BanPlayer()
-        {
-            if (TryGetPlayerId(out int id))
+            if (TryToGetUserQuantity(out cardQuantity))
             {
-                _players[id - 1].Ban();
-                Console.WriteLine("Игрок забанен");
+                _deck.RemoveCards(cardQuantity);
+                _player.GetCards(cardQuantity);
+                Console.WriteLine("Игрок получил карты.");
             }
         }
 
-        private void RemovePlayer()
+        private bool TryToGetUserQuantity(out int resultQuantity)
         {
-            if (TryGetPlayerId(out int id))
-            {
-                _players.RemoveAt(id - 1);
-                Console.WriteLine("Игрок удален");
-            }
-        }
+            string userInput = GetUserMessage("Введите число карт:");
 
-        public void UnBanPlayer()
-        {
-            if (TryGetPlayerId(out int id))
-            {
-                _players[id - 1].UnBan();
-                Console.WriteLine("Игрок разбанен");
-            }
-        }
-
-        private bool TryGetPlayerId(out int id)
-        {
-            string userId = GetUserMessage("Введите номер игрока:");
-
-            if (int.TryParse(userId, out id))
-            {
-                if (id > _players.Count || id < 1)
+            if (int.TryParse(userInput, out resultQuantity))
+            {   
+                if (resultQuantity <= 0 || resultQuantity > _deck.Cards.Count)
                 {
-                    Console.WriteLine("Игрока с таким индексом нету в базе данных");
+                    Console.WriteLine("Число выходит за границы количества карт!");
                 }
                 else
                 {
@@ -123,18 +71,10 @@ namespace WhilesPractice1
             }
             else
             {
-                Console.WriteLine("Введите целое число");
+                Console.WriteLine("Введите целое число!");
             }
 
             return false;
-        }
-
-        private void ShowPlayerInfo()
-        {
-            for (int i = 0; i < _players.Count; i++)
-            {
-                _players[i].ShowInfo();
-            }
         }
 
         private string GetUserMessage(string message)
@@ -146,43 +86,69 @@ namespace WhilesPractice1
 
     class Player
     {
-        private static int _idCounter = 1;
+        private List<card> _cards = new List<card>();
 
-        public Player(string name)
+        public void ShowCards()
         {
-            Id = _idCounter++;
-            Name = name;
-            IsBanned = false;
+            for (int i = 0; i < _cards.Count; i++)
+            {
+                _cards[i].ShowSymbol();
+            }
         }
 
-        public bool IsBanned { get; private set; }
-        public string Name { get; private set; }
-        public int Id { get; private set; }
-
-        public void Ban()
+        public void GetCards(int cardQuantity)
         {
-            if (IsBanned)
-                Console.WriteLine("Игрок уже забанен");
-            else
-                IsBanned = true;
+            for (int i = 0; i < cardQuantity; i++)
+            {
+                _cards.Add(new card());
+            }
+        }
+    }
+
+    class Deck
+    {
+        private int _deckLength;
+
+        public Deck(int deckLenght)
+        {
+            _deckLength = deckLenght;
+            AddCards();
         }
 
-        public void UnBan()
+        public List<card> Cards { get; private set; } = new List<card>();
+
+        public void AddCards()
         {
-            if (IsBanned)
-                IsBanned = false;
-            else
-                Console.WriteLine("Игрок не забанен");
+            for (int i = 0; i < _deckLength; i++)
+            {
+                Cards.Add(new card());
+            }
         }
 
-        public void ShowInfo()
+        public void ShowCards()
         {
-            Console.WriteLine($"Игрок: {Name} номер: {Id} забанен ли: {GetWordWithBanValue()}");
+            for (int i = 0; i < Cards.Count; i++)
+            {
+                Cards[i].ShowSymbol();
+            }
         }
 
-        private string GetWordWithBanValue()
+        public void RemoveCards(int cardQuantity)
         {
-            return (IsBanned) ? "Да" : "Нет";
+            for (int i = 0; i < cardQuantity; i++)
+            {
+                Cards.RemoveAt(0);
+            }
+        }
+    }
+
+    class card
+    {
+        public char Symbol { get; private set; } = '♠';
+
+        public void ShowSymbol()
+        {
+            Console.Write(Symbol + " ");
         }
     }
 }
