@@ -1,31 +1,275 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ConsoleApp2
+namespace WhilesPractice1
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            string name;
-            string surname;
-            string favouriteDrink;
-            int age;
+            LibraryView libraryPersonal = new LibraryView();
 
-            Console.WriteLine("Введите имя: ");
-            name = Console.ReadLine();
-            Console.WriteLine("Введите фамилию: ");
-            surname = Console.ReadLine();
-            Console.WriteLine("Введите возраст: ");
-            age = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("Введите любимый напиток: ");
-            favouriteDrink = Console.ReadLine();
+            libraryPersonal.Work();
+        }
+    }
 
-            Console.WriteLine($"Вы {name} у вас фамилия {surname} вам {age} лет и у вас любимый напиток это {favouriteDrink}");
+    class Library
+    {
+        private List<Book> _books = new List<Book>();
+
+        public void AddBook(string name, string writerName, int age)
+        {
+            _books.Add(new Book(name, writerName, age));
+            Console.WriteLine("Книга добавлена.");
+        }
+
+        public void ShowBooks()
+        {
+            for (int i = 0; i < _books.Count; i++)
+            {
+                _books[i].ShowInfo();
+            }
+        }
+
+        public void RemoveBookWithId(int id)
+        {
+            _books.RemoveAt(id - 1);
+        }
+
+        public bool TryFindBook(string userBookName)
+        {
+            bool isContainsName = false;
+
+            for (int i = 0; i < _books.Count; i++)
+            {
+                if (_books[i].Name == userBookName)
+                {
+                    _books[i].ShowInfo();
+                    isContainsName = true;
+                }
+            }
+
+            return isContainsName;
+        }
+
+        public bool TryFindWriter(string userWriter)
+        {
+            bool isContainsWriter = false;
+
+            for (int i = 0; i < _books.Count; i++)
+            {
+                if (_books[i].WriterName == userWriter)
+                {
+                    _books[i].ShowInfo();
+                    isContainsWriter = true;
+                }
+            }
+
+            return isContainsWriter;
+        }
+
+        public bool TryFindAge(int userAge)
+        {
+            bool isContainsAge = false;
+
+            for (int i = 0; i < _books.Count; i++)
+            {
+                if (_books[i].Age == userAge)
+                {
+                    _books[i].ShowInfo();
+                    isContainsAge = true;
+                }
+            }
+
+            return isContainsAge;
+        }
+
+        public bool TryFindId(int userId)
+        {
+            for (int i = 0; i < _books.Count; i++)
+            {
+                if (userId == _books[i].Id)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    class LibraryView
+    {
+        private Library _library = new Library();
+
+        public void Work()
+        {
+            const string AddBookCommand = "1";
+            const string RemoveBookCommand = "2";
+            const string FindWithNameCommand = "3";
+            const string FindWithWriterCommand = "4";
+            const string FindWithAgeCommand = "5";
+            const string ExitCommand = "6";
+
+            bool isWork = true;
+
+            while (isWork)
+            {
+                Console.WriteLine("** Библиотека **");
+                Console.WriteLine("Книги:");
+                Console.WriteLine();
+                _library.ShowBooks();
+                Console.WriteLine();
+                Console.WriteLine("Доступные команды:");
+                Console.WriteLine($"Добавить книгу: {AddBookCommand}");
+                Console.WriteLine($"Удалить книгу: {RemoveBookCommand}");
+                Console.WriteLine($"Искать книгу по названию: {FindWithNameCommand}");
+                Console.WriteLine($"Искать по автору: {FindWithWriterCommand}");
+                Console.WriteLine($"Искать по дате выпуска: {FindWithAgeCommand}");
+                Console.WriteLine($"Выход из библиотеки: {ExitCommand}");
+                string userInput = GetUserMessage("Введите команду:");
+
+                switch (userInput)
+                {
+                    case AddBookCommand:
+                        AddBookToLibrary();
+                        break;
+
+                    case RemoveBookCommand:
+                        DeleteBook();
+                        break;
+
+                    case FindWithNameCommand:
+                        FindWithBookName();
+                        break;
+
+                    case FindWithWriterCommand:
+                        FindWithBookWriter();
+                        break;
+
+                    case FindWithAgeCommand:
+                        FindWithBookAge();
+                        break;
+
+                    case ExitCommand:
+                        isWork = false;
+                        break;
+
+                    default:
+                        Console.WriteLine("Неверная команда!");
+                        break;
+                }
+
+                Console.ReadKey();
+                Console.Clear();
+            }
+        }
+
+        private void AddBookToLibrary()
+        {
+            string userName = GetUserMessage("Введите книгу:");
+            string userWriter = GetUserMessage("Введите писателя:");
+            string userAge = GetUserMessage("Введите год выпуска книги:");
+
+            if (int.TryParse(userAge, out int resultAge))
+            {
+                _library.AddBook(userName, userWriter, resultAge);
+            }
+            else
+            {
+                Console.WriteLine("Введите число!");
+            }
+        }
+
+        private void DeleteBook()
+        {
+            string userId = GetUserMessage("Введите номер книги:");
+
+            if (int.TryParse(userId, out int resultId))
+            {
+                if (_library.TryFindId(resultId))
+                {
+                    _library.RemoveBookWithId(resultId);
+                }
+                else
+                {
+                    Console.WriteLine("Неверный номер книги!");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Введите число!");
+            }
+        }
+
+        private void FindWithBookName()
+        {
+            string userBook = GetUserMessage("Введите название книги:");
+            bool isContainsBook = _library.TryFindBook(userBook);
+
+            if (isContainsBook == false)
+            {
+                Console.WriteLine("Не удалось найти книгу по названию.");
+            }
+        }
+
+        private void FindWithBookWriter()
+        {
+            string userWriter = GetUserMessage("Введите имя автора:");
+            bool isContainsWriter = _library.TryFindWriter(userWriter);
+
+            if (isContainsWriter == false)
+            {
+                Console.WriteLine("Не удалось найти книгу по автору.");
+            }
+        }
+
+        private void FindWithBookAge()
+        {
+            string userAge = GetUserMessage("Введите дату выхода книги:");
+
+            if (int.TryParse(userAge, out int resultAge))
+            {
+                bool isContainsBookAge = _library.TryFindAge(resultAge);
+
+                if (isContainsBookAge == false)
+                {
+                    Console.WriteLine("Не удалось найти книгу по возрасту.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Введите число!");
+            }
+        }
+
+        private string GetUserMessage(string message)
+        {
+            Console.WriteLine(message);
+            return Console.ReadLine();
+        }
+    }
+
+    class Book
+    {
+        private static int _idCounter = 1;
+
+        public Book(string name, string writerName, int age)
+        {
+            Id = _idCounter++;
+            Name = name;
+            WriterName = writerName;
+            Age = age;
+        }
+
+        public int Id { get; private set; }
+        public string Name { get; private set; }
+        public string WriterName { get; private set; }
+        public int Age { get; private set; }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine($"Книга: {Name} Писатель: {WriterName} Год выпуска: {Age} Номер книги: {Id}");
         }
     }
 }
