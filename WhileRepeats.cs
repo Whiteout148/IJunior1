@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace WhilesPractice1
 {
@@ -7,39 +9,148 @@ namespace WhilesPractice1
     {
         static void Main()
         {
-            Table playTable = new Table();
+            Personal libraryPersonal = new Personal();
 
-            playTable.Work();
+            libraryPersonal.Work();
         }
     }
 
-    class Table
+    class Library
     {
-        private Deck _deck = new Deck();
-        private Player _player = new Player();
+        private List<Book> _books = new List<Book>();
+
+        public void AddBook(string name, string writerName, int age)
+        {
+            _books.Add(new Book(name, writerName, age));
+            Console.WriteLine("Книга добавлена.");
+        }
+
+        public void ShowBooks()
+        {
+            for (int i = 0; i < _books.Count; i++)
+            {
+                _books[i].ShowInfo();
+            }
+        }
+
+        public void RemoveBookWithId(int id)
+        {
+            _books.RemoveAt(id - 1);
+        }
+
+        public bool TryToGetBookName(string userBookName)
+        {
+            bool isContainsName = false;
+
+            for (int i = 0; i < _books.Count; i++)
+            {
+                if (_books[i].Name == userBookName)
+                {
+                    _books[i].ShowInfo();
+                    isContainsName = true;
+                }
+            }
+
+            return isContainsName;
+        }
+
+        public bool TryToGetWriter(string userWriter)
+        {
+            bool isContainsWriter = false;
+
+            for (int i = 0; i < _books.Count; i++)
+            {
+                if (_books[i].WriterName == userWriter)
+                {
+                    _books[i].ShowInfo();
+                    isContainsWriter = true;
+                }
+            }
+
+            return isContainsWriter;
+        }
+
+        public bool TryToGetAge(int userAge)
+        {
+            bool isContainsAge = false;
+
+            for (int i = 0; i < _books.Count; i++)
+            {
+                if (_books[i].Age == userAge)
+                {
+                    _books[i].ShowInfo();
+                    isContainsAge = true;
+                }
+            }
+
+            return isContainsAge;
+        }
+
+        public bool TryToGetId(int userId)
+        {
+            for (int i = 0; i < _books.Count; i++)
+            {
+                if (userId == _books[i].Id)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    class Personal
+    {
+        private Library _library = new Library();
 
         public void Work()
         {
-            const string GetCardsCommand = "1";
-            const string ExitCommand = "2";
+            const string AddBookCommand = "1";
+            const string RemoveBookCommand = "2";
+            const string FindWithNameCommand = "3";
+            const string FindWithWriterCommand = "4";
+            const string FindWithAgeCommand = "5";
+            const string ExitCommand = "6";
 
             bool isWork = true;
 
             while (isWork)
             {
-                Console.WriteLine("Колода карт:");
-                _deck.ShowCards();
+                Console.WriteLine("** Библиотека **");
+                Console.WriteLine("Книги:");
                 Console.WriteLine();
-                Console.WriteLine("Карты игрока:");
-                _player.ShowCards();
-                Console.WriteLine($"Команда для получение карт: {GetCardsCommand}");
-                Console.WriteLine($"Команда для выхода: {ExitCommand}");
-                string userInput = Console.ReadLine();
+                _library.ShowBooks();
+                Console.WriteLine();
+                Console.WriteLine("Доступные команды:");
+                Console.WriteLine($"Добавить книгу: {AddBookCommand}");
+                Console.WriteLine($"Удалить книгу: {RemoveBookCommand}");
+                Console.WriteLine($"Искать книгу по названию: {FindWithNameCommand}");
+                Console.WriteLine($"Искать по автору: {FindWithWriterCommand}");
+                Console.WriteLine($"Искать по дате выпуска: {FindWithAgeCommand}");
+                Console.WriteLine($"Выход из библиотеки: {ExitCommand}");
+                string userInput = GetUserMessage("Введите команду:");
 
                 switch (userInput)
                 {
-                    case GetCardsCommand:
-                        PassCards();
+                    case AddBookCommand:
+                        AddBookToLibrary();
+                        break;
+
+                    case RemoveBookCommand:
+                        DeleteBook();
+                        break;
+
+                    case FindWithNameCommand:
+                        FindWithBookName();
+                        break;
+
+                    case FindWithWriterCommand:
+                        FindWithBookWriter();
+                        break;
+
+                    case FindWithAgeCommand:
+                        FindWithBookAge();
                         break;
 
                     case ExitCommand:
@@ -56,124 +167,113 @@ namespace WhilesPractice1
             }
         }
 
-        public void PassCards()
+        private void AddBookToLibrary()
         {
-            Console.WriteLine("Введите количество карт: ");
-            string userInput = Console.ReadLine();
+            string userName = GetUserMessage("Введите книгу:");
+            string userWriter = GetUserMessage("Введите писателя:");
+            string userAge = GetUserMessage("Введите год выпуска книги:");
 
-            if (int.TryParse(userInput, out int result))
+            if (TryToConvert(out int resultAge, userAge))
             {
-                if (result > _deck.GetCardsLenght() - 1 || result < 0)
+                _library.AddBook(userName, userWriter, resultAge);
+            }
+        }
+
+        private void DeleteBook()
+        {
+            string userId = GetUserMessage("Введите номер книги:");
+
+            if (TryToConvert(out int resultId, userId))
+            {
+                if (_library.TryToGetId(resultId))
                 {
-                    Console.WriteLine("Число за больше чем карт в колоде или меньше нуля!");
+                    _library.RemoveBookWithId(resultId);
                 }
                 else
                 {
-                    List<Card> newCards = new List<Card>();
-                    newCards = _deck.GetCards(result);
-                    _player.AddCards(newCards);
+                    Console.WriteLine("Неверный номер книги!");
                 }
+            }
+        }
+
+        private void FindWithBookName()
+        {
+            string userBook = GetUserMessage("Введите название книги:");
+            bool isContainsBook = _library.TryToGetBookName(userBook);
+
+            if (isContainsBook == false)
+            {
+                Console.WriteLine("Не удалось найти книгу по названию.");
+            }
+        }
+
+        private void FindWithBookWriter()
+        {
+            string userWriter = GetUserMessage("Введите имя автора:");
+            bool isContainsWriter = _library.TryToGetWriter(userWriter);
+
+            if (isContainsWriter == false)
+            {
+                Console.WriteLine("Не удалось найти книгу по автору.");
+            }
+        }
+
+        private void FindWithBookAge()
+        {
+            string userAge = GetUserMessage("Введите дату выхода книги:");
+
+            if (TryToConvert(out int resultAge, userAge))
+            {
+                bool isContainsBookAge = _library.TryToGetAge(resultAge);
+
+                if (isContainsBookAge == false)
+                {
+                    Console.WriteLine("Не удалось найти книгу по возрасту.");
+                }
+            }
+        }
+
+        private bool TryToConvert(out int result, string userMessage)
+        {
+            if (int.TryParse(userMessage, out result))
+            {
+                return true;
             }
             else
             {
-                Console.WriteLine("Введите целое число!");
+                Console.WriteLine("Введите число!");
             }
+
+            return false;
+        }
+
+        private string GetUserMessage(string message)
+        {
+            Console.WriteLine(message);
+            return Console.ReadLine();
         }
     }
 
-    class Player
+    class Book
     {
-        private List<Card> _cards = new List<Card>();
+        private static int _idCounter = 1;
 
-        public void AddCards(List<Card> gettedCards)
+        public Book(string name, string writerName, int age)
         {
-            _cards.AddRange(gettedCards);
+            Id = _idCounter++;
+            Name = name;
+            WriterName = writerName;
+            Age = age;
         }
 
-        public void ShowCards()
-        {
-            for (int i = 0; i < _cards.Count; i++)
-            {
-                _cards[i].ShowInfo();
-            }
-
-            Console.WriteLine();
-        }
-    }
-
-    class Deck
-    {
-        private List<Card> _cards = new List<Card>();
-
-        public Deck()
-        {
-            int minCardDenomination = 6;
-            int maxCardDenomination = 14;
-
-            AddCardRange(minCardDenomination, maxCardDenomination, '♠');
-            AddCardRange(minCardDenomination, maxCardDenomination, '♥');
-            AddCardRange(minCardDenomination, maxCardDenomination, '♦');
-            AddCardRange(minCardDenomination, maxCardDenomination, '♣');
-        }
-
-        public int GetCardsLenght()
-        {
-            return _cards.Count + 1;
-        }
-
-        public void ShowCards()
-        {
-            for (int i = 0; i < _cards.Count; i++)
-            {
-                int suitQuantity = 9;
-
-                if (i % suitQuantity == 0)
-                {
-                    Console.WriteLine();
-                }
-
-                _cards[i].ShowInfo();
-            }
-
-            Console.WriteLine();
-        }
-
-        public List<Card> GetCards(int cardQuantity)
-        {
-            List<Card> cardsToGet = new List<Card>();
-
-            for (int i = 0; i < cardQuantity; i++)
-            {
-                cardsToGet.Add(_cards[0]);
-                _cards.RemoveAt(0);
-            }
-
-            return cardsToGet;
-        }
-
-        private void AddCardRange(int minDenomination, int maxDenomination, char suit)
-        {
-            for (int i = minDenomination; i < maxDenomination + 1; i++)
-            {
-                _cards.Add(new Card(suit, i));
-            }
-        }
-    }
-
-    class Card
-    {
-        private char _suit;
-        private int _denomination;
-
-        public Card(char suit, int denomination)
-        {
-            _suit = suit;
-            _denomination = denomination;
-        }
+        public int Id { get; private set; }
+        public string Name { get; private set; }
+        public string WriterName { get; private set; }
+        public int Age { get; private set; }
 
         public void ShowInfo()
         {
-            Console.Write($" {_suit}{_denomination}");
+            Console.WriteLine($"Книга: {Name} Писатель: {WriterName} Год выпуска: {Age} Номер книги: {Id}");
         }
     }
 }
