@@ -6,7 +6,7 @@ class Program
 {
     static void Main()
     {
-        Dispatcher dispatcher = new Dispatcher();
+        Dispatcher dispatcher = new Dispatcher(5);
 
         dispatcher.Work();
     }
@@ -15,10 +15,16 @@ class Program
 class Dispatcher
 {
     private RailwayStation _station = new RailwayStation();
+    private int _trainRoute;
+
+    public Dispatcher(int trainRoute)
+    {
+        _trainRoute = trainRoute;
+    }
 
     public void Work()
     {
-        while (_station.GetTrainsQuantity() < 5)
+        while (_station.TrainsCount < 5)
         {
             Console.WriteLine("** Вокзал **");
             Console.WriteLine("Текующие рейсы:");
@@ -55,7 +61,7 @@ class Dispatcher
         {
             if (tickets <= resultCarriages * Carriage.MaxTickets)
             {
-                _station.AddTrain(new Message(startPoint, endPoint), resultCarriages);
+                _station.AddTrain(new DirectionMessage(startPoint, endPoint), resultCarriages);
                 _station.AddTicketsToTrain(tickets);
 
                 return true;
@@ -84,6 +90,11 @@ class RailwayStation
 {
     private List<Train> _trains = new List<Train>();
 
+    public int TrainsCount
+    {
+        get { return _trains.Count; }
+    }
+
     public int GetTickets()
     {
         Random random = new Random();
@@ -106,7 +117,7 @@ class RailwayStation
     {
         int trainIndex = _trains.Count - 1;
 
-        for (int i = 0; i < _trains[trainIndex].GetCarriagesQuantity(); i++)
+        for (int i = 0; i < _trains[trainIndex].CarriagesCount; i++)
         {
             if (ticketsQuantity >= Carriage.MaxTickets)
             {
@@ -126,23 +137,40 @@ class RailwayStation
         return _trains.Count;
     }
 
-    public void AddTrain(Message message, int carriagesQuantity)
+    public void AddTrain(DirectionMessage directionMessage, int carriagesQuantity)
     {
-        _trains.Add(new Train(message, carriagesQuantity));
+        _trains.Add(new Train(directionMessage, GetCarriages(carriagesQuantity)));
+    }
+
+    public List<Carriage> GetCarriages(int carriagesCount)
+    {
+        List<Carriage> attachedCarriages = new List<Carriage>();
+
+        for (int i = 0; i < carriagesCount; i++)
+        {
+            attachedCarriages.Add(new Carriage());
+        }
+
+        return attachedCarriages;
     }
 }
 
 class Train
 {
     private static int _idCounter = 1;
-    private List<Carriage> _carriages = new List<Carriage>();
-    private Message _message;
+    private List<Carriage> _carriages;
+    private DirectionMessage _directionMessage;
 
-    public Train(Message message, int carriagesQuantity)
+    public Train(DirectionMessage directionMessage, List<Carriage> carriages)
     {
         Id = _idCounter++;
-        _message = message;
-        AddCarriages(carriagesQuantity);
+        _directionMessage = directionMessage;
+        _carriages = carriages;
+    }
+
+    public int CarriagesCount
+    {
+        get { return _carriages.Count; }
     }
 
     public int Id { get; private set; }
@@ -153,16 +181,11 @@ class Train
 
         Console.WriteLine();
         Console.Write("Рейс с сообщением: ");
-        _message.ShowInfo();
+        _directionMessage.ShowInfo();
         Console.WriteLine($"Номер рейса: {Id}");
         Console.WriteLine($"Количество вагонов: {_carriages.Count}");
         Console.WriteLine($"Оставшийся билеты: {remainingTickets} занятые билеты: {GetBusyTickets()}");
         Console.WriteLine();
-    }
-
-    public int GetCarriagesQuantity()
-    {
-        return _carriages.Count;
     }
 
     public int GetCarriagesAllTickets()
@@ -186,14 +209,6 @@ class Train
 
         return busyTickets;
     }
-
-    private void AddCarriages(int carriagesQuantity)
-    {
-        for (int i = 0; i < carriagesQuantity; i++)
-        {
-            _carriages.Add(new Carriage());
-        }
-    }
 }
 
 class Carriage
@@ -203,7 +218,8 @@ class Carriage
         BusyTickets = 0;
     }
 
-    public static int MaxTickets { get; private set; } = 10;
+    public static int MaxTickets {  get { return _maxTickets; } }
+    private static int _maxTickets = 10;
     public int BusyTickets { get; private set; }
 
     public void AddTickets(int ticketsQuantity)
@@ -212,12 +228,12 @@ class Carriage
     }
 }
 
-class Message
+class DirectionMessage
 {
     private string _startPoint;
     private string _endPoint;
 
-    public Message(string startPoint, string endPoint)
+    public DirectionMessage(string startPoint, string endPoint)
     {
         _startPoint = startPoint;
         _endPoint = endPoint;
