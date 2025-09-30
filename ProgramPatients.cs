@@ -1,195 +1,76 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 class Program
 {
     static void Main()
     {
-        CashRegister cashRegister = new CashRegister();
+        Dispatcher dispatcher = new Dispatcher();
 
-        cashRegister.Work();
+        dispatcher.Work();
     }
 }
 
-abstract class Human
+class Dispatcher
 {
-    protected List<Product> _products = new List<Product>();
-    protected int _balance;
-
-    public int GetProductsLenght()
-    {
-        return _products.Count;
-    }
-
-    public void ShowProducts()
-    {
-        for (int i = 0; i < _products.Count; i++)
-        {
-            _products[i].ShowInfo();
-        }
-
-        Console.WriteLine();
-        Console.WriteLine("Баланс: " + _balance);
-    }
-}
-
-class Salesman : Human
-{
-    public Salesman()
-    {
-        _products.Add(new Product("Молоко", 10));
-        _products.Add(new Product("Хлеб", 3));
-        _products.Add(new Product("Пивко", 20));
-        _products.Add(new Product("Добрый кола", 9));
-        _products.Add(new Product("Жвачка", 5));
-    }
-
-    public bool IsHaveMoneyToBuy(int id, int clientBalance)
-    {
-        if (clientBalance < _products[GetIndexWithId(id)].Price)
-        {
-            Console.WriteLine("У вас не хватает денег на покупку этого продукта.");
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
-
-    public Product GetProduct(int id)
-    {
-        Product product = _products[GetIndexWithId(id)];
-        _balance += _products[GetIndexWithId(id)].Price;
-        _products.RemoveAt(GetIndexWithId(id));
-        return product;
-    }
-
-    public int GetIndexWithId(int id)
-    {
-        int index = -1;
-
-        for (int i = 0; i < _products.Count; i++)
-        {
-            if (id == _products[i].Id)
-            {
-                index = i;
-            }
-        }
-
-        return index;
-    }
-}
-
-class Client : Human
-{
-    public Client(int minMoney, int maxMoney)
-    {
-        Random random = new Random();
-
-        _balance = random.Next(minMoney, maxMoney);
-    }
- 
-    public void AddProduct(Product product)
-    {
-        _products.Add(product);
-        _balance -= product.Price;
-    }
-
-    public int GetBalance()
-    {
-        return _balance;
-    }
-}
-
-class CashRegister
-{
-    private Salesman _salesman = new Salesman();
-    private Client _client;
-
-    public CashRegister()
-    {
-        int minClientBalance = 5;
-        int maxClientBalance = 40;
-
-        _client = new Client(minClientBalance, maxClientBalance);
-    }
+    private RailwayStation _station = new RailwayStation();
 
     public void Work()
     {
-        const string BuyProductCommand = "1";
-        const string ExitCommand = "2";
-
-        bool isWork = true;
-
-        while (isWork)
+        while (_station.GetTrainsQuantity() < 5)
         {
-            Console.WriteLine("** 5орка **");
-            Console.WriteLine("Продукты в магазине:");
-            Console.WriteLine();
-            _salesman.ShowProducts();
-            Console.WriteLine();
-            Console.WriteLine("Ваши продукты:");
-            Console.WriteLine();
-            _client.ShowProducts();
-            Console.WriteLine();
-            Console.WriteLine($"Команда для покупки: {BuyProductCommand}");
-            Console.WriteLine($"Команда для выхода из магазина: {ExitCommand}");
-            string userInput = GetUserMessage("Введите команду:");
-
-            switch (userInput)
+            Console.WriteLine("** Вокзал **");
+            Console.WriteLine("Текующие рейсы:");
+            _station.ShowTrains();
+            string startPoint = GetUserMessage("Введите начальную точку поезда:");
+            string endPoint = GetUserMessage("Введите конечную точку поезда:");
+            Console.WriteLine("Ожидайте продажи билетов...");
+            int waitTime = 3000;
+            Thread.Sleep(waitTime);
+            int tickets = _station.GetTickets();
+            Console.WriteLine($"Билеты проданы, количество билетов: {tickets}");
+            string userCarriages = GetUserMessage($"Введите количество вагонов (в одном вагоне {Carriage.MaxTickets} мест): ");
+            int resultCarriages;
+           
+            if(TryToAddTrain(userCarriages, out resultCarriages, tickets, startPoint, endPoint))
             {
-                case BuyProductCommand:
-                    BuyProduct();
-                    break;
-
-                case ExitCommand:
-                    isWork = false;
-                    break;
-
-                default:
-                    Console.WriteLine("Неверная команда!");
-                    break;
+                Console.WriteLine("Рейс добавлен.");
+            }
+            else
+            {
+                Console.WriteLine("Не удалось добавить поезд.");
             }
 
             Console.ReadKey();
             Console.Clear();
         }
+
+        Console.WriteLine("Смена закончилась.");
     }
 
-    public void BuyProduct()
+    private bool TryToAddTrain(string userCarriages, out int resultCarriages, int tickets, string startPoint, string endPoint)
     {
-        string userId = GetUserMessage("Введите номер продукта:");
-
-        if (int.TryParse(userId, out int resultId))
+        if (int.TryParse(userCarriages, out resultCarriages))
         {
-            if (IsGetProductId(resultId))
+            if (tickets <= resultCarriages * Carriage.MaxTickets)
             {
-                if (_salesman.IsHaveMoneyToBuy(resultId, _client.GetBalance()))
-                {
-                    Product productToBuy = _salesman.GetProduct(resultId);
-                    _client.AddProduct(productToBuy);
-                    Console.WriteLine("Продукт куплен.");
-                }
+                _station.AddTrain(new Message(startPoint, endPoint), resultCarriages);
+                _station.AddTicketsToTrain(tickets);
+
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("В поезде не хватает мест для всех билетов!");
             }
         }
         else
         {
             Console.WriteLine("Введите число!");
         }
-    }
 
-    private bool IsGetProductId(int userId)
-    {
-        if (_salesman.GetIndexWithId(userId) == -1)
-        {
-            Console.WriteLine("Неверный номер продукта!");
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        return false;
     }
 
     private string GetUserMessage(string message)
@@ -199,23 +80,151 @@ class CashRegister
     }
 }
 
-class Product
+class RailwayStation
+{
+    private List<Train> _trains = new List<Train>();
+
+    public int GetTickets()
+    {
+        Random random = new Random();
+
+        int minTickets = 10;
+        int maxTickets = 100;
+
+        return random.Next(minTickets, maxTickets + 1);
+    }
+
+    public void ShowTrains()
+    {
+        for (int i = 0; i < _trains.Count; i++)
+        {
+            _trains[i].ShowInfo();
+        }
+    }
+
+    public void AddTicketsToTrain(int ticketsQuantity)
+    {
+        int trainIndex = _trains.Count - 1;
+
+        for (int i = 0; i < _trains[trainIndex].GetCarriagesQuantity(); i++)
+        {
+            if (ticketsQuantity >= Carriage.MaxTickets)
+            {
+                _trains[trainIndex].AddCarriagesTickets(Carriage.MaxTickets, i);
+                ticketsQuantity -= Carriage.MaxTickets;
+            }
+            else
+            {
+                _trains[trainIndex].AddCarriagesTickets(ticketsQuantity, i);
+                ticketsQuantity = 0;
+            }
+        }
+    }
+
+    public int GetTrainsQuantity()
+    {
+        return _trains.Count;
+    }
+
+    public void AddTrain(Message message, int carriagesQuantity)
+    {
+        _trains.Add(new Train(message, carriagesQuantity));
+    }
+}
+
+class Train
 {
     private static int _idCounter = 1;
+    private List<Carriage> _carriages = new List<Carriage>();
+    private Message _message;
 
-    public Product(string name, int price)
+    public Train(Message message, int carriagesQuantity)
     {
         Id = _idCounter++;
-        Name = name;
-        Price = price;
+        _message = message;
+        AddCarriages(carriagesQuantity);
     }
 
     public int Id { get; private set; }
-    public string Name { get; private set; }
-    public int Price { get; private set; }
 
     public void ShowInfo()
     {
-        Console.WriteLine($"{Name} Цена: {Price} Номер продукта: {Id}");
+        int remainingTickets = GetCarriagesAllTickets() - GetBusyTickets();
+
+        Console.WriteLine();
+        Console.Write("Рейс с сообщением: ");
+        _message.ShowInfo();
+        Console.WriteLine($"Номер рейса: {Id}");
+        Console.WriteLine($"Количество вагонов: {_carriages.Count}");
+        Console.WriteLine($"Оставшийся билеты: {remainingTickets} занятые билеты: {GetBusyTickets()}");
+        Console.WriteLine();
+    }
+
+    public int GetCarriagesQuantity()
+    {
+        return _carriages.Count;
+    }
+
+    public int GetCarriagesAllTickets()
+    {
+        return _carriages.Count * Carriage.MaxTickets;
+    }
+
+    public void AddCarriagesTickets(int tickets, int index)
+    {
+        _carriages[index].AddTickets(tickets);
+    }
+
+    private int GetBusyTickets()
+    {
+        int busyTickets = 0;
+
+        for (int i = 0; i < _carriages.Count; i++)
+        {
+            busyTickets += _carriages[i].BusyTickets;
+        }
+
+        return busyTickets;
+    }
+
+    private void AddCarriages(int carriagesQuantity)
+    {
+        for (int i = 0; i < carriagesQuantity; i++)
+        {
+            _carriages.Add(new Carriage());
+        }
+    }
+}
+
+class Carriage
+{
+    public Carriage()
+    {
+        BusyTickets = 0;
+    }
+
+    public static int MaxTickets { get; private set; } = 10;
+    public int BusyTickets { get; private set; }
+
+    public void AddTickets(int ticketsQuantity)
+    {
+        BusyTickets += ticketsQuantity;
+    }
+}
+
+class Message
+{
+    private string _startPoint;
+    private string _endPoint;
+
+    public Message(string startPoint, string endPoint)
+    {
+        _startPoint = startPoint;
+        _endPoint = endPoint;
+    }
+
+    public void ShowInfo()
+    {
+        Console.WriteLine($"{_startPoint} - {_endPoint}");
     }
 }
