@@ -1,233 +1,267 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
+using System.Runtime.Remoting.Messaging;
 using System.Threading;
 
-class Program
+namespace XDproject
 {
-    static void Main()
+    class Program
     {
-        Dispatcher dispatcher = new Dispatcher(5);
-
-        dispatcher.Work();
-    }
-}
-
-class Dispatcher
-{
-    private RailwayStation _station = new RailwayStation();
-    private int _trainRoute;
-
-    public Dispatcher(int trainRoute)
-    {
-        _trainRoute = trainRoute;
-    }
-
-    public void Work()
-    {
-        while (_station.TrainsCount < _trainRoute)
+        static void Main()
         {
-            Console.WriteLine("** Вокзал **");
-            Console.WriteLine("Текующие рейсы:");
-            _station.ShowTrains();
-            string startPoint = GetUserMessage("Введите начальную точку поезда:");
-            string endPoint = GetUserMessage("Введите конечную точку поезда:");
-            Console.WriteLine("Ожидайте продажи билетов...");
-            int waitTime = 3000;
-            Thread.Sleep(waitTime);
-            int tickets = _station.GetTickets();
-            Console.WriteLine($"Билеты проданы, количество билетов: {tickets}");
-            string userCarriages = GetUserMessage($"Введите количество вагонов (в одном вагоне {Carriage.MaxTickets} мест): ");
-           
-            if(TryToAddTrain(userCarriages, tickets, startPoint, endPoint))
+            Coliseum coliseum = new Coliseum();
+
+            coliseum.Work();
+        }
+    }
+
+    class Coliseum
+    {
+        private List<Fighter> _fighters = new List<Fighter>();
+
+        public Coliseum()
+        {
+            _fighters.Add(new Viking("Викинг", 100, 15, 50, 30));
+            _fighters.Add(new SwordsMan("Чел с мечом", 120, 10, 40));
+            _fighters.Add(new Wicked("Злой", 150, 5, 50, 30));
+            _fighters.Add(new SpellCaster("Ведьмак", 90, 5, 60, 25, 25));
+            _fighters.Add(new Dexterous("Ловкий чел", 85, 15, 40, 25));
+        }
+
+        public void Work()
+        {
+            ShowAllFighters();   
+        }
+
+        private void ShowAllFighters()
+        {
+            for (int i = 0; i < _fighters.Count; i++)
             {
-                Console.WriteLine("Рейс добавлен.");
+                _fighters[i].ShowInfo();
             }
+        }
+    }
+
+    abstract class Fighter
+    {
+        protected string _name;
+        protected int _damage;
+        protected int _armor;
+        protected int _health;
+
+        public Fighter(string name, int health, int damage, int armor)
+        {
+            _name = name;
+            _health = health;
+            _damage = damage;
+            _armor = armor;
+        }
+
+        public virtual int Damage => _damage;
+
+        public virtual void TakeDamage(int damage)
+        {
+            _health -= damage * _armor;
+        }
+
+        public virtual void ShowInfo()
+        {
+            Console.WriteLine($"Имя бойца: {_name} здоровье: {_health} наносимый урон: {_damage} броня: {_armor}");
+            Console.WriteLine("Особенность:");
+            ShowAbility();
+            Console.WriteLine();
+        }
+
+        public abstract void ShowAbility();
+    }
+
+    class Viking : Fighter
+    {
+        private int _chance;
+        private int _doubleDamage;
+
+        public Viking(string name, int health, int damage, int armor, int chance) : base(name, health, damage, armor)
+        {
+            _name = name;
+            _health = health;
+            _damage = damage;
+            _armor = armor;
+            _chance = chance;
+
+            _doubleDamage = damage + damage;
+
+            if (chance > UserUtils.MaxChanceWithPercent)
+            {
+                chance = UserUtils.MaxChanceWithPercent;
+            }
+        }
+
+        public override int Damage => (UserUtils.GetRandomNumber(0, UserUtils.MaxChanceWithPercent) <= _chance) ? _doubleDamage : _damage;
+
+        public override void ShowAbility()
+        {
+            Console.WriteLine("Есть шанс нанести удвоенный урон.");
+            Console.WriteLine($"Шанс {_chance} процентов");
+        }
+    }
+
+    class SwordsMan : Fighter
+    {
+        private static int s_attacksCountToUserAbility = 3;
+        private int _doubleDamage;
+        private int _currentAttacksCount;
+
+        public SwordsMan(string name, int health, int damage, int armor) : base(name, health, damage, armor)
+        {
+            _name = name;
+            _health = health;
+            _damage = damage;
+            _armor = armor;
+
+            _doubleDamage = damage + damage;
+
+            _currentAttacksCount = 0;
+        }
+
+        public override int Damage => (_currentAttacksCount % s_attacksCountToUserAbility == 0) ? _doubleDamage : _damage;
+
+        public override void TakeDamage(int damage)
+        {
+            base.TakeDamage(damage);
+            _currentAttacksCount++;
+        }
+
+        public override void ShowAbility()
+        {
+            Console.WriteLine("Каждую третью атаку наносит удвоенный урон.");
+            Console.WriteLine($"Количество атак: {_currentAttacksCount}");
+        }
+    }
+
+    class Wicked : Fighter
+    {
+        private int _currentRagesCount;
+        private int _maxHealth;
+        private int _RagesCountToHeals;
+        private int _healthToAdd;
+
+        public Wicked(string name, int health, int damage, int armor, int healthToAdd) : base(name, health, damage, armor)
+        {
+            _name = name;
+            _health = health;
+            _damage = damage;
+            _armor = armor;
+            _healthToAdd = healthToAdd;
+
+            _maxHealth = _health;
+            _RagesCountToHeals = 5;
+            _currentRagesCount = 0;
+        }
+
+        public override void TakeDamage(int damage)
+        {
+            base.TakeDamage(damage);
+            _currentRagesCount++;
+
+            if (_currentRagesCount >= _RagesCountToHeals)
+            {
+                Heals();
+                _currentRagesCount = 0;
+            }
+        }
+
+        public override void ShowAbility()
+        {
+            Console.WriteLine("После накопление ярости восстанавливает здоровье.");
+            Console.WriteLine($"Ярость: {_currentRagesCount} количество ярости для лечение: {_RagesCountToHeals}");
+        }
+
+        private void Heals()
+        {
+            _health += _healthToAdd;
+
+            if (_healthToAdd > _health)
+            {
+                _health = _maxHealth;
+            }
+        }
+    }
+
+    class SpellCaster : Fighter
+    {
+        private static int s_priceToMana = 5;
+        private int _mana;
+        private int _damageWithFireball;
+
+        public SpellCaster(string name, int health, int damage, int armor, int mana, int damageWithFireball) : base(name, health, damage, armor)
+        {
+            _name = name;
+            _health = health;
+            _damage = damage;
+            _armor = armor;
+            _mana = mana;
+            _damageWithFireball = damageWithFireball;
+
+            if (mana < s_priceToMana)
+            {
+                mana = s_priceToMana;
+            }
+        }
+
+        public override int Damage => (_mana >= s_priceToMana) ? _damageWithFireball : _damage;
+
+        public override void ShowAbility()
+        {
+            Console.WriteLine("Может применять заклинание с огненным шаром пока мана находится в нужном количестве.");
+            Console.WriteLine($"Мана: {_mana}");
+            Console.WriteLine($"Минимальное количество маны для использование заклинание: {s_priceToMana}");
+            Console.WriteLine($"Урон при огненном шаре: {_damageWithFireball}");
+        }
+    }
+
+    class Dexterous : Fighter
+    {
+        private int _chanceToEvade;
+
+        public Dexterous(string name, int health, int damage, int armor, int chanceToEvade) : base(name, health, damage, armor)
+        {
+            _name = name;
+            _health = health;
+            _damage = damage;
+            _armor = armor;
+            _chanceToEvade = chanceToEvade;
+
+            if (chanceToEvade > UserUtils.MaxChanceWithPercent)
+            {
+                chanceToEvade = UserUtils.MaxChanceWithPercent;
+            }
+        }
+
+        public override void TakeDamage(int damage)
+        {
+            if (UserUtils.GetRandomNumber(0, UserUtils.MaxChanceWithPercent) <= _chanceToEvade)
+                return;
             else
-            {
-                Console.WriteLine("Не удалось добавить поезд.");
-            }
-
-            Console.ReadKey();
-            Console.Clear();
+                base.TakeDamage(damage);
         }
 
-        Console.WriteLine("Смена закончилась.");
-    }
-
-    private bool TryToAddTrain(string userCarriagesCount, int tickets, string startPoint, string endPoint)
-    {
-        if (int.TryParse(userCarriagesCount, out int resultCarriagesCount))
+        public override void ShowAbility()
         {
-            if (tickets <= resultCarriagesCount * Carriage.MaxTickets)
-            {
-                Train train = new Train(new DirectionMessage(startPoint, endPoint), _station.CreateCarriages(resultCarriagesCount));
-                AddTicketsToTrain(tickets, train);
-                _station.AddTrain(train);
-
-                return true;
-            }
-            else
-            {
-                Console.WriteLine("В поезде не хватает мест для всех билетов!");
-            }
+            Console.WriteLine("Возможность уклонится от удара.");
+            Console.WriteLine($"Шанс на уклон: {_chanceToEvade} процентов");
         }
-        else
+    }
+
+    class UserUtils
+    {
+        private static int _maxChance = 100;
+        private static Random s_random = new Random();
+        public static int MaxChanceWithPercent => _maxChance;
+
+        public static int GetRandomNumber(int min, int max)
         {
-            Console.WriteLine("Введите число!");
+            return s_random.Next(min, max);
         }
-
-        return false;
-    }
-
-    private void AddTicketsToTrain(int ticketsQuantity, Train train)
-    {
-        for (int i = 0; i < train.CarriagesCount; i++)
-        {
-            if (ticketsQuantity >= Carriage.MaxTickets)
-            {
-                train.AddCarriagesTickets(Carriage.MaxTickets, i);
-                ticketsQuantity -= Carriage.MaxTickets;
-            }
-            else
-            {
-                train.AddCarriagesTickets(ticketsQuantity, i);
-                ticketsQuantity = 0;
-            }
-        }
-    }
-
-    private string GetUserMessage(string message)
-    {
-        Console.WriteLine(message);
-        return Console.ReadLine();
-    }
-}
-
-class RailwayStation
-{
-    private List<Train> _trains = new List<Train>();
-
-    public int TrainsCount => _trains.Count;
-
-    public int GetTickets()
-    {
-        Random random = new Random();
-
-        int minTickets = 10;
-        int maxTickets = 100;
-
-        return random.Next(minTickets, maxTickets + 1);
-    }
-
-    public void ShowTrains()
-    {
-        for (int i = 0; i < _trains.Count; i++)
-        {
-            _trains[i].ShowInfo();
-        }
-    }
-
-    public void AddTrain(Train train)
-    {
-        _trains.Add(train);
-    }
-
-    public List<Carriage> CreateCarriages(int carriagesCount)
-    {
-        List<Carriage> attachedCarriages = new List<Carriage>();
-
-        for (int i = 0; i < carriagesCount; i++)
-        {
-            attachedCarriages.Add(new Carriage());
-        }
-
-        return attachedCarriages;
-    }
-}
-
-class Train
-{
-    private static int _idCounter = 1;
-    private List<Carriage> _carriages;
-    private DirectionMessage _directionMessage;
-
-    public Train(DirectionMessage directionMessage, List<Carriage> carriages)
-    {
-        Id = _idCounter++;
-        _directionMessage = directionMessage;
-        _carriages = carriages;
-    }
-
-    public int CarriagesCount => _carriages.Count;
-    public int Id { get; private set; }
-
-    public void ShowInfo()
-    {
-        int remainingTickets = GetCarriagesAllTickets() - GetBusyTickets();
-
-        Console.WriteLine();
-        Console.Write("Рейс с сообщением: ");
-        _directionMessage.ShowInfo();
-        Console.WriteLine($"Номер рейса: {Id}");
-        Console.WriteLine($"Количество вагонов: {_carriages.Count}");
-        Console.WriteLine($"Оставшийся билеты: {remainingTickets} занятые билеты: {GetBusyTickets()}");
-        Console.WriteLine();
-    }
-
-    public int GetCarriagesAllTickets()
-    {
-        return _carriages.Count * Carriage.MaxTickets;
-    }
-
-    public void AddCarriagesTickets(int tickets, int index)
-    {
-        _carriages[index].AddTickets(tickets);
-    }
-
-    private int GetBusyTickets()
-    {
-        int busyTickets = 0;
-
-        for (int i = 0; i < _carriages.Count; i++)
-        {
-            busyTickets += _carriages[i].BusyTickets;
-        }
-
-        return busyTickets;
-    }
-}
-
-class Carriage
-{
-    private static int s_maxTickets = 10;
-    public static int MaxTickets {  get { return s_maxTickets; } }
-
-    public Carriage()
-    {
-        BusyTickets = 0;
-    }
-
-    public int BusyTickets { get; private set; }
-
-    public void AddTickets(int ticketsQuantity)
-    {
-        BusyTickets += ticketsQuantity;
-    }
-}
-
-class DirectionMessage
-{
-    private string _startPoint;
-    private string _endPoint;
-
-    public DirectionMessage(string startPoint, string endPoint)
-    {
-        _startPoint = startPoint;
-        _endPoint = endPoint;
-    }
-
-    public void ShowInfo()
-    {
-        Console.WriteLine($"{_startPoint} - {_endPoint}");
     }
 }
