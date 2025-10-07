@@ -25,36 +25,61 @@ namespace XDproject
             _fighters.Add(new Viking("Викинг", 100, 15, 50, 30));
             _fighters.Add(new SwordsMan("Чел с мечом", 120, 10, 40));
             _fighters.Add(new Wicked("Злой", 150, 5, 50, 30));
-            _fighters.Add(new SpellCaster("Ведьмак", 90, 5, 60, 25, 25));
-            _fighters.Add(new Dexterous("Ловкий чел", 85, 15, 40, 25));
+            _fighters.Add(new SpellCaster("Ведьмак", 90, 5, 60, 15, 25));
+            _fighters.Add(new Dexterous("Ловкий чел", 85, 15, 40, 30));
         }
 
         public void Work()
         {
             bool isWork = true;
 
-            while (isWork)
+            Console.WriteLine("** Колизей **");
+            Console.WriteLine("Типы бойцов");
+            Console.WriteLine();
+            ShowAllFighters();
+            Console.WriteLine();
+
+            Fighter firstFighter;
+            Fighter secondFighter;
+
+            string firstNumber = GetUserMessage("Введите номер первого бойца:");
+
+            if (TryToGetFighterNumber(firstNumber, out int resultFirstNumber))
             {
-                Console.WriteLine("** Колизей **");
-                Console.WriteLine("Типы бойцов");
-                Console.WriteLine();
-                ShowAllFighters();
-                Console.WriteLine();
+                firstFighter = _fighters[resultFirstNumber - 1].GetInfo();
 
-                Fighter firstFighter;
-                Fighter secondFighter;
+                string secondNumber = GetUserMessage("Введите номер второго бойца:");
 
-                string firstNumber = GetUserMessage("Введите номер первого бойца:");
-
-                if (TryToGetFighterNumber(firstNumber, out int resultFirstNumber))
+                if (TryToGetFighterNumber(secondNumber, out int resultSecondNumber))
                 {
-                    firstFighter = _fighters[resultFirstNumber - 1].GetInfo();
+                    secondFighter = (resultFirstNumber == resultSecondNumber) ? firstFighter.GetInfo(): _fighters[resultSecondNumber - 1].GetInfo();
+                    int threeSecondWithMs = 3000;
 
-                    string secondNumber = GetUserMessage("Введите номер второго бойца:");
+                    firstFighter.ShowInfo();
+                    secondFighter.ShowInfo();
 
-                    if (TryToGetFighterNumber(secondNumber, out int resultSecondNumber))
+                    Thread.Sleep(threeSecondWithMs);
+
+                    while (firstFighter.Health > 0 && secondFighter.Health > 0)
                     {
-                        secondFighter = _fighters[resultSecondNumber - 1].GetInfo();
+                        firstFighter.Attack(secondFighter);
+                        secondFighter.Attack(firstFighter);
+
+                        Thread.Sleep(threeSecondWithMs);
+                        Console.Clear();
+                    }
+
+                    if (firstFighter.Health > secondFighter.Health)
+                    {
+                        Console.WriteLine($"Победитель: {firstFighter.Name}");
+                    }
+                    else if (secondFighter.Health > firstFighter.Health)
+                    {
+                        Console.WriteLine($"Победитель: {secondFighter.Name}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Ничья.");
                     }
                 }
             }
@@ -98,11 +123,10 @@ namespace XDproject
 
     interface IDamageable
     {
-        void Attack(Fighter fighter);
-        void ShowAbilityInBattle();
+        void TakeDamage(int damage);
     }
 
-    abstract class Fighter
+    abstract class Fighter : IDamageable
     {
         protected string _name;
         protected int _damage;
@@ -117,11 +141,15 @@ namespace XDproject
             _armor = armor;
         }
 
+        public string Name { get { return _name; } }
         public int Health { get { return _health; } }
 
         public virtual void TakeDamage(int damage)
         {
-            _health *= _armor -= damage;
+            int resultDamage = damage * 100 / (100 + _armor);
+            _health -= resultDamage;
+
+            ShowHealth();
         }
 
         public void ShowInfo()
@@ -132,14 +160,23 @@ namespace XDproject
             Console.WriteLine();
         }
 
-        protected void ShowAttackInfo()
+        protected void ShowHealth()
         {
-            Console.WriteLine("Боец атаковал обычной атакой.");
+            Console.WriteLine($"{_name} Здоровье: {_health}");
         }
+
+        public abstract void Attack(IDamageable target);
 
         public abstract Fighter GetInfo();
 
         public abstract void ShowAbility();
+
+        public abstract void ShowAbilityInBattle();
+
+        protected void ShowAttackInfo()
+        {
+            Console.WriteLine($"Боец {_name} атаковал обычной атакой.");
+        }
     }
 
     class Viking : Fighter
@@ -160,18 +197,18 @@ namespace XDproject
             }
         }
 
-        public void Attack(Fighter fighter)
+        public override void Attack(IDamageable target)
         {
             int doubleDamage = _damage + _damage;
 
             if ((UserUtils.GetRandomNumber(0, UserUtils.MaxChanceWithPercent) <= _chance))
             {
-                fighter.TakeDamage(doubleDamage);
+                target.TakeDamage(doubleDamage);
                 ShowAbilityInBattle();
             }
             else
             {
-                fighter.TakeDamage(_damage);
+                target.TakeDamage(_damage);
                 ShowAttackInfo();
             }
         }
@@ -182,7 +219,7 @@ namespace XDproject
             Console.WriteLine($"Шанс {_chance} процентов");
         }
 
-        public void ShowAbilityInBattle()
+        public override void ShowAbilityInBattle()
         {
             Console.WriteLine($"Боец {_name} применил двойной удар.");
         }
@@ -193,7 +230,7 @@ namespace XDproject
         }
     }
 
-    class SwordsMan : Fighter, IDamageable
+    class SwordsMan : Fighter
     {
         private static int s_attacksCountToUserAbility = 3;
         private int _currentAttacksCount;
@@ -213,18 +250,18 @@ namespace XDproject
             base.TakeDamage(damage);
         }
 
-        public void Attack(Fighter fighter)
+        public override void Attack(IDamageable target)
         {
             int doubleDamage = _damage + _damage;
 
             if (_currentAttacksCount % s_attacksCountToUserAbility == 0)
             {
-                fighter.TakeDamage(doubleDamage);
+                target.TakeDamage(doubleDamage);
                 ShowAbilityInBattle();
             }
             else
             {
-                fighter.TakeDamage(_damage);
+                target.TakeDamage(_damage);
                 ShowAttackInfo();
             }
 
@@ -237,7 +274,7 @@ namespace XDproject
             Console.WriteLine($"Количество атак: {_currentAttacksCount}");
         }
 
-        public void ShowAbilityInBattle()
+        public override void ShowAbilityInBattle()
         {
             Console.WriteLine($"Боец {_name} применил двойной удар.");
             Console.WriteLine($"Количество атак: {_currentAttacksCount}");
@@ -249,7 +286,7 @@ namespace XDproject
         }
     }
 
-    class Wicked : Fighter, IDamageable
+    class Wicked : Fighter
     {
         private int _currentRagesCount;
         private int _maxHealth;
@@ -289,9 +326,9 @@ namespace XDproject
             Console.WriteLine($"Ярость: {_currentRagesCount} количество ярости для лечение: {_RagesCountToHeals}");
         }
 
-        public void Attack(Fighter fighter)
+        public override void Attack(IDamageable target)
         {
-            fighter.TakeDamage(_damage);
+            target.TakeDamage(_damage);
             ShowAttackInfo();
         }
 
@@ -299,13 +336,13 @@ namespace XDproject
         {
             _health += _healthToAdd;
 
-            if (_healthToAdd > _health)
+            if (_health > _maxHealth)
             {
                 _health = _maxHealth;
             }
         }
 
-        public void ShowAbilityInBattle()
+        public override void ShowAbilityInBattle()
         {
             Console.WriteLine($"Боец {_name} применил лечение.");
         }
@@ -316,7 +353,7 @@ namespace XDproject
         }
     }
 
-    class SpellCaster : Fighter, IDamageable
+    class SpellCaster : Fighter
     {
         private static int s_priceToMana = 5;
         private int _mana;
@@ -337,16 +374,17 @@ namespace XDproject
             }
         }
 
-        public void Attack(Fighter fighter)
+        public override void Attack(IDamageable target)
         {
             if (_mana >= s_priceToMana)
             {
-                fighter.TakeDamage(_damageWithFireball);
+                target.TakeDamage(_damageWithFireball);
                 ShowAbilityInBattle();
+                _mana -= s_priceToMana;
             }
             else
             {
-                fighter.TakeDamage(_damage);
+                target.TakeDamage(_damage);
                 ShowAttackInfo();
             }
         }
@@ -359,7 +397,7 @@ namespace XDproject
             Console.WriteLine($"Урон при огненном шаре: {_damageWithFireball}");
         }
 
-        public void ShowAbilityInBattle()
+        public override void ShowAbilityInBattle()
         {
             Console.WriteLine($"Боец {_name} применил огненный шар.");
             Console.WriteLine($"Мана: {_mana}");
@@ -371,7 +409,7 @@ namespace XDproject
         }
     }
 
-    class Dexterous : Fighter, IDamageable
+    class Dexterous : Fighter
     {
         private int _chanceToEvade;
 
@@ -394,15 +432,19 @@ namespace XDproject
             if (UserUtils.GetRandomNumber(0, UserUtils.MaxChanceWithPercent) <= _chanceToEvade)
             {
                 ShowAbilityInBattle();
+                ShowHealth();
                 return;
             }
             else
+            {
                 base.TakeDamage(damage);
+            }
         }
 
-        public void Attack(Fighter fighter)
+        public override void Attack(IDamageable target)
         {
-            fighter.TakeDamage(_damage);
+            target.TakeDamage(_damage);
+            ShowAttackInfo();
         }
 
         public override void ShowAbility()
@@ -411,7 +453,7 @@ namespace XDproject
             Console.WriteLine($"Шанс на уклон: {_chanceToEvade} процентов");
         }
 
-        public void ShowAbilityInBattle()
+        public override void ShowAbilityInBattle()
         {
             Console.WriteLine($"Боец {_name} уклонился.");
         }
