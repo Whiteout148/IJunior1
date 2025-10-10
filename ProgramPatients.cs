@@ -31,8 +31,6 @@ namespace XDproject
 
         public void Work()
         {
-            bool isWork = true;
-
             Console.WriteLine("** Колизей **");
             Console.WriteLine("Типы бойцов");
             Console.WriteLine();
@@ -46,42 +44,53 @@ namespace XDproject
 
             if (TryToGetFighterNumber(firstNumber, out int resultFirstNumber))
             {
-                firstFighter = _fighters[resultFirstNumber - 1].GetInfo();
+                firstFighter = _fighters[resultFirstNumber - 1].GetClone();
 
                 string secondNumber = GetUserMessage("Введите номер второго бойца:");
 
                 if (TryToGetFighterNumber(secondNumber, out int resultSecondNumber))
                 {
-                    secondFighter = (resultFirstNumber == resultSecondNumber) ? firstFighter.GetInfo(): _fighters[resultSecondNumber - 1].GetInfo();
-                    int threeSecondWithMs = 3000;
+                    secondFighter = (resultFirstNumber == resultSecondNumber) ? firstFighter.GetClone(): _fighters[resultSecondNumber - 1].GetClone();
 
-                    firstFighter.ShowInfo();
-                    secondFighter.ShowInfo();
-
-                    Thread.Sleep(threeSecondWithMs);
-
-                    while (firstFighter.Health > 0 && secondFighter.Health > 0)
-                    {
-                        firstFighter.Attack(secondFighter);
-                        secondFighter.Attack(firstFighter);
-
-                        Thread.Sleep(threeSecondWithMs);
-                        Console.Clear();
-                    }
-
-                    if (firstFighter.Health > secondFighter.Health)
-                    {
-                        Console.WriteLine($"Победитель: {firstFighter.Name}");
-                    }
-                    else if (secondFighter.Health > firstFighter.Health)
-                    {
-                        Console.WriteLine($"Победитель: {secondFighter.Name}");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Ничья.");
-                    }
+                    StartFight(firstFighter, secondFighter);
                 }
+            }
+        }
+
+        private void StartFight(Fighter firstFighter, Fighter secondFighter)
+        {
+            firstFighter.ShowInfo();
+            secondFighter.ShowInfo();
+
+            int threeSecondWithMs = 3000;
+
+            Thread.Sleep(threeSecondWithMs);
+
+            while (firstFighter.Health > 0 && secondFighter.Health > 0)
+            {
+                firstFighter.Attack(secondFighter);
+                secondFighter.Attack(firstFighter);
+
+                Thread.Sleep(threeSecondWithMs);
+                Console.Clear();
+            }
+
+            ShowFightResult(firstFighter, secondFighter);
+        }
+
+        private void ShowFightResult(Fighter firstFighter, Fighter secondFighter)
+        {
+            if (firstFighter.Health > secondFighter.Health)
+            {
+                Console.WriteLine($"Победитель: {firstFighter.Name}");
+            }
+            else if (secondFighter.Health > firstFighter.Health)
+            {
+                Console.WriteLine($"Победитель: {secondFighter.Name}");
+            }
+            else
+            {
+                Console.WriteLine("Ничья.");
             }
         }
 
@@ -126,7 +135,11 @@ namespace XDproject
         void TakeDamage(int damage);
     }
 
-    abstract class Fighter : IDamageable
+    interface IDoubleAttack
+    {
+        void DoubleAttack(Fighter fighter);
+    }
+        abstract class Fighter : IDamageable
     {
         protected string _name;
         protected int _damage;
@@ -146,7 +159,7 @@ namespace XDproject
 
         public virtual void TakeDamage(int damage)
         {
-            int resultDamage = damage * 100 / (100 + _armor);
+            int resultDamage = damage * UserUtils.MaxPercent / (UserUtils.MaxPercent + _armor);
             _health -= resultDamage;
 
             ShowHealth();
@@ -167,7 +180,7 @@ namespace XDproject
 
         public abstract void Attack(IDamageable target);
 
-        public abstract Fighter GetInfo();
+        public abstract Fighter GetClone();
 
         public abstract void ShowAbility();
 
@@ -190,20 +203,14 @@ namespace XDproject
             _damage = damage;
             _armor = armor;
             _chance = chance;
-
-            if (chance > UserUtils.MaxChanceWithPercent)
-            {
-                chance = UserUtils.MaxChanceWithPercent;
-            }
         }
 
         public override void Attack(IDamageable target)
         {
-            int doubleDamage = _damage + _damage;
-
-            if ((UserUtils.GetRandomNumber(0, UserUtils.MaxChanceWithPercent) <= _chance))
+            if ((UserUtils.IsGetChance(_chance)))
             {
-                target.TakeDamage(doubleDamage);
+                target.TakeDamage(_damage);
+                target.TakeDamage(_damage);
                 ShowAbilityInBattle();
             }
             else
@@ -224,7 +231,7 @@ namespace XDproject
             Console.WriteLine($"Боец {_name} применил двойной удар.");
         }
 
-        public override Fighter GetInfo()
+        public override Fighter GetClone()
         {
             return new Viking(_name, _health, _damage, _armor, _chance);
         }
@@ -245,18 +252,12 @@ namespace XDproject
             _currentAttacksCount = 0;
         }
 
-        public override void TakeDamage(int damage)
-        {
-            base.TakeDamage(damage);
-        }
-
         public override void Attack(IDamageable target)
         {
-            int doubleDamage = _damage + _damage;
-
             if (_currentAttacksCount % s_attacksCountToUserAbility == 0)
             {
-                target.TakeDamage(doubleDamage);
+                target.TakeDamage(_damage);
+                target.TakeDamage(_damage);
                 ShowAbilityInBattle();
             }
             else
@@ -264,6 +265,8 @@ namespace XDproject
                 target.TakeDamage(_damage);
                 ShowAttackInfo();
             }
+
+            Console.WriteLine($"Количество атак: {_currentAttacksCount}");
 
             _currentAttacksCount++;
         }
@@ -277,10 +280,9 @@ namespace XDproject
         public override void ShowAbilityInBattle()
         {
             Console.WriteLine($"Боец {_name} применил двойной удар.");
-            Console.WriteLine($"Количество атак: {_currentAttacksCount}");
         }
 
-        public override Fighter GetInfo()
+        public override Fighter GetClone()
         {
             return new SwordsMan(_name, _health, _damage, _armor);
         }
@@ -347,7 +349,7 @@ namespace XDproject
             Console.WriteLine($"Боец {_name} применил лечение.");
         }
 
-        public override Fighter GetInfo()
+        public override Fighter GetClone()
         {
             return new Wicked(_name, _health, _damage, _armor, _healthToAdd);
         }
@@ -403,7 +405,7 @@ namespace XDproject
             Console.WriteLine($"Мана: {_mana}");
         }
 
-        public override Fighter GetInfo()
+        public override Fighter GetClone()
         {
             return new SpellCaster(_name, _health, _damage, _armor, _mana, _damageWithFireball);
         }
@@ -420,16 +422,11 @@ namespace XDproject
             _damage = damage;
             _armor = armor;
             _chanceToEvade = chanceToEvade;
-
-            if (chanceToEvade > UserUtils.MaxChanceWithPercent)
-            {
-                chanceToEvade = UserUtils.MaxChanceWithPercent;
-            }
         }
 
         public override void TakeDamage(int damage)
         {
-            if (UserUtils.GetRandomNumber(0, UserUtils.MaxChanceWithPercent) <= _chanceToEvade)
+            if (UserUtils.IsGetChance(_chanceToEvade))
             {
                 ShowAbilityInBattle();
                 ShowHealth();
@@ -458,17 +455,22 @@ namespace XDproject
             Console.WriteLine($"Боец {_name} уклонился.");
         }
 
-        public override Fighter GetInfo()
+        public override Fighter GetClone()
         {
             return new Dexterous(_name, _health, _damage, _armor, _chanceToEvade);
         }
     }
 
-    class UserUtils
+    static class UserUtils
     {
-        private static int _maxChance = 100;
+        private static int _maxPercent = 100;
         private static Random s_random = new Random();
-        public static int MaxChanceWithPercent => _maxChance;
+        public static int MaxPercent => _maxPercent;
+
+        public static bool IsGetChance(int chance)
+        {
+            return (GetRandomNumber(0, _maxPercent) <= chance) ? true: false;
+        }
 
         public static int GetRandomNumber(int min, int max)
         {
