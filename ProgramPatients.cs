@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 
 namespace XDproject
@@ -156,7 +157,7 @@ namespace XDproject
         }
 
         public string Name { get; protected set; }
-        public int Health {  get; protected set; }
+        public int Health { get; protected set; }
 
         public virtual void TakeDamage(int damage)
         {
@@ -176,7 +177,11 @@ namespace XDproject
             Console.WriteLine($"{Name} Здоровье: {Health}");
         }
 
-        public abstract void Attack(IDamageable target);
+        public virtual void Attack(IDamageable target)
+        {
+            target.TakeDamage(Damage);
+            ShowAttackInfo();
+        }
 
         public abstract Fighter GetClone();
 
@@ -208,17 +213,20 @@ namespace XDproject
 
         public override void Attack(IDamageable target)
         {
+            int resultDamage;
+
             if ((UserUtils.IsGetChance(_chanceToDoubleDamage)))
             {
-                int doubleDamage = Damage + Damage;
-                target.TakeDamage(Damage);
+                resultDamage = Damage + Damage;
                 ShowAbilityInBattle();
             }
             else
             {
-                target.TakeDamage(Damage);
+                resultDamage = Damage;
                 ShowAttackInfo();
             }
+
+            target.TakeDamage(resultDamage);
         }
 
         public override void ShowAbility()
@@ -229,8 +237,8 @@ namespace XDproject
 
         public override void ShowAbilityInBattle()
         {
-            base.ShowAbilityInBattle();    
-            Console.WriteLine($"Боец {Name} применил двойной удар.");
+            base.ShowAbilityInBattle();
+            Console.WriteLine($"Боец {Name} применил двойной урон.");
         }
 
         public override Fighter GetClone()
@@ -241,7 +249,8 @@ namespace XDproject
 
     class SwordsMan : Fighter
     {
-        private const int _attacksCountToUserAbility = 3;
+        private const int AttacksCountToUserAbility = 3;
+
         private int _currentAttacksCount;
 
         public SwordsMan(string name, int health, int damage, int armor) : base(name, health, damage, armor)
@@ -256,16 +265,14 @@ namespace XDproject
 
         public override void Attack(IDamageable target)
         {
-            if (_currentAttacksCount % _attacksCountToUserAbility == 0)
+            if (_currentAttacksCount % AttacksCountToUserAbility == 0)
             {
-                target.TakeDamage(Damage);
-                target.TakeDamage(Damage);
+                DoubleAttack(target);
                 ShowAbilityInBattle();
             }
             else
             {
                 target.TakeDamage(Damage);
-                ShowAttackInfo();
             }
 
             Console.WriteLine($"Количество атак: {_currentAttacksCount}");
@@ -289,13 +296,19 @@ namespace XDproject
         {
             return new SwordsMan(Name, Health, Damage, Armor);
         }
+
+        private void DoubleAttack(IDamageable target)
+        {
+            target.TakeDamage(Damage);
+            target.TakeDamage(Damage);
+        }
     }
 
     class Wicked : Fighter
     {
         private int _currentRagesCount;
         private int _maxHealth;
-        private int _RagesCountToHeals;
+        private int _ragesCountToHeals;
         private int _healthToAdd;
 
         public Wicked(string name, int health, int damage, int armor, int healthToAdd) : base(name, health, damage, armor)
@@ -307,7 +320,7 @@ namespace XDproject
             _healthToAdd = healthToAdd;
 
             _maxHealth = Health;
-            _RagesCountToHeals = 5;
+            _ragesCountToHeals = 5;
             _currentRagesCount = 0;
         }
 
@@ -317,7 +330,7 @@ namespace XDproject
             _currentRagesCount++;
             Console.WriteLine($"Ярость: {_currentRagesCount}");
 
-            if (_currentRagesCount >= _RagesCountToHeals)
+            if (_currentRagesCount >= _ragesCountToHeals)
             {
                 Heals();
                 ShowAbilityInBattle();
@@ -328,7 +341,7 @@ namespace XDproject
         public override void ShowAbility()
         {
             Console.WriteLine("После накопление ярости восстанавливает здоровье.");
-            Console.WriteLine($"Ярость: {_currentRagesCount} количество ярости для лечение: {_RagesCountToHeals}");
+            Console.WriteLine($"Ярость: {_currentRagesCount} количество ярости для лечение: {_ragesCountToHeals}");
         }
 
         public override void Attack(IDamageable target)
@@ -361,7 +374,8 @@ namespace XDproject
 
     class SpellCaster : Fighter
     {
-        private const int _priceToMana = 5;
+        private const int PriceToMana = 5;
+
         private int _mana;
         private int _damageWithFireball;
 
@@ -374,26 +388,29 @@ namespace XDproject
             _mana = mana;
             _damageWithFireball = damageWithFireball;
 
-            if (mana < _priceToMana)
+            if (mana < PriceToMana)
             {
-                mana = _priceToMana;
+                mana = PriceToMana;
             }
         }
 
         public override void Attack(IDamageable target)
         {
-            if (_mana >= _priceToMana)
+            int resultDamage;
+
+            if (_mana >= PriceToMana)
             {
-                target.TakeDamage(_damageWithFireball);
                 ShowAbilityInBattle();
-                _mana -= _priceToMana;
+                _mana -= PriceToMana;
+                resultDamage = _damageWithFireball;
             }
             else
             {
-                target.TakeDamage(Damage);
+                resultDamage = Damage;
                 ShowAttackInfo();
             }
 
+            target.TakeDamage(resultDamage);
             Console.WriteLine($"Мана: {_mana}");
         }
 
@@ -401,7 +418,7 @@ namespace XDproject
         {
             Console.WriteLine("Может применять заклинание с огненным шаром пока мана находится в нужном количестве.");
             Console.WriteLine($"Мана: {_mana}");
-            Console.WriteLine($"Минимальное количество маны для использование заклинание: {_priceToMana}");
+            Console.WriteLine($"Минимальное количество маны для использование заклинание: {PriceToMana}");
             Console.WriteLine($"Урон при огненном шаре: {_damageWithFireball}");
         }
 
@@ -444,12 +461,6 @@ namespace XDproject
             }
         }
 
-        public override void Attack(IDamageable target)
-        {
-            target.TakeDamage(Damage);
-            ShowAttackInfo();
-        }
-
         public override void ShowAbility()
         {
             Console.WriteLine("Возможность уклонится от удара.");
@@ -470,13 +481,13 @@ namespace XDproject
 
     static class UserUtils
     {
-        private static int _maxPercent = 100;
+        private static int s_maxPercent = 100;
         private static Random s_random = new Random();
-        public static int MaxPercent => _maxPercent;
+        public static int MaxPercent => s_maxPercent;
 
         public static bool IsGetChance(int chance)
         {
-            return GetRandomNumber(0, _maxPercent) <= chance;
+            return GetRandomNumber(0, s_maxPercent) <= chance;
         }
 
         public static int GetRandomNumber(int min, int max)
