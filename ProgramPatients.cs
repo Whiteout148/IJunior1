@@ -23,7 +23,7 @@ namespace XDproject
         public Coliseum()
         {
             _fighters.Add(new Viking("Викинг", 100, 15, 50, 30));
-            _fighters.Add(new SwordsMan("Чел с мечом", 120, 10, 40));
+            _fighters.Add(new SwordsMan("Чел с мечом", 120, 10, 30));
             _fighters.Add(new Wicked("Злой", 150, 5, 50, 30));
             _fighters.Add(new SpellCaster("Ведьмак", 90, 5, 60, 15, 25));
             _fighters.Add(new Dexterous("Ловкий чел", 85, 15, 40, 30));
@@ -70,6 +70,9 @@ namespace XDproject
             {
                 firstFighter.Attack(secondFighter);
                 secondFighter.Attack(firstFighter);
+                Console.WriteLine();
+                firstFighter.ShowHealth();
+                secondFighter.ShowHealth();
 
                 Thread.Sleep(threeSecondWithMs);
                 Console.Clear();
@@ -135,11 +138,7 @@ namespace XDproject
         void TakeDamage(int damage);
     }
 
-    interface IDoubleAttack
-    {
-        void DoubleAttack(Fighter fighter);
-    }
-        abstract class Fighter : IDamageable
+    abstract class Fighter : IDamageable
     {
         protected string _name;
         protected int _damage;
@@ -159,10 +158,7 @@ namespace XDproject
 
         public virtual void TakeDamage(int damage)
         {
-            int resultDamage = damage * UserUtils.MaxPercent / (UserUtils.MaxPercent + _armor);
-            _health -= resultDamage;
-
-            ShowHealth();
+            _health -= (damage * UserUtils.MaxPercent) / (UserUtils.MaxPercent + _armor);
         }
 
         public void ShowInfo()
@@ -173,7 +169,7 @@ namespace XDproject
             Console.WriteLine();
         }
 
-        protected void ShowHealth()
+        public void ShowHealth()
         {
             Console.WriteLine($"{_name} Здоровье: {_health}");
         }
@@ -184,7 +180,10 @@ namespace XDproject
 
         public abstract void ShowAbility();
 
-        public abstract void ShowAbilityInBattle();
+        public virtual void ShowAbilityInBattle()
+        {
+            Console.WriteLine("Боец применил способность.");
+        }
 
         protected void ShowAttackInfo()
         {
@@ -228,6 +227,7 @@ namespace XDproject
 
         public override void ShowAbilityInBattle()
         {
+            base.ShowAbilityInBattle();    
             Console.WriteLine($"Боец {_name} применил двойной удар.");
         }
 
@@ -279,6 +279,7 @@ namespace XDproject
 
         public override void ShowAbilityInBattle()
         {
+            base.ShowAbilityInBattle();
             Console.WriteLine($"Боец {_name} применил двойной удар.");
         }
 
@@ -346,6 +347,7 @@ namespace XDproject
 
         public override void ShowAbilityInBattle()
         {
+            base.ShowAbilityInBattle();
             Console.WriteLine($"Боец {_name} применил лечение.");
         }
 
@@ -389,6 +391,8 @@ namespace XDproject
                 target.TakeDamage(_damage);
                 ShowAttackInfo();
             }
+
+            Console.WriteLine($"Мана: {_mana}");
         }
 
         public override void ShowAbility()
@@ -401,8 +405,8 @@ namespace XDproject
 
         public override void ShowAbilityInBattle()
         {
+            base.ShowAbilityInBattle();
             Console.WriteLine($"Боец {_name} применил огненный шар.");
-            Console.WriteLine($"Мана: {_mana}");
         }
 
         public override Fighter GetClone()
@@ -452,6 +456,7 @@ namespace XDproject
 
         public override void ShowAbilityInBattle()
         {
+            base.ShowAbilityInBattle();
             Console.WriteLine($"Боец {_name} уклонился.");
         }
 
