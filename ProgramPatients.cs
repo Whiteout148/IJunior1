@@ -8,180 +8,240 @@ namespace XDproject
     {
         static void Main()
         {
-            SuperMarket superMarket = new SuperMarket(3);
+            BattleField battleField = new BattleField();
 
-            superMarket.Work();
+            battleField.Work();
         }
     }
 
-    class SuperMarket
+    class BattleField
     {
-        private List<Product> _products = new List<Product>();
-        private Queue<Client> _clients = new Queue<Client>();
+        private List<Fighter> _firstPlatoon = new List<Fighter>();
+        private List<Fighter> _secondPlatoon = new List<Fighter>();
 
-        private int _balance;
-
-        public SuperMarket(int clientsCount)
+        public BattleField()
         {
-            _balance = 0;
+            _firstPlatoon.Add(new Fighter("Леха", 100, 20, 30));
+            _firstPlatoon.Add(new Sniper(2, "Максим", 90, 20, 50));
+            _firstPlatoon.Add(new GrenadeLauncher(3, "Иван", 100, 10, 40));
+            _firstPlatoon.Add(new MachineGunner(5, "Антон", 120, 20, 10));
+            _firstPlatoon.Add(new Sniper(3, "Второй Максим", 70, 40, 50));
 
-            _products.Add(new Product("Яйца", 20));
-            _products.Add(new Product("Молоко", 10));
-            _products.Add(new Product("Добрый кола", 15));
-            _products.Add(new Product("Пиво", 30));
-            _products.Add(new Product("Энержека", 15));
-            _products.Add(new Product("Сигареты", 40));
-
-            AddClients(clientsCount);
+            _secondPlatoon.Add(new Fighter("Вова", 100, 30, 20));
+            _secondPlatoon.Add(new Sniper(3, "Серега", 120, 10, 10));
+            _secondPlatoon.Add(new GrenadeLauncher(3, "Андрей", 100, 20, 10));
+            _secondPlatoon.Add(new MachineGunner(3, "Михаил", 100, 10, 30));
+            _secondPlatoon.Add(new MachineGunner(5, "Второй Серега", 60, 20, 30));
         }
 
         public void Work()
         {
-            while (_clients.Count > 0)
+            ShowPlatoon(_firstPlatoon);
+            Console.WriteLine();
+            ShowPlatoon(_secondPlatoon);
+            Console.WriteLine("Нажмите любую кнопку чтобы начать бой между взводами.");
+            Console.ReadKey();
+            Console.WriteLine();
+
+            while (GetFightersHealth(_firstPlatoon) > 0 && GetFightersHealth(_secondPlatoon) > 0)
             {
-                Console.WriteLine(" 5орка II ");
-                Console.WriteLine("Список продуктов: ");
+                AttackPlatoon(_firstPlatoon, _secondPlatoon, "Атакует первый взвод.");
                 Console.WriteLine();
-                ShowProducts();
-                Console.WriteLine();
-                Console.WriteLine("Список продуктов клиента:");
-                _clients.Peek().ShowInfo();
+                AttackPlatoon(_secondPlatoon, _firstPlatoon, "Атакует второй взвод.");
 
-                if (_clients.Peek().Balance < _clients.Peek().GetProductsPrice())
-                {
-                    _clients.Peek().ThrowProducts();
-                }
-
-                _balance += _clients.Peek().GetProductsPrice();
-                _clients.Dequeue().AddProductsToBag();
-
-                Console.ReadKey();
                 Console.Clear();
             }
+
+            ShowResults();
         }
 
-        private void ShowProducts()
+        private int GetFightersHealth(List<Fighter> platoon)
         {
-            for (int i = 0; i < _products.Count; i++)
+            int resultHealth = 0;
+
+            for (int i = 0; i < platoon.Count; i++)
             {
-                _products[i].ShowInfo();
+                resultHealth += platoon[i].Health;
             }
+
+            return resultHealth;
         }
-         
-        private void AddClients(int clientsCount)
+
+        private void ShowResults()
         {
-            for (int i = 0; i < clientsCount; i++)
+            if (GetFightersHealth(_firstPlatoon) > 0 && GetFightersHealth(_secondPlatoon) <= 0)
             {
-                _clients.Enqueue(new Client(_products));
+                Console.WriteLine("Выиграл первый взвод.");
             }
-        }
-    }
-
-    class Client
-    {
-        private const int MinBalance = 20;
-        private const int MaxBalance = 50;
-        private const int MaxDesiredProducts = 5;
-
-        private List<Product> _bag = new List<Product>();
-        private List<Product> _basket = new List<Product>();
-
-        public Client(List<Product> desiredProducts)
-        {
-            Balance = UserUtils.GetRandomNumber(MinBalance, MaxBalance);
-
-            AddRandomProducts(desiredProducts);
-        }
-
-        public int Balance { get; private set; }
-
-        public void ShowInfo()
-        {
-            Console.WriteLine($"Баланс клиента: {Balance}");
-            Console.WriteLine("Желаемые продукты:");
-
-            for (int i = 0; i < _basket.Count; i++)
+            else if (GetFightersHealth(_secondPlatoon) > 0 && GetFightersHealth(_firstPlatoon) <= 0)
             {
-                _basket[i].ShowInfo();
+                Console.WriteLine("Выиграл второй взвод");
+            }
+            else
+            {
+                Console.WriteLine("Ничья.");
             }
         }
 
-        public void ThrowProducts()
+        private void ShowPlatoon(List<Fighter> platoon)
         {
-            while (GetProductsPrice() > Balance)
+            for (int i = 0; i < platoon.Count; i++)
             {
-                Console.WriteLine();
-                int randomProductIndex = UserUtils.GetRandomNumber(0, _basket.Count - 1);
-                Console.WriteLine($"Был оставлен продукт:");
-                _basket[randomProductIndex].ShowInfo();
-                _basket.RemoveAt(randomProductIndex);
+                platoon[i].ShowInfo();
+            }
+        }
 
-                int halfSecondWithMs = 500;
+        private void AttackPlatoon(List<Fighter> platoon, List<Fighter> platoonToAttack, string message)
+        {
+            int halfSecondWithMs = 500;
 
+            Console.WriteLine(message);
+
+            for (int i = 0; i < platoon.Count; i++)
+            {
+                platoon[i].ShowAttackInfo();
+                platoon[i].Attack(platoonToAttack);
                 Thread.Sleep(halfSecondWithMs);
             }
         }
-
-        public void AddProductsToBag()
-        {
-            for (int i = 0; i < _basket.Count; i++)
-            {
-                _bag.Add(_basket[i]);
-            }
-
-            _basket = null;
-        }
-
-        public int GetProductsPrice()
-        {
-            int resultPrice = 0;
-
-            for (int i = 0; i < _basket.Count; i++)
-            {
-                resultPrice += _basket[i].Price;
-            }
-
-            return resultPrice;
-        }
-
-        private void AddRandomProducts(List<Product> desiredProducts)
-        {
-            for (int i = 0; i < MaxDesiredProducts; i++)
-            {
-                _basket.Add(desiredProducts[UserUtils.GetRandomNumber(0, desiredProducts.Count - 1)].GetClone());
-            }
-        }
     }
-    class Product
-    {
-        private string _name;
 
-        public Product(string name, int price)
+    interface IDamageable
+    {
+        void TakeDamage(int damage);
+    }
+
+    class Fighter : IDamageable
+    {
+        protected string _name;
+        protected int _damage;
+        protected int _armor;
+
+        public Fighter(string name, int health, int damage, int armor)
         {
+            Health = health;
             _name = name;
-            Price = price;
+            _damage = damage;
+            _armor = armor;
         }
 
-        public int Price { get; private set; }
+        public int Health { get; protected set; }
 
         public void ShowInfo()
         {
-            Console.WriteLine($"{_name} стоимость: {Price}");
+            Console.WriteLine($"Имя {_name} Здоровье {Health} Урон {_damage} Броня {_armor}");
+            Console.Write("Тип: ");
+            ShowType();
         }
 
-        public Product GetClone()
+        public void TakeDamage(int damage)
         {
-            return new Product(_name, Price);
+            Health -= (damage * UserUtils.MaxPercent / (UserUtils.MaxPercent + _armor));
+        }
+
+        public void ShowAttackInfo()
+        {
+            Console.WriteLine($"Боец {_name} атакует.");
+        }
+
+        public virtual void Attack(List<Fighter> target)
+        {
+            target[UserUtils.GetRandomNumber(0, target.Count - 1)].TakeDamage(_damage);
+        }
+
+        protected virtual void ShowType()
+        {
+            Console.WriteLine("Обычный.");
+        }
+    }
+
+    class Sniper : Fighter
+    {
+        private int _damageCounter;
+
+        public Sniper(int damageCounter, string name, int health, int damage, int armor) : base(name, health, damage, armor)
+        {
+            _damageCounter = damageCounter;
+        }
+
+        public override void Attack(List<Fighter> target)
+        {
+            int resultDamage = _damage * _damageCounter;
+
+            target[UserUtils.GetRandomNumber(0, target.Count - 1)].TakeDamage(resultDamage);
+        }
+
+        protected override void ShowType()
+        {
+            Console.WriteLine("Снайпер.");
+            Console.WriteLine("Множитель урона: " + _damageCounter);
+        }
+    }
+
+    class GrenadeLauncher : Fighter
+    {
+        private List<int> _AttackedTargetsIndex = new List<int>();
+        private int _targetsCount;
+
+        public GrenadeLauncher(int targetsCount, string name, int health, int damage, int armor) : base(name, health, damage, armor)
+        {
+            _targetsCount = targetsCount;
+        }
+
+        public override void Attack(List<Fighter> target)
+        {
+            for (int i = 0; i < _targetsCount; i++)
+            {
+                int targetIndex = UserUtils.GetRandomNumber(0, target.Count - 1);
+                target[targetIndex].TakeDamage(_damage);
+                _AttackedTargetsIndex.Add(targetIndex);
+            }
+
+            _AttackedTargetsIndex.Clear();
+        }
+
+        protected override void ShowType()
+        {
+            Console.WriteLine("Панзер гренадер.");
+            Console.WriteLine("Количество врагов на атаку: " + _targetsCount);
+        }
+    }
+
+    class MachineGunner : Fighter
+    {
+        private List<int> _AttackedTargetsIndex = new List<int>();
+        private int _targetsCount;
+
+        public MachineGunner(int targetsCount, string name, int health, int damage, int armor) : base(name, health, damage, armor)
+        {
+            _targetsCount = targetsCount;
+        }
+
+        public override void Attack(List<Fighter> target)
+        {
+            for (int i = 0; i < _targetsCount; i++)
+            {
+                target[UserUtils.GetRandomNumber(0, target.Count - 1)].TakeDamage(_damage);
+            }
+
+            _AttackedTargetsIndex.Clear();
+        }
+
+        protected override void ShowType()
+        {
+            Console.WriteLine("Пулеметчик.");
+            Console.WriteLine("Количество врагов на атаку: " + _targetsCount);
         }
     }
 
     static class UserUtils
     {
+        public const int MaxPercent = 100;
         private static Random s_random = new Random();
 
         public static int GetRandomNumber(int min, int max)
         {
-            return s_random.Next(min, max);
+            return s_random.Next(min, max + 1);
         }
     }
 }
