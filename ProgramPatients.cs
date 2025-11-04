@@ -38,10 +38,18 @@ namespace XDproject
         }
     }
 
-    class Platoon
+    class Platoon 
     {
         private List<Fighter> _fighters = new List<Fighter>();
         public int FighterCount { get { return _fighters.Count; } }
+
+        public void Attack(List<IDamageable> targets)
+        {
+            for (int i = 0; i < FighterCount; i++)
+            {
+                _fighters[i].Attack(targets);
+            }
+        }
 
         public void ShowFighters()
         {
@@ -50,6 +58,11 @@ namespace XDproject
                 _fighters[i].ShowInfo();
                 Console.WriteLine();
             }
+        }
+
+        public List<IDamageable> GetFighters()
+        {
+            return _fighters;                                                       
         }
 
         public void AddFighter(Fighter fighter)
@@ -70,7 +83,7 @@ namespace XDproject
         }
     }
 
-    class Fighter 
+    class Fighter : IDamageable
     {
         protected int Damage;
         protected int Armor;
@@ -93,26 +106,51 @@ namespace XDproject
             ShowType();
         }
 
+        public virtual void TakeDamage(int damage)
+        {
+            int resultDamage = damage * (100 / (100 + Armor));
+
+            Health -= resultDamage;
+        }
+
+        public virtual void Attack(List<IDamageable> targets)
+        {
+            for (int i = 0; i < targets.Count; i++)
+            {
+                targets[i].TakeDamage(Damage);
+            }
+        }
+
         public virtual void ShowType()
         {
             Console.WriteLine("Обычный");
+        }
+
+        public virtual Fighter GetClone()
+        {
+            return new Fighter(Name, Health, Damage, Armor);
         }
     }
 
     class Sniper : Fighter
     {
-        private int _damageCounter;
+        private int _damageFactor;
 
         public Sniper(int damageCounter, string name, int health, int damage, int armor) : base(name ,health, damage, armor)
         {
-            _damageCounter = damageCounter;
+            _damageFactor = damageCounter;
 
-            damage *= _damageCounter;
+            damage *= _damageFactor;
         }
 
         public override void ShowType()
         {
-            Console.WriteLine($"Снайпер, множитель урона: {_damageCounter}");
+            Console.WriteLine($"Снайпер, множитель урона: {_damageFactor}");
+        }
+
+        public override Fighter GetClone()
+        {
+            return new Sniper(_damageFactor, Name, Health, Damage, Armor);
         }
     }
 
@@ -130,6 +168,11 @@ namespace XDproject
             Console.WriteLine("Гранатометчик");
             Console.WriteLine($"Количество противников на атаку: {_targets}");
         }
+
+        public override Fighter GetClone()
+        {
+            return new GrenadeLauncher(_targets, Name, Health, Damage, Armor);
+        }
     }
 
     class MachineGunner : Fighter
@@ -145,6 +188,11 @@ namespace XDproject
         {
             Console.WriteLine("Пулеметчик");
             Console.WriteLine($"Количество противников на атаку: {_targets}");
+        }
+
+        public override Fighter GetClone()
+        {
+            return new MachineGunner(_targets, Name, Health, Damage, Armor);
         }
     }
 
