@@ -60,7 +60,7 @@ namespace XDproject
             }
         }
 
-        public List<IDamageable> GetFighters()
+        public List<Fighter> GetFighters()
         {
             return _fighters;                                                       
         }
