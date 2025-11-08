@@ -9,6 +9,8 @@ namespace XDproject
         static void Main()
         {
             BattleField battleField = new BattleField();
+
+            battleField.Fight();
         }
     }
 
@@ -22,7 +24,7 @@ namespace XDproject
         private Platoon _firstPlatoon = new Platoon();
         private Platoon _secondPlatoon = new Platoon();
 
-        private void AddFightersToPlatoon()
+        public BattleField()
         {
             _firstPlatoon.AddFighter(new Fighter("Х1", 100, 20, 30));
             _firstPlatoon.AddFighter(new Sniper(2, "Х2", 90, 30, 60));
@@ -48,10 +50,30 @@ namespace XDproject
             _firstPlatoon.AddFightersToDamage();
             _secondPlatoon.AddFightersToDamage();
 
+            int secondWithMs = 1000;
+
             while (_firstPlatoon.GetFightersHealth() > 0 && _secondPlatoon.GetFightersHealth() > 0)
             {
-                _firstPlatoon.Attack(_secondPlatoon.FightersToDamage);                    
+                _firstPlatoon.Attack(_secondPlatoon.FightersToDamage);
                 _secondPlatoon.Attack(_firstPlatoon.FightersToDamage);
+            }
+
+            ShowResults();
+        }
+
+        private void ShowResults()
+        {
+            if (_firstPlatoon.GetFightersHealth() > 0 && _secondPlatoon.GetFightersHealth() <= 0)
+            {
+                Console.WriteLine("Первый взвод победил.");
+            }
+            else if (_secondPlatoon.GetFightersHealth() > 0 && _firstPlatoon.GetFightersHealth() <= 0)
+            {
+                Console.WriteLine("Второй взвод победил.");
+            }
+            else
+            {
+                Console.WriteLine("Ничья");
             }
         }
     }
@@ -59,14 +81,16 @@ namespace XDproject
     class Platoon
     {
         private List<Fighter> _fighters = new List<Fighter>();
-        public int FighterCount { get { return _fighters.Count; } }
-        public List<Fighter> FightersToDamage = new List<Fighter>();
+        public List<IDamageable> FightersToDamage = new List<IDamageable>();
 
         public void Attack(List<IDamageable> targets)
         {
-            for (int i = 0; i < FighterCount; i++)
+            int halfSecondMs = 500;
+
+            for (int i = 0; i < _fighters.Count; i++)
             {
                 _fighters[i].Attack(targets);
+                Thread.Sleep(halfSecondMs);
             }
         }
 
