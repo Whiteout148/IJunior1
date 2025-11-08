@@ -25,23 +25,42 @@ namespace XDproject
         private void AddFightersToPlatoon()
         {
             _firstPlatoon.AddFighter(new Fighter("Х1", 100, 20, 30));
-            _firstPlatoon.AddFighter(new Sniper(2 ,"Х2", 90, 30, 60));
-            _firstPlatoon.AddFighter(new GrenadeLauncher(4 ,"Х3", 110, 20, 30));
+            _firstPlatoon.AddFighter(new Sniper(2, "Х2", 90, 30, 60));
+            _firstPlatoon.AddFighter(new GrenadeLauncher(4, "Х3", 110, 20, 30));
             _firstPlatoon.AddFighter(new MachineGunner(3, "Х4", 100, 20, 50));
             _firstPlatoon.AddFighter(new GrenadeLauncher(5, "Х5", 100, 30, 30));
 
             _secondPlatoon.AddFighter(new Fighter("Д1", 100, 20, 40));
-            _secondPlatoon.AddFighter(new Sniper(3 ,"Д2", 100, 20, 50));
-            _secondPlatoon.AddFighter(new GrenadeLauncher(2,"Д3", 120, 20, 50));
-            _secondPlatoon.AddFighter(new MachineGunner(3,"Д4", 110, 30, 50));
-            _secondPlatoon.AddFighter(new Sniper(4,"Д5", 110, 40, 60));
+            _secondPlatoon.AddFighter(new Sniper(3, "Д2", 100, 20, 50));
+            _secondPlatoon.AddFighter(new GrenadeLauncher(2, "Д3", 120, 20, 50));
+            _secondPlatoon.AddFighter(new MachineGunner(3, "Д4", 110, 30, 50));
+            _secondPlatoon.AddFighter(new Sniper(4, "Д5", 110, 40, 60));
+        }
+
+        public void Fight()
+        {
+            _firstPlatoon.ShowFighters();
+            Console.WriteLine();
+            _secondPlatoon.ShowFighters();
+            Console.WriteLine("Нажмите любую клавишу чтобы начать бой.");
+            Console.ReadKey();
+
+            _firstPlatoon.AddFightersToDamage();
+            _secondPlatoon.AddFightersToDamage();
+
+            while (_firstPlatoon.GetFightersHealth() > 0 && _secondPlatoon.GetFightersHealth() > 0)
+            {
+                _firstPlatoon.Attack(_secondPlatoon.FightersToDamage);                    
+                _secondPlatoon.Attack(_firstPlatoon.FightersToDamage);
+            }
         }
     }
 
-    class Platoon 
+    class Platoon
     {
         private List<Fighter> _fighters = new List<Fighter>();
         public int FighterCount { get { return _fighters.Count; } }
+        public List<Fighter> FightersToDamage = new List<Fighter>();
 
         public void Attack(List<IDamageable> targets)
         {
@@ -60,9 +79,12 @@ namespace XDproject
             }
         }
 
-        public List<Fighter> GetFighters()
+        public void AddFightersToDamage()
         {
-            return _fighters;                                                       
+            for (int i = 0; i < _fighters.Count; i++)
+            {
+                FightersToDamage.Add(_fighters[i].GetClone());
+            }
         }
 
         public void AddFighter(Fighter fighter)
@@ -88,7 +110,7 @@ namespace XDproject
         protected int Damage;
         protected int Armor;
 
-        public Fighter(string name ,int health, int damage, int armor)
+        public Fighter(string name, int health, int damage, int armor)
         {
             Name = name;
             Health = health;
@@ -115,6 +137,9 @@ namespace XDproject
 
         public virtual void Attack(List<IDamageable> targets)
         {
+            Console.WriteLine($"Боец {Name} атакует.");
+            ShowType();
+
             for (int i = 0; i < targets.Count; i++)
             {
                 targets[i].TakeDamage(Damage);
@@ -136,7 +161,7 @@ namespace XDproject
     {
         private int _damageFactor;
 
-        public Sniper(int damageCounter, string name, int health, int damage, int armor) : base(name ,health, damage, armor)
+        public Sniper(int damageCounter, string name, int health, int damage, int armor) : base(name, health, damage, armor)
         {
             _damageFactor = damageCounter;
 
