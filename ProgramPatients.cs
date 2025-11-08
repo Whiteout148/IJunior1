@@ -33,10 +33,10 @@ namespace XDproject
             _firstPlatoon.AddFighter(new GrenadeLauncher(5, "Х5", 100, 30, 30));
 
             _secondPlatoon.AddFighter(new Fighter("Д1", 100, 20, 40));
-            _secondPlatoon.AddFighter(new Sniper(3, "Д2", 100, 20, 50));
+            _secondPlatoon.AddFighter(new Sniper(3, "Д2", 100, 40, 50));
             _secondPlatoon.AddFighter(new GrenadeLauncher(2, "Д3", 120, 20, 50));
-            _secondPlatoon.AddFighter(new MachineGunner(3, "Д4", 110, 30, 50));
-            _secondPlatoon.AddFighter(new Sniper(4, "Д5", 110, 40, 60));
+            _secondPlatoon.AddFighter(new MachineGunner(3, "Д4", 110, 50, 50));
+            _secondPlatoon.AddFighter(new Sniper(4, "Д5", 110, 90, 60));
         }
 
         public void Fight()
@@ -46,9 +46,6 @@ namespace XDproject
             _secondPlatoon.ShowFighters();
             Console.WriteLine("Нажмите любую клавишу чтобы начать бой.");
             Console.ReadKey();
-
-            _firstPlatoon.AddFightersToDamage();
-            _secondPlatoon.AddFightersToDamage();
 
             int secondWithMs = 1000;
 
@@ -81,7 +78,7 @@ namespace XDproject
     class Platoon
     {
         private List<Fighter> _fighters = new List<Fighter>();
-        public List<IDamageable> FightersToDamage = new List<IDamageable>();
+        public List<IDamageable> FightersToDamage => new List<IDamageable>(_fighters);
 
         public void Attack(List<IDamageable> targets)
         {
@@ -100,14 +97,6 @@ namespace XDproject
             {
                 _fighters[i].ShowInfo();
                 Console.WriteLine();
-            }
-        }
-
-        public void AddFightersToDamage()
-        {
-            for (int i = 0; i < _fighters.Count; i++)
-            {
-                FightersToDamage.Add(_fighters[i].GetClone());
             }
         }
 
@@ -154,9 +143,12 @@ namespace XDproject
 
         public virtual void TakeDamage(int damage)
         {
-            int resultDamage = damage * (100 / (100 + Armor));
+            int resultDamage = damage * 100 / (100 + Armor);
 
             Health -= resultDamage;
+
+            if (Health < 0)
+                Health = 0;
         }
 
         public virtual void Attack(List<IDamageable> targets)
@@ -173,11 +165,6 @@ namespace XDproject
         public virtual void ShowType()
         {
             Console.WriteLine("Обычный");
-        }
-
-        public virtual Fighter GetClone()
-        {
-            return new Fighter(Name, Health, Damage, Armor);
         }
     }
 
@@ -196,11 +183,6 @@ namespace XDproject
         {
             Console.WriteLine($"Снайпер, множитель урона: {_damageFactor}");
         }
-
-        public override Fighter GetClone()
-        {
-            return new Sniper(_damageFactor, Name, Health, Damage, Armor);
-        }
     }
 
     class GrenadeLauncher : Fighter
@@ -217,11 +199,6 @@ namespace XDproject
             Console.WriteLine("Гранатометчик");
             Console.WriteLine($"Количество противников на атаку: {_targets}");
         }
-
-        public override Fighter GetClone()
-        {
-            return new GrenadeLauncher(_targets, Name, Health, Damage, Armor);
-        }
     }
 
     class MachineGunner : Fighter
@@ -237,11 +214,6 @@ namespace XDproject
         {
             Console.WriteLine("Пулеметчик");
             Console.WriteLine($"Количество противников на атаку: {_targets}");
-        }
-
-        public override Fighter GetClone()
-        {
-            return new MachineGunner(_targets, Name, Health, Damage, Armor);
         }
     }
 
