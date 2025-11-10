@@ -28,9 +28,9 @@ namespace XDproject
         {
             _firstPlatoon.AddFighter(new Fighter("Х1", 100, 20, 30));
             _firstPlatoon.AddFighter(new Sniper(2, "Х2", 90, 30, 60));
-            _firstPlatoon.AddFighter(new GrenadeLauncher(4, "Х3", 110, 20, 30));
-            _firstPlatoon.AddFighter(new MachineGunner(3, "Х4", 100, 20, 50));
-            _firstPlatoon.AddFighter(new GrenadeLauncher(5, "Х5", 100, 30, 30));
+            _firstPlatoon.AddFighter(new GrenadeLauncher(2, "Х3", 110, 20, 30));
+            _firstPlatoon.AddFighter(new MachineGunner(2, "Х4", 100, 20, 50));
+            _firstPlatoon.AddFighter(new GrenadeLauncher(2, "Х5", 100, 30, 30));
 
             _secondPlatoon.AddFighter(new Fighter("Д1", 100, 20, 40));
             _secondPlatoon.AddFighter(new Sniper(3, "Д2", 100, 40, 50));
@@ -46,8 +46,6 @@ namespace XDproject
             _secondPlatoon.ShowFighters();
             Console.WriteLine("Нажмите любую клавишу чтобы начать бой.");
             Console.ReadKey();
-
-            int secondWithMs = 1000;
 
             while (_firstPlatoon.GetFightersHealth() > 0 && _secondPlatoon.GetFightersHealth() > 0)
             {
@@ -82,12 +80,10 @@ namespace XDproject
 
         public void Attack(List<IDamageable> targets)
         {
-            int halfSecondMs = 500;
 
             for (int i = 0; i < _fighters.Count; i++)
             {
                 _fighters[i].Attack(targets);
-                Thread.Sleep(halfSecondMs);
             }
         }
 
@@ -143,7 +139,7 @@ namespace XDproject
 
         public virtual void TakeDamage(int damage)
         {
-            int resultDamage = damage * 100 / (100 + Armor);
+            int resultDamage = damage * UserUtils.MaxPercent / (UserUtils.MaxPercent + Armor);
 
             Health -= resultDamage;
 
@@ -156,10 +152,7 @@ namespace XDproject
             Console.WriteLine($"Боец {Name} атакует.");
             ShowType();
 
-            for (int i = 0; i < targets.Count; i++)
-            {
-                targets[i].TakeDamage(Damage);
-            }
+            targets[UserUtils.GetRandomNumber(0, targets.Count)].TakeDamage(Damage);
         }
 
         public virtual void ShowType()
@@ -194,6 +187,26 @@ namespace XDproject
             _targets = targets;
         }
 
+        public override void Attack(List<IDamageable> targets)
+        {
+            List<IDamageable> attackedTargets = new List<IDamageable>();
+            IDamageable currentTarget = targets[UserUtils.GetRandomNumber(0, targets.Count)];
+
+            for (int i = 0; i < _targets; i++)
+            {
+                while (attackedTargets.Contains(currentTarget))
+                {
+                    currentTarget = targets[UserUtils.GetRandomNumber(0, targets.Count)];
+                }
+
+                currentTarget.TakeDamage(Damage);
+                attackedTargets.Add(currentTarget);
+            }
+
+            attackedTargets.Clear();
+            currentTarget = null;
+        }
+
         public override void ShowType()
         {
             Console.WriteLine("Гранатометчик");
@@ -215,16 +228,25 @@ namespace XDproject
             Console.WriteLine("Пулеметчик");
             Console.WriteLine($"Количество противников на атаку: {_targets}");
         }
+
+        public override void Attack(List<IDamageable> targets)
+        {
+            for (int i = 0; i < _targets; i++)
+            {
+                targets[UserUtils.GetRandomNumber(0, targets.Count)].TakeDamage(Damage);
+            }
+        }
     }
 
     static class UserUtils
     {
         private static Random s_random = new Random();
-        public static int MaxPercent { get; private set; } = 100;
+        private static int _maxPercent = 100;
+        public static int MaxPercent { get { return _maxPercent; } }
 
         public static int GetRandomNumber(int min, int max)
         {
-            return s_random.Next(min, max + 1);
+            return s_random.Next(min, max);
         }
     }
 }
