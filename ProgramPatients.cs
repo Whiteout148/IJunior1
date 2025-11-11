@@ -26,17 +26,17 @@ namespace XDproject
 
         public BattleField()
         {
-            _firstPlatoon.AddFighter(new Fighter("Х1", 100, 20, 30));
+            _firstPlatoon.AddFighter(new Fighter("Х1", 100, 40, 30));
             _firstPlatoon.AddFighter(new Sniper(2, "Х2", 90, 30, 60));
-            _firstPlatoon.AddFighter(new GrenadeLauncher(2, "Х3", 110, 20, 30));
-            _firstPlatoon.AddFighter(new MachineGunner(2, "Х4", 100, 20, 50));
-            _firstPlatoon.AddFighter(new GrenadeLauncher(2, "Х5", 100, 30, 30));
+            _firstPlatoon.AddFighter(new GrenadeLauncher(5, "Х3", 110, 40, 30));
+            _firstPlatoon.AddFighter(new MachineGunner(6, "Х4", 100, 50, 50));
+            _firstPlatoon.AddFighter(new GrenadeLauncher(5, "Х5", 100, 30, 30));
 
             _secondPlatoon.AddFighter(new Fighter("Д1", 100, 20, 40));
-            _secondPlatoon.AddFighter(new Sniper(3, "Д2", 100, 40, 50));
+            _secondPlatoon.AddFighter(new Sniper(2, "Д2", 90, 30, 50));
             _secondPlatoon.AddFighter(new GrenadeLauncher(2, "Д3", 120, 20, 50));
-            _secondPlatoon.AddFighter(new MachineGunner(3, "Д4", 110, 50, 50));
-            _secondPlatoon.AddFighter(new Sniper(4, "Д5", 110, 90, 60));
+            _secondPlatoon.AddFighter(new MachineGunner(2, "Д4", 110, 30, 50));
+            _secondPlatoon.AddFighter(new Sniper(2, "Д5", 90, 90, 60));
         }
 
         public void Fight()
@@ -47,7 +47,7 @@ namespace XDproject
             Console.WriteLine("Нажмите любую клавишу чтобы начать бой.");
             Console.ReadKey();
 
-            while (_firstPlatoon.GetFightersHealth() > 0 && _secondPlatoon.GetFightersHealth() > 0)
+            while (_firstPlatoon.GetLivingFighters() > 0 && _secondPlatoon.GetLivingFighters() > 0)
             {
                 _firstPlatoon.Attack(_secondPlatoon.FightersToDamage);
                 _secondPlatoon.Attack(_firstPlatoon.FightersToDamage);
@@ -58,11 +58,11 @@ namespace XDproject
 
         private void ShowResults()
         {
-            if (_firstPlatoon.GetFightersHealth() > 0 && _secondPlatoon.GetFightersHealth() <= 0)
+            if (_firstPlatoon.GetLivingFighters() > 0 && _secondPlatoon.GetLivingFighters() <= 0)
             {
                 Console.WriteLine("Первый взвод победил.");
             }
-            else if (_secondPlatoon.GetFightersHealth() > 0 && _firstPlatoon.GetFightersHealth() <= 0)
+            else if (_secondPlatoon.GetLivingFighters() > 0 && _firstPlatoon.GetLivingFighters() <= 0)
             {
                 Console.WriteLine("Второй взвод победил.");
             }
@@ -80,7 +80,6 @@ namespace XDproject
 
         public void Attack(List<IDamageable> targets)
         {
-
             for (int i = 0; i < _fighters.Count; i++)
             {
                 _fighters[i].Attack(targets);
@@ -101,16 +100,19 @@ namespace XDproject
             _fighters.Add(fighter);
         }
 
-        public int GetFightersHealth()
+        public int GetLivingFighters()
         {
-            int resultHealth = 0;
+            int fightersCount = 0;
 
             for (int i = 0; i < _fighters.Count; i++)
             {
-                resultHealth += _fighters[i].Health;
+                if (_fighters[i].Health > 0)
+                {
+                    fightersCount++;
+                }
             }
 
-            return resultHealth;
+            return fightersCount;
         }
     }
 
@@ -165,11 +167,16 @@ namespace XDproject
     {
         private int _damageFactor;
 
-        public Sniper(int damageCounter, string name, int health, int damage, int armor) : base(name, health, damage, armor)
+        public Sniper(int damageFactor, string name, int health, int damage, int armor) : base(name, health, damage, armor)
         {
-            _damageFactor = damageCounter;
+            _damageFactor = damageFactor;
+        }
 
-            damage *= _damageFactor;
+        public override void Attack(List<IDamageable> targets)
+        {
+            int resultDamage = Damage * _damageFactor;
+
+            targets[UserUtils.GetRandomNumber(0, targets.Count)].TakeDamage(resultDamage);
         }
 
         public override void ShowType()
@@ -189,22 +196,17 @@ namespace XDproject
 
         public override void Attack(List<IDamageable> targets)
         {
-            List<IDamageable> attackedTargets = new List<IDamageable>();
-            IDamageable currentTarget = targets[UserUtils.GetRandomNumber(0, targets.Count)];
+            List<IDamageable> untouchedTargets = new List<IDamageable>();
+
+            untouchedTargets.AddRange(targets);
 
             for (int i = 0; i < _targets; i++)
             {
-                while (attackedTargets.Contains(currentTarget))
-                {
-                    currentTarget = targets[UserUtils.GetRandomNumber(0, targets.Count)];
-                }
+                int currentTargetIndex = UserUtils.GetRandomNumber(0, untouchedTargets.Count);
 
-                currentTarget.TakeDamage(Damage);
-                attackedTargets.Add(currentTarget);
+                untouchedTargets[currentTargetIndex].TakeDamage(currentTargetIndex);
+                untouchedTargets.RemoveAt(currentTargetIndex);
             }
-
-            attackedTargets.Clear();
-            currentTarget = null;
         }
 
         public override void ShowType()
@@ -242,7 +244,7 @@ namespace XDproject
     {
         private static Random s_random = new Random();
         private static int _maxPercent = 100;
-        public static int MaxPercent { get { return _maxPercent; } }
+        public static int MaxPercent => _maxPercent;
 
         public static int GetRandomNumber(int min, int max)
         {
