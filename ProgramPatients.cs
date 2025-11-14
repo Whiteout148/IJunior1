@@ -20,7 +20,7 @@ namespace XDproject
         public void Work()
         {
             const string CommandAddFish = "1";
-            const string CommandTakeFish = "2";
+            const string CommandRemoveFish = "2";
             const string CommandExit = "3";
 
             bool isWork = true;
@@ -33,9 +33,10 @@ namespace XDproject
                 Console.WriteLine();
                 Console.WriteLine("Типы команд:");
                 Console.WriteLine($"Добавить рыбу: {CommandAddFish}");
-                Console.WriteLine($"Забрать рыбу: {CommandTakeFish}");
+                Console.WriteLine($"Забрать рыбу: {CommandRemoveFish}");
                 Console.WriteLine($"Выход: {CommandExit}");
-                Living();
+                BecomeOldFisces();
+                ShowDeadFisces();
 
                 switch (Console.ReadLine())
                 {
@@ -43,8 +44,8 @@ namespace XDproject
                         AddFish();
                         break;
 
-                    case CommandTakeFish:
-                        TakeFish();
+                    case CommandRemoveFish:
+                        RemoveFish();
                         break;
 
                     case CommandExit:
@@ -61,17 +62,23 @@ namespace XDproject
             }
         }
 
-        private void Living()
+        private void ShowDeadFisces()
         {
             for (int i = 0; i < _fisces.Count; i++)
             {
-                _fisces[i].GrowOld();
-
                 if (_fisces[i].IsDie())
                 {
-                    Console.WriteLine($"рыба: {_fisces[i].Name} умерла.");
+                    Console.WriteLine($"Рыбка: {_fisces[i].Name} умерла.");
                     _fisces.RemoveAt(i);
                 }
+            }
+        }
+
+        private void BecomeOldFisces()
+        {
+            for (int i = 0; i < _fisces.Count; i++)
+            {
+                _fisces[i].BecomeOlder();
             }
         }
 
@@ -103,7 +110,7 @@ namespace XDproject
             }
         }
 
-        private void TakeFish()
+        private void RemoveFish()
         {
             string userName = GetUserMessage("Введите имя рыбы которую хотите забрать:");
 
@@ -184,7 +191,7 @@ namespace XDproject
 
         public string Name { get; private set; }
 
-        public void GrowOld()
+        public void BecomeOlder()
         {
             _health--;
         }
