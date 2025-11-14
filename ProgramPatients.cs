@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 
 namespace XDproject
 {
@@ -7,15 +8,15 @@ namespace XDproject
     {
         static void Main()
         {
-            Aquarium aquarium = new Aquarium();
+            Oceanarium oceanarium = new Oceanarium();
 
-            aquarium.Work();
+            oceanarium.Work();
         }
     }
 
-    class Aquarium
+    class Oceanarium
     {
-        private List<Fish> _fisces = new List<Fish>();
+        private Aquarium _aquarium = new Aquarium();
 
         public void Work()
         {
@@ -29,23 +30,23 @@ namespace XDproject
             {
                 Console.WriteLine("Рыбы в аквариуме: ");
                 Console.WriteLine();
-                ShowFisces();
+                _aquarium.ShowFisces();
                 Console.WriteLine();
                 Console.WriteLine("Типы команд:");
                 Console.WriteLine($"Добавить рыбу: {CommandAddFish}");
                 Console.WriteLine($"Забрать рыбу: {CommandRemoveFish}");
                 Console.WriteLine($"Выход: {CommandExit}");
-                BecomeOldFisces();
-                ShowDeadFisces();
+                _aquarium.BecomeOldFisces();
+                _aquarium.ShowDeadFisces();
 
                 switch (Console.ReadLine())
                 {
                     case CommandAddFish:
-                        AddFish();
+                        _aquarium.AddFish();
                         break;
 
                     case CommandRemoveFish:
-                        RemoveFish();
+                        _aquarium.RemoveFish();
                         break;
 
                     case CommandExit:
@@ -61,12 +62,17 @@ namespace XDproject
                 Console.Clear();
             }
         }
+    }
 
-        private void ShowDeadFisces()
+    class Aquarium
+    {
+        private List<Fish> _fisces = new List<Fish>();
+
+        public void ShowDeadFisces()
         {
-            for (int i = 0; i < _fisces.Count; i++)
+            for (int i = _fisces.Count - 1; i >= 0; i--)
             {
-                if (_fisces[i].IsDie())
+                if (_fisces[i].IsDead)
                 {
                     Console.WriteLine($"Рыбка: {_fisces[i].Name} умерла.");
                     _fisces.RemoveAt(i);
@@ -74,7 +80,7 @@ namespace XDproject
             }
         }
 
-        private void BecomeOldFisces()
+        public void BecomeOldFisces()
         {
             for (int i = 0; i < _fisces.Count; i++)
             {
@@ -82,7 +88,7 @@ namespace XDproject
             }
         }
 
-        private void ShowFisces()
+        public void ShowFisces()
         {
             for (int i = 0; i < _fisces.Count; i++)
             {
@@ -90,7 +96,7 @@ namespace XDproject
             }
         }
 
-        private void AddFish()
+        public void AddFish()
         {
             string userName = GetUserMessage("Введите название рыбы:");
 
@@ -102,7 +108,7 @@ namespace XDproject
             {
                 string userAge = GetUserMessage("Введите возраст рыбы:");
 
-                if (TryGetAge(userAge, out int resultAge))
+                if (UserUtils.TryGetPositiveNumber(userAge, out int resultAge))
                 {
                     _fisces.Add(new Fish(resultAge, userName));
                     Console.WriteLine("Рыба добавлена.");
@@ -110,7 +116,7 @@ namespace XDproject
             }
         }
 
-        private void RemoveFish()
+        public void RemoveFish()
         {
             string userName = GetUserMessage("Введите имя рыбы которую хотите забрать:");
 
@@ -131,32 +137,11 @@ namespace XDproject
             return Console.ReadLine();
         }
 
-        private bool TryGetAge(string userAge, out int age)
-        {
-            if (int.TryParse(userAge, out age))
-            {
-                if (age <= 0)
-                {
-                    Console.WriteLine("Введите такое количество жизней чтобы рыба не умерла в первую же итерацию!");
-                }
-                else
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                Console.WriteLine("Введите число!");
-            }
-
-            return false;
-        }
-
         private int GetIndexWithName(string userName)
         {
             for (int i = 0; i < _fisces.Count; i++)
             {
-                if (_fisces[i].Name == userName)
+                if (_fisces[i].Name.ToLower() == userName.ToLower())
                 {
                     return i;
                 }
@@ -189,6 +174,8 @@ namespace XDproject
             Name = name;
         }
 
+        public bool IsDead => _health < 0;
+
         public string Name { get; private set; }
 
         public void BecomeOlder()
@@ -196,14 +183,39 @@ namespace XDproject
             _health--;
         }
 
-        public bool IsDie()
-        {
-            return _health < 0;
-        }
-
         public void ShowInfo()
         {
             Console.WriteLine($"Имя {Name}, Кол-во жизней {_health}.");
+        }
+    }
+
+    static class UserUtils
+    {
+        public static string GetUserMessage(string message)
+        {
+            Console.WriteLine(message);
+            return Console.ReadLine();
+        }
+        
+        public static bool TryGetPositiveNumber(string userNumber, out int resultNumber)
+        {
+            if (int.TryParse(userNumber, out resultNumber))
+            {
+                if (resultNumber <= 0)
+                {
+                    Console.WriteLine("Введите число которое больше чем ноль");
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Введите число!");
+            }
+
+            return false;
         }
     }
 }
