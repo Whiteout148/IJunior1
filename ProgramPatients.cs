@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http.Headers;
 
 namespace XDproject
@@ -8,50 +9,72 @@ namespace XDproject
     {
         static void Main()
         {
-            Zoo zoo = new Zoo();
+            Service service = new Service();
 
-            zoo.Work();
+            service.Work();
         }
     }
 
-    class Zoo
+    class Service
     {
-        public List<Aviary> _aviaries = new List<Aviary>();
+        private const int MinCarsCount = 2;
+        private const int MaxCarsCount = 5;
+        private const int MinDetailsSet = 3;
+        private const int MaxDetailsSet = 6;
+        private const int FineToDenyRepair = 15;
+        private const int PriceToRepair = 10;
+        private const string StartRepairCommand = "1";
+        private const string RepairDetailCommand = "2";
+        private const string DenyRepairCommand = "3";
 
-        public Zoo()
+        private Queue<Car> _cars = new Queue<Car>();
+        private List<Detail> _details = new List<Detail>();
+        private int _balance;
+
+        public Service()
         {
-            _aviaries.Add(new Aviary());
-            _aviaries.Add(new Aviary());
-            _aviaries.Add(new Aviary());
-            _aviaries.Add(new Aviary());
+            _balance = 0;
 
-            AddAnimalsToAviary();
+            for (int i = 0; i < UserUtils.GetRandomNumber(MinCarsCount, MaxCarsCount); i++)
+            {
+                _cars.Enqueue(new Car());
+            }
+
+            for (int i = 0; i < UserUtils.GetRandomNumber(MinDetailsSet, MaxDetailsSet); i++)
+            {
+                _details.AddRange(UserUtils.GetAllTypeDetails());
+            }
         }
 
         public void Work()
         {
-            const string ExitCommand = "exit";
-
-            bool isWork = true;
-
-            while (isWork)
+            while (_cars.Count > 0)
             {
-                Console.WriteLine("** Зоопарк **");
-                Console.WriteLine("\nКоличество вольеров: " + _aviaries.Count);
-                Console.WriteLine("Напишите номер вольера или (exit) для выхода.");
-                string userInput = Console.ReadLine();
+                Console.WriteLine("** Автосервис **");
+                Console.WriteLine();
+                Console.WriteLine("Баланс автосервиса: " + _balance);
+                Console.WriteLine();
+                Console.WriteLine("Всего машин в очереди: " + _cars.Count);
+                Console.WriteLine("Машина в очереди на ремонт:");
+                Console.WriteLine();
+                _cars.Peek().ShowDetails();
+                Console.WriteLine();
+                Console.WriteLine($"Команда чтобы начать ремонт: {StartRepairCommand}");
+                Console.WriteLine($"Команда для отказа в ремонте: {DenyRepairCommand}");
 
-                if (userInput == ExitCommand)
+                switch (Console.ReadLine())
                 {
-                    isWork = false;
-                }
-                else if (UserUtils.TryGetNumberInRange(userInput, out int result, _aviaries.Count))
-                {
-                    ShowAviary(result - 1);
-                }
-                else
-                {
-                    Console.WriteLine("Нету такой команды!");
+                    case StartRepairCommand:
+                        RepairCar();
+                        break;
+
+                    case DenyRepairCommand:
+                        DenyRepair();
+                        break;
+
+                    default:
+                        Console.WriteLine("Нету такой команды.");
+                        break;
                 }
 
                 Console.ReadKey();
@@ -59,77 +82,130 @@ namespace XDproject
             }
         }
 
-        private void ShowAviary(int number)
+        private void DenyRepair()
         {
-            Console.WriteLine("Вольер номер: " + (number + 1));
-            Console.WriteLine("Количество животных: " + _aviaries[number].AnimalsCount);
-            Console.WriteLine("Животные: ");
-
-            _aviaries[number].ShowAnimals();
+            _balance -= FineToDenyRepair;
+            Console.WriteLine("Вы отменили ремонт.");
+            _cars.Dequeue();
         }
 
-        private void AddAnimalsToAviary()
+        private void RepairCar()
         {
-            string male = "Самец";
-            string female = "Самка";
+            int resultMoney;
 
-            List<Animal> animalsToAdd = new List<Animal>();
-
-            animalsToAdd.Add(new Animal("Лев", female, "Рычание"));
-            animalsToAdd.Add(new Animal("Лев", male, "Рычание"));
-            animalsToAdd.Add(new Animal("Тигр", female, "Рычание"));
-            animalsToAdd.Add(new Animal("Тигр", male, "Рычание"));
-            animalsToAdd.Add(new Animal("Свинка", male, "Хрюканье"));
-            animalsToAdd.Add(new Animal("Свинка", female, "Хрюканье"));
-
-            for (int i = 0; i < _aviaries.Count; i++)
+            if (IsRepairAllDetails(out resultMoney))
             {
-                _aviaries[i].AddAnimals(UserUtils.GetRandomAnimals(animalsToAdd));
+                resultMoney += PriceToRepair;
             }
+
+            _cars.Dequeue();
+            _balance += resultMoney;
+        }
+
+        private bool IsRepairAllDetails(out int resultMoney)
+        {
+            resultMoney = 0;
+            bool isRepared = true;
+            Console.Clear();
+
+            for (int i = 0; i < _cars.Peek().BrokenDetails.Count; i++)
+            {
+                _cars.Peek().ShowDetails();
+
+                Console.WriteLine("Нажмите любую клавишу чтобы отремонтировать деталь.");
+
+                int detailIndex = UserUtils.GetIndexWithType(_cars.Peek().BrokenDetails[i].Type, _details);
+
+                if (Console.ReadLine() == DenyRepairCommand)
+                {
+                    int fineToUnRepairedDetails = UserUtils.GetDetailsPrice(_cars.Peek().BrokenDetails);
+
+                    resultMoney -= fineToUnRepairedDetails;
+                    Console.WriteLine("Вы отменили во время ремонта, цена за все непочиненные детали:" + fineToUnRepairedDetails);
+                }
+
+                if (detailIndex == -1)
+                {
+                    isRepared = false;
+                    Console.WriteLine("У вас нету такой детали.");
+                }
+                else
+                {
+                    resultMoney += _details[detailIndex].Price;
+                    _cars.Peek().AddDetail(_details[detailIndex]);
+                    _details.RemoveAt(detailIndex);
+                    _cars.Peek().BrokenDetails.RemoveAt(i);
+                }
+
+                Console.ReadKey();
+            }
+
+            return isRepared;
         }
     }
 
-    class Aviary
+    class Car
     {
-        private List<Animal> _animals = new List<Animal>();
-        public int AnimalsCount => _animals.Count;
+        private List<Detail> _details = new List<Detail>();
+        private List<Detail> _brokenDetails = new List<Detail>();
+        public List<Detail> BrokenDetails = new List<Detail>();
 
-        public void AddAnimals(List<Animal> animalsToAd)
+        public Car()
         {
-            _animals.AddRange(animalsToAd);
+            _details = UserUtils.GetAllTypeDetails();
+            _brokenDetails = UserUtils.GetBrokenDetails(_details);
+
+            for (int i = 0; i < _brokenDetails.Count; i++)
+            {
+                BrokenDetails.Add(_brokenDetails[i].GetClone());
+            }
         }
 
-        public void ShowAnimals()
+        public void AddDetail(Detail detail)
         {
-            for (int i = 0; i < _animals.Count; i++)
+            _details.Add(detail);
+        }
+
+        public void ShowDetails()
+        {
+            Console.WriteLine("Целые детали:");
+
+            for (int i = 0; i < _details.Count; i++)
             {
-                _animals[i].ShowInfo();
-                Console.WriteLine();
+                _details[i].ShowInfo();
+            }
+
+            Console.WriteLine("Сломанные детали:");
+
+            for (int i = 0; i < BrokenDetails.Count; i++)
+            {
+                BrokenDetails[i].ShowInfo();
             }
         }
     }
 
-    class Animal
+    class Detail
     {
         private string _type;
-        private string _gender;
-        private string _sound;
+        private int _price;
 
-        public Animal(string type, string gender, string sound)
+        public Detail(string type, int price)
         {
             _type = type;
-            _gender = gender;
-            _sound = sound;
+            _price = price;
+        }
+
+        public string Type => _type;
+        public int Price => _price;
+
+        public Detail GetClone()
+        {
+            return new Detail(_type, _price);
         }
 
         public void ShowInfo()
         {
-            Console.WriteLine($"Тип {_type} Пол {_gender} Звук {_sound}");
-        }
-
-        public Animal GetClone()
-        {
-            return new Animal(_type, _gender, _sound);
+            Console.WriteLine($"Тип: {_type} Цена {_price}");
         }
     }
 
@@ -139,40 +215,59 @@ namespace XDproject
 
         public static int GetRandomNumber(int min, int max)
         {
-            return s_random.Next(min, max);
+            return s_random.Next(min, max + 1);
         }
 
-        public static bool TryGetNumberInRange(string userNumber, out int result, int max)
+        public static List<Detail> GetBrokenDetails(List<Detail> details)
         {
-            if (int.TryParse(userNumber, out result))
+            List<Detail> brokenDetails = new List<Detail>();
+
+            for (int i = 0; i < GetRandomNumber(1, details.Count); i++)
             {
-                if (result > max || result <= 0)
-                {
-                    Console.WriteLine("Число больше чем максимальное количество!");
-                }
-                else
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                Console.WriteLine("Введите число!");
+                int detailIndex = GetRandomNumber(0, details.Count - 1);
+
+                brokenDetails.Add(details[detailIndex]);
+                details.RemoveAt(detailIndex);
             }
 
-            return false;
+            return brokenDetails;
         }
 
-        public static List<Animal> GetRandomAnimals(List<Animal> animals)
+        public static List<Detail> GetAllTypeDetails()
         {
-            List<Animal> animalsToGive = new List<Animal>();
+            List<Detail> details = new List<Detail>();
 
-            for (int i = 0; i < GetRandomNumber(1, animals.Count); i++)
+            details.Add(new Detail("Двигатель", 15));
+            details.Add(new Detail("Аккумулятор", 5));
+            details.Add(new Detail("Колеса", 10));
+            details.Add(new Detail("Фары", 10));
+
+            return details;
+        }
+
+        public static int GetDetailsPrice(List<Detail> details)
+        {
+            int resultPrice = 0;
+
+            for (int i = 0; i < details.Count; i++)
             {
-                animalsToGive.Add(animals[i].GetClone());
+                resultPrice += details[i].Price;
             }
 
-            return animalsToGive;
+            return resultPrice;
+        }
+
+        public static int GetIndexWithType(string type, List<Detail> details)
+        {
+            for (int i = 0; i < details.Count; i++)
+            {
+                if (details[i].Type == type)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
         }
     }
 }
