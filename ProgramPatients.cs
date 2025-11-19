@@ -15,12 +15,52 @@ namespace XDproject
         }
     }
 
+    class WareHouse
+    {
+        private const int MinDetailsSet = 3;
+        private const int MaxDetailsSet = 6;
+
+        private List<Detail> _details = new List<Detail>();
+
+        public WareHouse()
+        {
+            for (int i = 0; i < UserUtils.GetRandomNumber(MinDetailsSet, MaxDetailsSet); i++)
+            {
+                _details.AddRange(DetailsManager.GetAllTypeDetails(false));
+            }
+        }
+
+        public bool IsGetDetail(string type)
+        {
+            for (int i = 0; i < _details.Count; i++)
+            {
+                if (_details[i].Type == type)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public Detail GetDetailsWithType(string type)
+        {
+            for (int i = 0; i < _details.Count; i++)
+            {
+                if (_details[i].Type == type)
+                {
+                    return _details[i];
+                }
+            }
+
+            return null;
+        }
+    }
+
     class Service
     {
         private const int MinCarsCount = 2;
         private const int MaxCarsCount = 5;
-        private const int MinDetailsSet = 3;
-        private const int MaxDetailsSet = 6;
         private const int FineToDenyRepair = 15;
         private const int PriceToRepair = 10;
         private const string StartRepairCommand = "1";
@@ -28,7 +68,6 @@ namespace XDproject
         private const string DenyRepairCommand = "3";
 
         private Queue<Car> _cars = new Queue<Car>();
-        private List<Detail> _details = new List<Detail>();
         private int _balance;
 
         public Service()
@@ -38,11 +77,6 @@ namespace XDproject
             for (int i = 0; i < UserUtils.GetRandomNumber(MinCarsCount, MaxCarsCount); i++)
             {
                 _cars.Enqueue(new Car());
-            }
-
-            for (int i = 0; i < UserUtils.GetRandomNumber(MinDetailsSet, MaxDetailsSet); i++)
-            {
-                _details.AddRange(UserUtils.GetAllTypeDetails());
             }
         }
 
@@ -107,79 +141,37 @@ namespace XDproject
             resultMoney = 0;
             bool isRepared = true;
             Console.Clear();
+        }
 
-            for (int i = 0; i < _cars.Peek().BrokenDetails.Count; i++)
-            {
-                _cars.Peek().ShowDetails();
+        private void ReplaceDetail()
+        {
 
-                Console.WriteLine("Нажмите любую клавишу чтобы отремонтировать деталь.");
-
-                int detailIndex = UserUtils.GetIndexWithType(_cars.Peek().BrokenDetails[i].Type, _details);
-
-                if (Console.ReadLine() == DenyRepairCommand)
-                {
-                    int fineToUnRepairedDetails = UserUtils.GetDetailsPrice(_cars.Peek().BrokenDetails);
-
-                    resultMoney -= fineToUnRepairedDetails;
-                    Console.WriteLine("Вы отменили во время ремонта, цена за все непочиненные детали:" + fineToUnRepairedDetails);
-                }
-
-                if (detailIndex == -1)
-                {
-                    isRepared = false;
-                    Console.WriteLine("У вас нету такой детали.");
-                }
-                else
-                {
-                    resultMoney += _details[detailIndex].Price;
-                    _cars.Peek().AddDetail(_details[detailIndex]);
-                    _details.RemoveAt(detailIndex);
-                    _cars.Peek().BrokenDetails.RemoveAt(i);
-                }
-
-                Console.ReadKey();
-            }
-
-            return isRepared;
         }
     }
 
     class Car
     {
         private List<Detail> _details = new List<Detail>();
-        private List<Detail> _brokenDetails = new List<Detail>();
-        public List<Detail> BrokenDetails = new List<Detail>();
 
         public Car()
         {
-            _details = UserUtils.GetAllTypeDetails();
-            _brokenDetails = UserUtils.GetBrokenDetails(_details);
-
-            for (int i = 0; i < _brokenDetails.Count; i++)
-            {
-                BrokenDetails.Add(_brokenDetails[i].GetClone());
-            }
+            _details.AddRange(DetailsManager.GetAllTypeDetails(true));
         }
 
-        public void AddDetail(Detail detail)
+        public void AddRepairedDetail(Detail detail)
         {
-            _details.Add(detail);
+            int index = DetailsManager.GetIndexWithType(detail.Type ,_details);
+
+            _details[index] = detail;
         }
 
         public void ShowDetails()
         {
-            Console.WriteLine("Целые детали:");
+            Console.WriteLine("Детали:\n");
 
             for (int i = 0; i < _details.Count; i++)
             {
                 _details[i].ShowInfo();
-            }
-
-            Console.WriteLine("Сломанные детали:");
-
-            for (int i = 0; i < BrokenDetails.Count; i++)
-            {
-                BrokenDetails[i].ShowInfo();
             }
         }
     }
@@ -188,73 +180,57 @@ namespace XDproject
     {
         private string _type;
         private int _price;
+        private bool _isBroke;
 
-        public Detail(string type, int price)
+        public Detail(string type, int price, bool isbroke)
         {
             _type = type;
             _price = price;
+            _isBroke = isbroke;
         }
 
+        public bool IsBroke => _isBroke;
         public string Type => _type;
         public int Price => _price;
 
-        public Detail GetClone()
-        {
-            return new Detail(_type, _price);
-        }
-
         public void ShowInfo()
         {
-            Console.WriteLine($"Тип: {_type} Цена {_price}");
+            Console.WriteLine($"Тип: {_type} Цена: {_price} Состояние: {GetMessageWithState()}");
+        }
+
+        private string GetMessageWithState()
+        {
+            return (_isBroke) ? "Требуется замена" : "Целое";
         }
     }
 
-    static class UserUtils
+    static class DetailsManager
     {
-        private static Random s_random = new Random();
+        private static string s_engine = "Двигатель";
+        private static string s_battery = "Аккумулятор";
+        private static string s_wheels = "Колеса";
+        private static string s_lights = "Фары";
 
-        public static int GetRandomNumber(int min, int max)
-        {
-            return s_random.Next(min, max + 1);
-        }
-
-        public static List<Detail> GetBrokenDetails(List<Detail> details)
-        {
-            List<Detail> brokenDetails = new List<Detail>();
-
-            for (int i = 0; i < GetRandomNumber(1, details.Count); i++)
-            {
-                int detailIndex = GetRandomNumber(0, details.Count - 1);
-
-                brokenDetails.Add(details[detailIndex]);
-                details.RemoveAt(detailIndex);
-            }
-
-            return brokenDetails;
-        }
-
-        public static List<Detail> GetAllTypeDetails()
+        public static List<Detail> GetAllTypeDetails(bool isRandomState)
         {
             List<Detail> details = new List<Detail>();
 
-            details.Add(new Detail("Двигатель", 15));
-            details.Add(new Detail("Аккумулятор", 5));
-            details.Add(new Detail("Колеса", 10));
-            details.Add(new Detail("Фары", 10));
-
-            return details;
-        }
-
-        public static int GetDetailsPrice(List<Detail> details)
-        {
-            int resultPrice = 0;
-
-            for (int i = 0; i < details.Count; i++)
+            if (isRandomState)
             {
-                resultPrice += details[i].Price;
+                details.Add(new Detail(s_engine, 15, Convert.ToBoolean(UserUtils.GetRandomNumber(0, 1))));
+                details.Add(new Detail(s_battery, 5, Convert.ToBoolean(UserUtils.GetRandomNumber(0, 1))));
+                details.Add(new Detail(s_wheels, 10, Convert.ToBoolean(UserUtils.GetRandomNumber(0, 1))));
+                details.Add(new Detail(s_lights, 10, Convert.ToBoolean(UserUtils.GetRandomNumber(0, 1))));
+            }
+            else
+            {
+                details.Add(new Detail(s_engine, 15, false));
+                details.Add(new Detail(s_battery, 5, false));
+                details.Add(new Detail(s_wheels, 10, false));
+                details.Add(new Detail(s_lights, 10, false));
             }
 
-            return resultPrice;
+            return details;
         }
 
         public static int GetIndexWithType(string type, List<Detail> details)
@@ -268,6 +244,28 @@ namespace XDproject
             }
 
             return -1;
+        }
+
+        public static int GetDetailsPrice(List<Detail> details)
+        {
+            int resultPrice = 0;
+
+            for (int i = 0; i < details.Count; i++)
+            {
+                resultPrice += details[i].Price;
+            }
+
+            return resultPrice;
+        }
+    }
+
+    static class UserUtils
+    {
+        private static Random s_random = new Random();
+
+        public static int GetRandomNumber(int min, int max)
+        {
+            return s_random.Next(min, max + 1);
         }
     }
 }
