@@ -17,17 +17,11 @@ namespace XDproject
 
     class WareHouse
     {
-        private const int MinDetailsSet = 3;
-        private const int MaxDetailsSet = 6;
+        private List<Detail> _details;
 
-        private List<Detail> _details = new List<Detail>();
-
-        public WareHouse()
+        public WareHouse(List<Detail> details)
         {
-            for (int i = 0; i < UserUtils.GetRandomNumber(MinDetailsSet, MaxDetailsSet); i++)
-            {
-                _details.AddRange(DetailsManager.GetAllTypeDetails(false));
-            }
+            _details = details;
         }
 
         public bool IsGetDetail(string type)
@@ -59,6 +53,8 @@ namespace XDproject
 
     class Service
     {
+        private const int MinDetailSets = 3;
+        private const int MaxDetailSets = 6;
         private const int MinCarsCount = 2;
         private const int MaxCarsCount = 5;
         private const int FineToDenyRepair = 15;
@@ -67,7 +63,7 @@ namespace XDproject
         private const string RepairDetailCommand = "2";
         private const string DenyRepairCommand = "3";
 
-        private WareHouse _wareHouse = new WareHouse();
+        private WareHouse _wareHouse;
         private Queue<Car> _cars = new Queue<Car>();
         private int _balance;
 
@@ -75,9 +71,14 @@ namespace XDproject
         {
             _balance = 0;
 
-            for (int i = 0; i < UserUtils.GetRandomNumber(MinCarsCount, MaxCarsCount); i++)
+            int randomCarsCount = UserUtils.GetRandomNumber(MinCarsCount, MaxCarsCount);
+            int randomDetailSetsCount = UserUtils.GetRandomNumber(MinDetailSets, MaxDetailSets);
+
+            _wareHouse = new WareHouse(DetailsFactory.GetDetailSets(randomDetailSetsCount));
+
+            for (int i = 0; i < randomCarsCount; i++)
             {
-                _cars.Enqueue(new Car());
+                _cars.Enqueue(new Car(DetailsFactory.GetAllTypeDetails(true)));
             }
         }
 
@@ -130,8 +131,6 @@ namespace XDproject
                 Console.WriteLine("Вы завершили ремонт раньше времени.");
             }
 
-            _cars.Dequeue();
-
             _balance += priceToRepair;
         }
 
@@ -145,20 +144,21 @@ namespace XDproject
         private bool IsRepairedAllDetails(out int resultPrice)
         {
             Console.Clear();
+            Car currentCar = _cars.Dequeue();
 
-            List<Detail> brokenDetails = _cars.Peek().GetBrokenDetails();
+            List<Detail> brokenDetails = currentCar.GetBrokenDetails();
             resultPrice = 0;
             bool isFullRepaired = true;
 
             bool isWork = true;
 
-            while (isWork || brokenDetails.Count > 0)
+            while (isWork && brokenDetails.Count > 0)
             {
-                _cars.Peek().ShowDetails();
+                currentCar.ShowDetails();
 
                 Console.WriteLine($"Напишите название детали чтобы её заменить, или {DenyRepairCommand} чтобы завершить починку");
                 string userInput = Console.ReadLine();
-                int detailIndex = DetailsManager.GetIndexWithType(userInput, brokenDetails);
+                int detailIndex = DetailsFactory.GetIndexWithType(userInput, brokenDetails);
 
                 if (userInput == DenyRepairCommand)
                 {
@@ -170,7 +170,7 @@ namespace XDproject
                 }
                 else
                 {
-                    if (IsRepairDetail(brokenDetails, detailIndex))
+                    if (IsRepairDetail(brokenDetails, detailIndex, currentCar))
                     {
                         resultPrice += brokenDetails[detailIndex].Price;
                     }
@@ -191,11 +191,11 @@ namespace XDproject
             return isFullRepaired;
         }
 
-        private bool IsRepairDetail(List<Detail> brokenDetails, int detailIndex)
+        private bool IsRepairDetail(List<Detail> brokenDetails, int detailIndex, Car car)
         {
             if (_wareHouse.IsGetDetail(brokenDetails[detailIndex].Type))
             {
-                _cars.Peek().AddRepairedDetail(_wareHouse.GetDetailWithType(brokenDetails[detailIndex].Type));
+                car.AddRepairedDetail(_wareHouse.GetDetailWithType(brokenDetails[detailIndex].Type));
                 Console.WriteLine("Деталь заменена.");
 
                 return true;
@@ -211,11 +211,11 @@ namespace XDproject
 
     class Car
     {
-        private List<Detail> _details = new List<Detail>();
+        private List<Detail> _details;
 
-        public Car()
+        public Car(List<Detail> details)
         {
-            _details.AddRange(DetailsManager.GetAllTypeDetails(true));
+            _details = details;
         }
 
         public List<Detail> GetBrokenDetails()
@@ -235,7 +235,7 @@ namespace XDproject
 
         public void AddRepairedDetail(Detail repairedDetail)
         {
-            int detailIndex = DetailsManager.GetIndexWithType(repairedDetail.Type, _details);
+            int detailIndex = DetailsFactory.GetIndexWithType(repairedDetail.Type, _details);
 
             _details.RemoveAt(detailIndex);
             _details.Add(repairedDetail);
@@ -245,41 +245,49 @@ namespace XDproject
         {
             Console.WriteLine("Детали:\n");
 
-            DetailsManager.ShowDetails(_details);
+            DetailsFactory.ShowDetails(_details);
         }
     }
 
     class Detail
     {
-        private string _type;
-        private int _price;
-        private bool _isBroke;
-
         public Detail(string type, int price, bool isbroke)
         {
-            _type = type;
-            _price = price;
-            _isBroke = isbroke;
+            Type = type;
+            Price = price;
+            IsBroke = isbroke;
         }
 
-        public bool IsBroke => _isBroke;
-        public string Type => _type;
-        public int Price => _price;
+        public bool IsBroke { get; private set; }
+        public string Type { get; private set; }
+        public int Price { get; private set; }
 
         public void ShowInfo()
         {
-            string messageWithState = (_isBroke) ? "Требуется замена" : "Исправное";
+            string messageWithState = (IsBroke) ? "Требуется замена" : "Исправное";
 
-            Console.WriteLine($"Тип: {_type} Цена: {_price} Состояние: {messageWithState}");
+            Console.WriteLine($"Тип: {Type} Цена: {Price} Состояние: {messageWithState}");
         }
     }
 
-    static class DetailsManager
+    static class DetailsFactory
     {
         private static string s_engine = "Двигатель";
         private static string s_battery = "Аккумулятор";
         private static string s_wheels = "Колеса";
         private static string s_lights = "Фары";
+
+        public static List<Detail> GetDetailSets(int setsCount)
+        {
+            List<Detail> details = new List<Detail>();
+
+            for (int i = 0; i < setsCount; i++)
+            {
+                details.AddRange(GetAllTypeDetails(false));
+            }
+
+            return details;
+        }
 
         public static List<Detail> GetAllTypeDetails(bool isRandomState)
         {
