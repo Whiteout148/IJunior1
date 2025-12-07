@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Compression;
 using System.Linq;
 using System.Media;
 using System.Runtime.InteropServices;
@@ -34,27 +35,24 @@ namespace XDproject
         public void Work()
         {
             Console.WriteLine("До амнистии");
+            Console.WriteLine();
 
-            for (int i = 0; i < _criminals.Count; i++)
-            {
-                _criminals[i].ShowInfo();
-            }
+            UserUtils.ShowCollection(_criminals);
 
             Console.WriteLine();
             Console.WriteLine("После амнистии");
             Console.WriteLine();
 
             Amnesty();
+
+            UserUtils.ShowCollection(_criminals);
         }
 
         private void Amnesty()
         {
-            var filteredCriminals = _criminals.Where(criminal => criminal.Crime != _crimeToLiberation).Select(criminal => criminal);
+            var filteredCriminals = _criminals.Where(criminal => criminal.Crime != _crimeToLiberation).Select(criminal => criminal).ToList();
 
-            foreach (var filtered in filteredCriminals)
-            {
-                filtered.ShowInfo();
-            }
+            _criminals = filteredCriminals;
         }
     }
 
@@ -73,6 +71,17 @@ namespace XDproject
         public void ShowInfo()
         {
             Console.WriteLine($"Фио: {_fullName} Преступление: {Crime}");
+        }
+    }
+
+    static class UserUtils
+    {
+        public static void ShowCollection(List<Criminal> collection)
+        {
+            for (int i = 0; i < collection.Count; i++)
+            {
+                collection[i].ShowInfo();
+            }
         }
     }
 }
