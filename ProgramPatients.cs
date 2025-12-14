@@ -4,6 +4,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Media;
 using System.Runtime.InteropServices;
+using System.Security.Policy;
 
 namespace XDproject
 {
@@ -11,63 +12,55 @@ namespace XDproject
     {
         static void Main()
         {
-            PsychHospital investigativeCommittee = new PsychHospital();
+            Server server = new Server();
 
-            investigativeCommittee.Work();
+            server.Work();
         }
     }
 
-    class PsychHospital
+    class Server
     {
-        private List<Patients> _patients = new List<Patients>();
+        private const int LiderCount = 3;
+        private List<Player> _players = new List<Player>();
 
-        public PsychHospital()
+        public Server()
         {
-            _patients.Add(new Patients("Петров Антон Борисов", 12, "Шиза"));
-            _patients.Add(new Patients("Темеев Дмитрий Калугин", 28, "Депрессия"));
-            _patients.Add(new Patients("Буянов Владимир Иванов", 9, "Аутизм"));
-            _patients.Add(new Patients("Иванов Николай Захаров", 50, "ПТСР"));
-            _patients.Add(new Patients("Захаров Иван Антонов", 40, "ПТСР"));
-            _patients.Add(new Patients("Ибрагимов Руслан Дудаев", 21, "Шиза"));
-            _patients.Add(new Patients("Могильников Алексей Абрамов", 35, "Депрессия"));
-            _patients.Add(new Patients("Сокарев Евгений Владимиров", 30, "ОКР"));
-            _patients.Add(new Patients("Иванов Андропов Михайлов", 47, "ОКР"));
-            _patients.Add(new Patients("Дударин Иван Николаев", 7, "Аутизм"));
+            _players.Add(new Player("Ivanzolo2004", 50, 34));
+            _players.Add(new Player("ZxProshnik_1", 60, 90));
+            _players.Add(new Player("XXXnoname", 60, 80));
+            _players.Add(new Player("Pivnoye_Payzuri", 70, 50));
+            _players.Add(new Player("LOX123", 80, 50));
+            _players.Add(new Player("S1mple", 46, 30));
+            _players.Add(new Player("4u4elo", 96, 10));
+            _players.Add(new Player("Kisselka04", 67, 80));
+            _players.Add(new Player("RaveBoy1999", 93, 30));
+            _players.Add(new Player("Niga2", 24, 56));
         }
 
         public void Work()
         {
-            const string SortByNameCommand = "1";
-            const string SortByAgeCommand = "2";
-            const string SearchByDiseaseCommand = "3";
-            const string ExitCommand = "4";
+            const string SearchTopForceCommand = "1";
+            const string SearchTopLevelCommand = "2";
+            const string ExitCommand = "3";
 
             bool isWork = true;
 
             while (isWork)
             {
-                Console.WriteLine("** Психушка **");
-                Console.WriteLine("Пациенты: ");
-
-                UserUtils.ShowCollection(_patients);
-
-                Console.WriteLine($"Команда для сортировки пациентов по ФИО: {SortByNameCommand}");
-                Console.WriteLine($"Команда для сортировки по возрасту: {SortByAgeCommand}");
-                Console.WriteLine($"Команда для поиска по заболеванию: {SearchByDiseaseCommand}");
-                Console.WriteLine($"Команда для выхода: {ExitCommand}");
+                Console.WriteLine("Игроки сервера: ");
+                UserUtils.ShowCollection(_players);
+                Console.WriteLine($"Узнать топ 3 игроков по силе: {SearchTopForceCommand}");
+                Console.WriteLine($"Узнать топ 3 игроков по уровню: {SearchTopLevelCommand}");
+                Console.WriteLine($"Выход: {ExitCommand}");
 
                 switch (Console.ReadLine())
                 {
-                    case SortByNameCommand:
-                        SortByName();
+                    case SearchTopLevelCommand:
+                        ShowWithLevel();
                         break;
 
-                    case SortByAgeCommand:
-                        SortByAge();
-                        break;
-
-                    case SearchByDiseaseCommand:
-                        SearchByDisease();
+                    case SearchTopForceCommand:
+                        ShowWithForce();
                         break;
 
                     case ExitCommand:
@@ -75,7 +68,7 @@ namespace XDproject
                         break;
 
                     default:
-                        Console.WriteLine("Такой команды нету.");
+                        Console.WriteLine("Нету такой команды.");
                         break;
                 }
 
@@ -84,60 +77,60 @@ namespace XDproject
             }
         }
 
-        private void SortByName()
+        private void ShowWithForce()
         {
-            var orderedPatients = _patients.OrderBy(patient => patient.FullName).ToList();
+            var filteredPlayers = _players.OrderByDescending(player => player.Force).ToList();
 
-            UserUtils.ShowCollection(orderedPatients);
+            Console.WriteLine("Топ 3 игроков по силе:");
+            Console.WriteLine();
+            UserUtils.ShowWithCount(filteredPlayers, LiderCount);
         }
 
-        private void SortByAge()
+        private void ShowWithLevel()
         {
-            var orderedPatients = _patients.OrderBy(patient => patient.Age).ToList();
+            var filteredPlayers = _players.OrderByDescending(player => player.Level).ToList();
 
-            UserUtils.ShowCollection(orderedPatients);
-        }
-
-        private void SearchByDisease()
-        {
-            Console.WriteLine("Введите заболевание:");
-            string userInput = Console.ReadLine();
-
-            var filteredPatients = _patients.Where(patient => patient.Disease == userInput).ToList();
-
-            if (filteredPatients.Count <= 0)
-            {
-                Console.WriteLine("Пациентов с таким заболеванием нету.");
-            }
-            else
-            {
-                UserUtils.ShowCollection(filteredPatients);
-            }
+            Console.WriteLine("Топ 3 игроков по уровню:");
+            Console.WriteLine();
+            UserUtils.ShowWithCount(filteredPlayers, LiderCount);
         }
     }
 
-    class Patients
+    class Player
     {
-        public Patients(string fullName, int age, string disease)
+        public Player(string name, int level, int force)
         {
-            FullName = fullName;
-            Age = age;
-            Disease = disease;
+            Name = name;
+            Level = level;
+            Force = force;
         }
 
-        public string FullName { get; private set; }
-        public int Age { get; private set; }
-        public string Disease { get; private set; }
+        public string Name { get; private set; }
+        public int Level { get; private set; }
+        public int Force { get; private set; }
 
         public void ShowInfo()
         {
-            Console.WriteLine($"Фио: {FullName} Возраст: {Age} Заболевание: {Disease}");
+            Console.WriteLine($"Имя: {Name} Уровень: {Level} Сила: {Force}");
+        }
+
+        public Player GetClone()
+        {
+            return new Player(Name, Level, Force);
         }
     }
 
     static class UserUtils
     {
-        public static void ShowCollection(List<Patients> collection)
+        public static void ShowWithCount(List<Player> collection, int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                collection[i].ShowInfo();
+            }
+        }
+
+        public static void ShowCollection(List<Player> collection)
         {
             Console.WriteLine();
 
@@ -148,6 +141,18 @@ namespace XDproject
             }
 
             Console.WriteLine();
+        }
+
+        public static List<Player> GetCloneCollection(List<Player> collection)
+        {
+            List<Player> newCollection = new List<Player>();
+
+            for (int i = 0; i < collection.Count; i++)
+            {
+                newCollection.Add(collection[i].GetClone());
+            }
+
+            return newCollection;
         }
     }
 }
