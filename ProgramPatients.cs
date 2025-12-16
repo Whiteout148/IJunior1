@@ -79,20 +79,20 @@ namespace XDproject
 
         private void ShowWithForce()
         {
-            var filteredPlayers = _players.OrderByDescending(player => player.Force).ToList();
+            var filteredPlayers = _players.OrderByDescending(player => player.Force).Take(LiderCount).ToList();
 
             Console.WriteLine("Топ 3 игроков по силе:");
             Console.WriteLine();
-            UserUtils.ShowWithCount(filteredPlayers, LiderCount);
+            UserUtils.ShowCollection(filteredPlayers);
         }
 
         private void ShowWithLevel()
         {
-            var filteredPlayers = _players.OrderByDescending(player => player.Level).ToList();
+            var filteredPlayers = _players.OrderByDescending(player => player.Level).Take(LiderCount).ToList();
 
             Console.WriteLine("Топ 3 игроков по уровню:");
             Console.WriteLine();
-            UserUtils.ShowWithCount(filteredPlayers, LiderCount);
+            UserUtils.ShowCollection(filteredPlayers);
         }
     }
 
@@ -121,15 +121,7 @@ namespace XDproject
     }
 
     static class UserUtils
-    {
-        public static void ShowWithCount(List<Player> collection, int count)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                collection[i].ShowInfo();
-            }
-        }
-
+    {     
         public static void ShowCollection(List<Player> collection)
         {
             Console.WriteLine();
