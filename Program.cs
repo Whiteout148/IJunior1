@@ -1,275 +1,83 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace WhilesPractice1
+namespace Ujin
 {
     internal class Program
     {
         static void Main()
         {
-            LibraryView libraryPersonal = new LibraryView();
+            ArtemWolf artemWolf = new ArtemWolf(2026);
 
-            libraryPersonal.Work();
+            artemWolf.Work();
         }
     }
 
-    class Library
+    class ArtemWolf
     {
-        private List<Book> _books = new List<Book>();
+        private int _currentDate;
 
-        public void AddBook(string name, string writerName, int age)
+        private List<Stew> _stews = new List<Stew>();
+
+        public ArtemWolf(int currentDate)
         {
-            _books.Add(new Book(name, writerName, age));
-            Console.WriteLine("Книга добавлена.");
+            _currentDate = currentDate;
+
+            _stews.Add(new Stew("С рыбой", 2018, 2023));
+            _stews.Add(new Stew("С говядиной", 2017, 2028));
+            _stews.Add(new Stew("С курицей", 2020, 2024));
+            _stews.Add(new Stew("Со свининой", 2018, 2030));
         }
-
-        public void ShowBooks()
-        {
-            for (int i = 0; i < _books.Count; i++)
-            {
-                _books[i].ShowInfo();
-            }
-        }
-
-        public void RemoveBookWithId(int id)
-        {
-            _books.RemoveAt(id - 1);
-        }
-
-        public bool TryFindBook(string userBookName)
-        {
-            bool isContainsName = false;
-
-            for (int i = 0; i < _books.Count; i++)
-            {
-                if (_books[i].Name == userBookName)
-                {
-                    _books[i].ShowInfo();
-                    isContainsName = true;
-                }
-            }
-
-            return isContainsName;
-        }
-
-        public bool TryFindWriter(string userWriter)
-        {
-            bool isContainsWriter = false;
-
-            for (int i = 0; i < _books.Count; i++)
-            {
-                if (_books[i].WriterName == userWriter)
-                {
-                    _books[i].ShowInfo();
-                    isContainsWriter = true;
-                }
-            }
-
-            return isContainsWriter;
-        }
-
-        public bool TryFindAge(int userAge)
-        {
-            bool isContainsAge = false;
-
-            for (int i = 0; i < _books.Count; i++)
-            {
-                if (_books[i].Age == userAge)
-                {
-                    _books[i].ShowInfo();
-                    isContainsAge = true;
-                }
-            }
-
-            return isContainsAge;
-        }
-
-        public bool TryFindId(int userId)
-        {
-            for (int i = 0; i < _books.Count; i++)
-            {
-                if (userId == _books[i].Id)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-    }
-
-    class LibraryView
-    {
-        private Library _library = new Library();
 
         public void Work()
         {
-            const string AddBookCommand = "1";
-            const string RemoveBookCommand = "2";
-            const string FindWithNameCommand = "3";
-            const string FindWithWriterCommand = "4";
-            const string FindWithAgeCommand = "5";
-            const string ExitCommand = "6";
-
-            bool isWork = true;
-
-            while (isWork)
-            {
-                Console.WriteLine("** Библиотека **");
-                Console.WriteLine("Книги:");
-                Console.WriteLine();
-                _library.ShowBooks();
-                Console.WriteLine();
-                Console.WriteLine("Доступные команды:");
-                Console.WriteLine($"Добавить книгу: {AddBookCommand}");
-                Console.WriteLine($"Удалить книгу: {RemoveBookCommand}");
-                Console.WriteLine($"Искать книгу по названию: {FindWithNameCommand}");
-                Console.WriteLine($"Искать по автору: {FindWithWriterCommand}");
-                Console.WriteLine($"Искать по дате выпуска: {FindWithAgeCommand}");
-                Console.WriteLine($"Выход из библиотеки: {ExitCommand}");
-                string userInput = GetUserMessage("Введите команду:");
-
-                switch (userInput)
-                {
-                    case AddBookCommand:
-                        AddBookToLibrary();
-                        break;
-
-                    case RemoveBookCommand:
-                        DeleteBook();
-                        break;
-
-                    case FindWithNameCommand:
-                        FindWithBookName();
-                        break;
-
-                    case FindWithWriterCommand:
-                        FindWithBookWriter();
-                        break;
-
-                    case FindWithAgeCommand:
-                        FindWithBookAge();
-                        break;
-
-                    case ExitCommand:
-                        isWork = false;
-                        break;
-
-                    default:
-                        Console.WriteLine("Неверная команда!");
-                        break;
-                }
-
-                Console.ReadKey();
-                Console.Clear();
-            }
+            Console.WriteLine("Все тушенки:");
+            ShowStews(_stews);
+            Console.WriteLine("просрочки:");
+            ShowStews(GetOverdueStews());
         }
 
-        private void AddBookToLibrary()
+        private List<Stew> GetOverdueStews()
         {
-            string userName = GetUserMessage("Введите книгу:");
-            string userWriter = GetUserMessage("Введите писателя:");
-            string userAge = GetUserMessage("Введите год выпуска книги:");
+            var overdueStews = _stews.Where(stew => stew.BestBeforeDate < _currentDate).Select(stew => stew).ToList();
 
-            if (int.TryParse(userAge, out int resultAge))
-            {
-                _library.AddBook(userName, userWriter, resultAge);
-            }
-            else
-            {
-                Console.WriteLine("Введите число!");
-            }
+            return overdueStews;
         }
 
-        private void DeleteBook()
+        private void ShowStews(List<Stew> stews)
         {
-            string userId = GetUserMessage("Введите номер книги:");
+            Console.WriteLine();
 
-            if (int.TryParse(userId, out int resultId))
+            for (int i = 0; i < stews.Count; i++)
             {
-                if (_library.TryFindId(resultId))
-                {
-                    _library.RemoveBookWithId(resultId);
-                }
-                else
-                {
-                    Console.WriteLine("Неверный номер книги!");
-                }
+                stews[i].ShowInfo();
             }
-            else
-            {
-                Console.WriteLine("Введите число!");
-            }
-        }
 
-        private void FindWithBookName()
-        {
-            string userBook = GetUserMessage("Введите название книги:");
-            bool isContainsBook = _library.TryFindBook(userBook);
-
-            if (isContainsBook == false)
-            {
-                Console.WriteLine("Не удалось найти книгу по названию.");
-            }
-        }
-
-        private void FindWithBookWriter()
-        {
-            string userWriter = GetUserMessage("Введите имя автора:");
-            bool isContainsWriter = _library.TryFindWriter(userWriter);
-
-            if (isContainsWriter == false)
-            {
-                Console.WriteLine("Не удалось найти книгу по автору.");
-            }
-        }
-
-        private void FindWithBookAge()
-        {
-            string userAge = GetUserMessage("Введите дату выхода книги:");
-
-            if (int.TryParse(userAge, out int resultAge))
-            {
-                bool isContainsBookAge = _library.TryFindAge(resultAge);
-
-                if (isContainsBookAge == false)
-                {
-                    Console.WriteLine("Не удалось найти книгу по возрасту.");
-                }
-            }
-            else
-            {
-                Console.WriteLine("Введите число!");
-            }
-        }
-
-        private string GetUserMessage(string message)
-        {
-            Console.WriteLine(message);
-            return Console.ReadLine();
+            Console.WriteLine();
         }
     }
 
-    class Book
+    class Stew
     {
-        private static int _idCounter = 1;
+        private int _productionDate;
+        private string _name;
 
-        public Book(string name, string writerName, int age)
+        public Stew(string name, int productionDate, int bestBeforeDate)
         {
-            Id = _idCounter++;
-            Name = name;
-            WriterName = writerName;
-            Age = age;
+            _name = name;
+            _productionDate = productionDate;
+            BestBeforeDate = bestBeforeDate;
         }
 
-        public int Id { get; private set; }
-        public string Name { get; private set; }
-        public string WriterName { get; private set; }
-        public int Age { get; private set; }
+        public int BestBeforeDate { get; private set; }
 
         public void ShowInfo()
         {
-            Console.WriteLine($"Книга: {Name} Писатель: {WriterName} Год выпуска: {Age} Номер книги: {Id}");
+            Console.WriteLine($"Тушенка: {_name}, дата производство: {_productionDate}, Срок годности до: {BestBeforeDate}");
         }
     }
 }
