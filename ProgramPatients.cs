@@ -12,139 +12,74 @@ namespace XDproject
     {
         static void Main()
         {
-            Server server = new Server();
+            MilitaryLeadership militaryLeadership = new MilitaryLeadership();
 
-            server.Work();
+            militaryLeadership.Work();
         }
     }
 
-    class Server
+    class MilitaryLeadership
     {
-        private const int LiderCount = 3;
-        private List<Player> _players = new List<Player>();
+        private List<Soldier> _soldiers = new List<Soldier>();
 
-        public Server()
+        public MilitaryLeadership()
         {
-            _players.Add(new Player("Ivanzolo2004", 50, 34));
-            _players.Add(new Player("ZxProshnik_1", 60, 90));
-            _players.Add(new Player("XXXnoname", 60, 80));
-            _players.Add(new Player("Pivnoye_Payzuri", 70, 50));
-            _players.Add(new Player("LOX123", 80, 50));
-            _players.Add(new Player("S1mple", 46, 30));
-            _players.Add(new Player("4u4elo", 96, 10));
-            _players.Add(new Player("Kisselka04", 67, 80));
-            _players.Add(new Player("RaveBoy1999", 93, 30));
-            _players.Add(new Player("Niga2", 24, 56));
+            _soldiers.Add(new Soldier("Иван", "Лейтенант", 7, "АК-47"));
+            _soldiers.Add(new Soldier("Сергей", "Сержант", 12, "АК-74"));
+            _soldiers.Add(new Soldier("Дмитрий", "Рядовой", 8, "АК-12"));
+            _soldiers.Add(new Soldier("Владлен", "Майор", 9, "АК-15"));
+            _soldiers.Add(new Soldier("Александр", "Майор", 2, "Пистолет Макарова"));
         }
 
         public void Work()
         {
-            const string SearchTopForceCommand = "1";
-            const string SearchTopLevelCommand = "2";
-            const string ExitCommand = "3";
+            ShowSoldiers();
+            Console.WriteLine("Нажмите на любую кнопку чтобы получить только имя и звание");
+            Console.ReadLine();
+            FilterSoldiers();
+        }
 
-            bool isWork = true;
+        private void FilterSoldiers()
+        {
+            var filteredSoldiers = _soldiers.Select(soldier => new { Name = soldier.Name, Rank = soldier.Rank }).ToList();
 
-            while (isWork)
+            for (int i = 0; i < filteredSoldiers.Count; i++)
             {
-                Console.WriteLine("Игроки сервера: ");
-                UserUtils.ShowCollection(_players);
-                Console.WriteLine($"Узнать топ 3 игроков по силе: {SearchTopForceCommand}");
-                Console.WriteLine($"Узнать топ 3 игроков по уровню: {SearchTopLevelCommand}");
-                Console.WriteLine($"Выход: {ExitCommand}");
-
-                switch (Console.ReadLine())
-                {
-                    case SearchTopLevelCommand:
-                        ShowWithLevel();
-                        break;
-
-                    case SearchTopForceCommand:
-                        ShowWithForce();
-                        break;
-
-                    case ExitCommand:
-                        isWork = false;
-                        break;
-
-                    default:
-                        Console.WriteLine("Нету такой команды.");
-                        break;
-                }
-
-                Console.ReadKey();
-                Console.Clear();
+                Console.WriteLine($"Имя: {filteredSoldiers[i].Name} Звание: {filteredSoldiers[i].Rank}");
             }
         }
 
-        private void ShowWithForce()
+        private void ShowSoldiers()
         {
-            var filteredPlayers = _players.OrderByDescending(player => player.Force).Take(LiderCount).ToList();
-
-            Console.WriteLine("Топ 3 игроков по силе:");
             Console.WriteLine();
-            UserUtils.ShowCollection(filteredPlayers);
-        }
 
-        private void ShowWithLevel()
-        {
-            var filteredPlayers = _players.OrderByDescending(player => player.Level).Take(LiderCount).ToList();
-
-            Console.WriteLine("Топ 3 игроков по уровню:");
-            Console.WriteLine();
-            UserUtils.ShowCollection(filteredPlayers);
+            for (int i = 0; i < _soldiers.Count; i++)
+            {
+                _soldiers[i].ShowInfo();
+                Console.WriteLine();
+            }
         }
     }
 
-    class Player
+    class Soldier
     {
-        public Player(string name, int level, int force)
+        private int _serviceLive;
+        private string _gun;
+
+        public Soldier(string name, string rank, int serviceLife, string gun)
         {
             Name = name;
-            Level = level;
-            Force = force;
+            _gun = gun;
+            _serviceLive = serviceLife;
+            Rank = rank;
         }
 
         public string Name { get; private set; }
-        public int Level { get; private set; }
-        public int Force { get; private set; }
+        public string Rank { get; private set; }
 
         public void ShowInfo()
         {
-            Console.WriteLine($"Имя: {Name} Уровень: {Level} Сила: {Force}");
-        }
-
-        public Player GetClone()
-        {
-            return new Player(Name, Level, Force);
-        }
-    }
-
-    static class UserUtils
-    {     
-        public static void ShowCollection(List<Player> collection)
-        {
-            Console.WriteLine();
-
-            for (int i = 0; i < collection.Count; i++)
-            {
-                collection[i].ShowInfo();
-                Console.WriteLine();
-            }
-
-            Console.WriteLine();
-        }
-
-        public static List<Player> GetCloneCollection(List<Player> collection)
-        {
-            List<Player> newCollection = new List<Player>();
-
-            for (int i = 0; i < collection.Count; i++)
-            {
-                newCollection.Add(collection[i].GetClone());
-            }
-
-            return newCollection;
+            Console.WriteLine($"Имя: {Name} звание: {Rank} срок службы: {_serviceLive} вооружение: {_gun}");
         }
     }
 }
