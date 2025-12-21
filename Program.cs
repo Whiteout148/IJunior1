@@ -45,14 +45,9 @@ namespace Ujin
         private void TransferFighters()
         {
             var soldiersToTransfer = _firstSquad.Where(soldier => soldier.Name.ToUpper().StartsWith(FirstLetterInName)).ToList();
-            _secondSquad.AddRange(soldiersToTransfer);
 
-            for (int i = 0; i < soldiersToTransfer.Count; i++)
-            {
-                int index = GetIndexWithSoldier(_firstSquad, soldiersToTransfer[i]);
-
-                _firstSquad.RemoveAt(index);
-            }
+            _firstSquad = _firstSquad.Except(soldiersToTransfer).ToList();
+            _secondSquad = _secondSquad.Union(soldiersToTransfer).ToList();
         }
 
         private void ShowInfo()
@@ -74,19 +69,6 @@ namespace Ujin
                 squad[i].ShowInfo();
                 Console.WriteLine();
             }
-        }
-
-        private int GetIndexWithSoldier(List<Soldier> squad, Soldier soldier)
-        {
-            for (int i = 0; i < squad.Count; i++)
-            {
-                if (squad[i] == soldier)
-                {
-                    return i;
-                }
-            }
-
-            return -1;
         }
     }
 
