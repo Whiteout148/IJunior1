@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,73 +12,126 @@ namespace Ujin
     {
         static void Main()
         {
-            ArtemWolf artemWolf = new ArtemWolf(2026);
+            MilitaryLeadership militaryLeadership = new MilitaryLeadership();
 
-            artemWolf.Work();
+            militaryLeadership.Work();
         }
     }
 
-    class ArtemWolf
+    class MilitaryLeadership
     {
-        private int _currentDate;
+        private Squad _firstSquad;
+        private Squad _secondSquad;
 
-        private List<Stew> _stews = new List<Stew>();
-
-        public ArtemWolf(int currentDate)
+        public MilitaryLeadership()
         {
-            _currentDate = currentDate;
+            List<Soldier> soldiers = new List<Soldier>();
 
-            _stews.Add(new Stew("С рыбой", 2018, 2023));
-            _stews.Add(new Stew("С говядиной", 2017, 2028));
-            _stews.Add(new Stew("С курицей", 2020, 2024));
-            _stews.Add(new Stew("Со свининой", 2018, 2030));
+            soldiers.Add(new Soldier("Иван"));
+            soldiers.Add(new Soldier("Сергей"));
+            soldiers.Add(new Soldier("Борис"));
+            soldiers.Add(new Soldier("Берат"));
+
+            _firstSquad = new Squad(soldiers);
+            _secondSquad = new Squad(new List<Soldier>());
         }
 
         public void Work()
         {
-            Console.WriteLine("Все тушенки:");
-            ShowStews(_stews);
-            Console.WriteLine("просрочки:");
-            ShowStews(GetOverdueStews());
+            Console.WriteLine("Солдаты до перевода:");
+            ShowInfo();
+            Console.WriteLine("Солдаты после перевода:");
+            TransferFighters();
+            ShowInfo();
         }
 
-        private List<Stew> GetOverdueStews()
+        private void TransferFighters()
         {
-            var overdueStews = _stews.Where(stew => stew.BestBeforeDate < _currentDate).Select(stew => stew).ToList();
+            var soldiersToTransfer = _firstSquad.Soldiers.Where(soldier => soldier.Name.ToUpper().StartsWith("Б")).ToList();
 
-            return overdueStews;
-        }
+            _secondSquad.Soldiers.AddRange(soldiersToTransfer);
 
-        private void ShowStews(List<Stew> stews)
-        {
-            Console.WriteLine();
-
-            for (int i = 0; i < stews.Count; i++)
+            for (int i = 0; i < soldiersToTransfer.Count; i++)
             {
-                stews[i].ShowInfo();
-            }
+                int index = UserUtils.GetIndex(_firstSquad.Soldiers, soldiersToTransfer[i]);
 
+                _firstSquad.Soldiers.RemoveAt(index);
+            }
+        }
+
+        private void ShowInfo()
+        {
+            Console.WriteLine("1 Отряд:");
+            _firstSquad.ShowSoldiers();
+            Console.WriteLine();
+            Console.WriteLine("2 Отряд:");
+            _secondSquad.ShowSoldiers();
             Console.WriteLine();
         }
     }
 
-    class Stew
+    class Squad
     {
-        private int _productionDate;
-        private string _name;
-
-        public Stew(string name, int productionDate, int bestBeforeDate)
+        private List<Soldier> _soldiers = new List<Soldier>();
+        private List<Soldier> _clonedSoldiers = new List<Soldier>();
+                    
+        public Squad(List<Soldier> soldiers)
         {
-            _name = name;
-            _productionDate = productionDate;
-            BestBeforeDate = bestBeforeDate;
+            _soldiers = soldiers;
+
+            for (int i = 0; i < _soldiers.Count; i++)
+            {
+                _clonedSoldiers.Add(_soldiers[i].GetClone());
+            }
         }
 
-        public int BestBeforeDate { get; private set; }
+        public List<Soldier> Soldiers => _clonedSoldiers;
+
+        public void ShowSoldiers()
+        {
+            Console.WriteLine();
+
+            for (int i = 0; i < _clonedSoldiers.Count; i++)
+            {
+                _clonedSoldiers[i].ShowInfo();
+                Console.WriteLine();
+            }
+        }
+    }
+
+    class Soldier
+    {
+        public Soldier(string name)
+        {
+            Name = name;
+        }
+
+        public string Name { get; private set; }
 
         public void ShowInfo()
         {
-            Console.WriteLine($"Тушенка: {_name}, дата производство: {_productionDate}, Срок годности до: {BestBeforeDate}");
+            Console.WriteLine("Имя:" + Name);
+        }
+
+        public Soldier GetClone()
+        {
+            return new Soldier(Name);
+        }
+    }
+
+    static class UserUtils
+    {
+        public static int GetIndex(List<Soldier> soldiers, Soldier soldier)
+        {
+            for (int i = 0; i < soldiers.Count; i++)
+            {
+                if (soldiers[i] == soldier)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
         }
     }
 }
