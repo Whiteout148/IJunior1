@@ -21,7 +21,8 @@ namespace Хуильник
         private int _dullets;
 
         public void Fire(Player player)
-        {           
+        {
+            player.TakeDamage(_damage);
             _dullets -= 1;
         }
     }
