@@ -1,94 +1,58 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Linq;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ujin
+namespace Хуильник
 {
     internal class Program
     {
-        static void Main()
+        static void Main(string[] args)
         {
-            MilitaryLeadership militaryLeadership = new MilitaryLeadership();
 
-            militaryLeadership.Work();
         }
     }
 
-    class MilitaryLeadership
+    class Weapon
     {
-        private const string FirstLetterInName = "Б";
+        private int _damage;
+        private int _dullets;
 
-        private List<Soldier> _firstSquad = new List<Soldier>();
-        private List<Soldier> _secondSquad = new List<Soldier>();
-
-        public MilitaryLeadership()
-        {
-            _firstSquad.Add(new Soldier("Иван"));
-            _firstSquad.Add(new Soldier("Сергей"));
-            _firstSquad.Add(new Soldier("Борис"));
-            _firstSquad.Add(new Soldier("Берат"));
+        public void Fire(Player player)
+        {           
+            _dullets -= 1;
         }
+    }
 
-        public void Work()
+    class Player
+    {
+        private int _health;
+
+        public void TakeDamage(int damage)
         {
-            Console.WriteLine("Солдаты до перевода:");
-            ShowInfo();
-            Console.WriteLine("Солдаты после перевода:");
-            TransferFighters();
-            ShowInfo();
-        }
-
-        private void TransferFighters()
-        {
-            var soldiersToTransfer = _firstSquad.Where(soldier => soldier.Name.ToUpper().StartsWith(FirstLetterInName)).ToList();
-
-            _firstSquad = _firstSquad.Except(soldiersToTransfer).ToList();
-            _secondSquad = _secondSquad.Union(soldiersToTransfer).ToList();
-        }
-
-        private void ShowInfo()
-        {
-            Console.WriteLine("1 Отряд:");
-            ShowSquad(_firstSquad);
-            Console.WriteLine();
-            Console.WriteLine("2 Отряд:");
-            ShowSquad(_secondSquad);
-            Console.WriteLine();
-        }
-
-        private void ShowSquad(List<Soldier> squad)
-        {
-            Console.WriteLine();
-
-            for (int i = 0; i < squad.Count; i++)
+            if (damage > 0)
             {
-                squad[i].ShowInfo();
-                Console.WriteLine();
+                if (_health - damage <= 0)
+                {
+                    _health = 0;
+                }
+                else
+                {
+                    _health -= damage;
+                }
             }
         }
     }
 
-    class Soldier
+    class Bot
     {
-        public Soldier(string name)
-        {
-            Name = name;
-        }
+        private Weapon _weapon;
 
-        public string Name { get; private set; }
-
-        public void ShowInfo()
+        public void OnSeePlayer(Player player)
         {
-            Console.WriteLine("Имя:" + Name);
-        }
-
-        public Soldier GetClone()
-        {
-            return new Soldier(Name);
+            _weapon.Fire(player);
         }
     }
 }
