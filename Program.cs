@@ -17,19 +17,33 @@ namespace Хуильник
 
     class Weapon
     {
-        private int _damage;
-        private int _dullets;
+        private const int BulletsToFire = 1;
+
+        public int Damage { get; private set; }
+
+        private int _bullets;
+         
+        public Weapon(int damage, int bullets)
+        {
+            Damage = damage;
+            _bullets = bullets;
+        }
 
         public void Fire(Player player)
         {
-            player.TakeDamage(_damage);
-            _dullets -= 1;
+            player.TakeDamage(Damage);
+            _bullets -= BulletsToFire;
         }
     }
 
     class Player
     {
         private int _health;
+
+        public Player(int health)
+        {
+            _health = health;
+        }
 
         public void TakeDamage(int damage)
         {
