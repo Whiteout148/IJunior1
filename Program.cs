@@ -22,21 +22,28 @@ namespace Хуильник
         private const int BulletsToFire = 1;
         private int _bullets;
 
-        public int Damage { get; private set; }
-
         public Weapon(int damage, int bullets)
         {
             Damage = (damage < MinDamage) ? MinDamage : damage;
             _bullets = (bullets < MinBullets) ? BulletsToFire : bullets;
         }
 
+        public int Damage { get; private set; }
+
         public void Fire(Player player)
         {
-            if (player != null)
+            if (player == null)
             {
-                player.TakeDamage(Damage);
-                _bullets -= BulletsToFire;
+                throw new NullReferenceException();
             }
+
+            if (_bullets < BulletsToFire)
+            {
+                throw new InvalidOperationException();
+            }
+
+            player.TakeDamage(Damage);
+            _bullets -= BulletsToFire;
         }
     }
 
@@ -52,9 +59,14 @@ namespace Хуильник
 
         public void TakeDamage(int damage)
         {
+            if (damage < 0)
+            {
+                throw new InvalidOperationException();
+            }
+
             int currentDamage = Math.Max(0, _health - damage);
 
-            _health -= currentDamage;
+            _health -= damage;
         }
     }
 
@@ -64,10 +76,12 @@ namespace Хуильник
 
         public void OnSeePlayer(Player player)
         {
-            if (player != null)
+            if (player == null)
             {
-                _weapon.Fire(player);
+                throw new NullReferenceException();
             }
+
+            _weapon.Fire(player);
         }
     }
 }
