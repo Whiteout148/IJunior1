@@ -17,47 +17,44 @@ namespace Хуильник
 
     class Weapon
     {
+        private const int MinBullets = 3;
+        private const int MinDamage = 5;
         private const int BulletsToFire = 1;
+        private int _bullets;
 
         public int Damage { get; private set; }
 
-        private int _bullets;
-         
         public Weapon(int damage, int bullets)
         {
-            Damage = damage;
-            _bullets = bullets;
+            Damage = (damage < MinDamage) ? MinDamage : damage;
+            _bullets = (bullets < MinBullets) ? BulletsToFire : bullets;
         }
 
         public void Fire(Player player)
         {
-            player.TakeDamage(Damage);
-            _bullets -= BulletsToFire;
+            if (player != null)
+            {
+                player.TakeDamage(Damage);
+                _bullets -= BulletsToFire;
+            }
         }
     }
 
     class Player
     {
+        private const int MinHealth = 1;
         private int _health;
 
         public Player(int health)
         {
-            _health = health;
+            _health = (health < MinHealth) ? MinHealth : health;
         }
 
         public void TakeDamage(int damage)
         {
-            if (damage > 0)
-            {
-                if (_health - damage <= 0)
-                {
-                    _health = 0;
-                }
-                else
-                {
-                    _health -= damage;
-                }
-            }
+            int currentDamage = Math.Max(0, _health - damage);
+
+            _health -= currentDamage;
         }
     }
 
@@ -67,7 +64,10 @@ namespace Хуильник
 
         public void OnSeePlayer(Player player)
         {
-            _weapon.Fire(player);
+            if (player != null)
+            {
+                _weapon.Fire(player);
+            }
         }
     }
 }
