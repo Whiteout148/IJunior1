@@ -12,14 +12,12 @@ namespace Хуильник
     {
         static void Main(string[] args)
         {
-            Product iPhone12 = new Product("IPhone 12");
-            Product iPhone11 = new Product("IPhone 11");
+            Good iPhone12 = new Good("IPhone 12");
+            Good iPhone11 = new Good("IPhone 11");
 
             Warehouse warehouse = new Warehouse();
 
-            int cartsCount = 5;
-
-            Shop shop = new Shop(warehouse, cartsCount);
+            Shop shop = new Shop(warehouse);
 
             warehouse.Delive(iPhone12, 10);
             warehouse.Delive(iPhone11, 1);
@@ -32,27 +30,24 @@ namespace Хуильник
 
             //Вывод всех товаров в корзине
 
-            Console.WriteLine(cart.Order().PayLink);
+            Console.WriteLine(cart.GetOrder().PayLink);
 
             cart.Add(iPhone12, 9); //Ошибка, после заказа со склада убираются заказанные товары
         }
     }
 
+    interface IProductGetter
+    {
+        bool TryGet(Good toGet, int count);
+        void RemoveProducts(Dictionary<Good, int> products);
+    }
+
     class Shop
     {
         private Warehouse _wareHouse;
-        private List<Cart> _carts = new List<Cart>();
 
-        public Shop(Warehouse wareHouse, int cartsCount)
+        public Shop(Warehouse wareHouse)
         {
-            for (int i = 0; i < cartsCount; i++)
-            {
-                Wallet wallet = new Wallet("рандомная ссылка");
-                Cart toAdd = new Cart(wallet);
-                toAdd.NeedToAdd += OnNeedToGet;
-                _carts.Add(toAdd);
-            }
-
             if (wareHouse == null)
             {
                 throw new NullReferenceException();
@@ -63,28 +58,18 @@ namespace Хуильник
 
         public Cart Cart()
         {
-            if (_carts.Count < 1)
-            {
-                throw new NullReferenceException();
-            }
+            Order order = new Order("рандомная ссылка");
+            Cart cart = new Cart(order, _wareHouse);
 
-            return _carts.First();
-        }
-
-        private void OnNeedToGet(Product product, int count, Cart cart)
-        {
-            if (_wareHouse.TryGet(product, count))
-            {
-                cart.Add(product, count);
-            }
+            return cart;
         }
     }
 
-    class Warehouse
+    class Warehouse : IProductGetter
     {
-        private Dictionary<Product, int> _products = new Dictionary<Product, int>();
+        private Dictionary<Good, int> _products = new Dictionary<Good, int>();
 
-        public void Delive(Product product, int count)
+        public void Delive(Good product, int count)
         {
             if (product == null)
             {
@@ -99,9 +84,17 @@ namespace Хуильник
             _products.Add(product, count);
         }
 
-        public bool TryGet(Product toGet, int count)
+        public void RemoveProducts(Dictionary<Good, int> products)
         {
-            Product productToAdd = null;
+            foreach (var product in products)
+            {
+                _products.Remove(product.Key);
+            }
+        }
+
+        public bool TryGet(Good toGet, int count)
+        {
+            Good productToAdd = null;
             int resultValue = -1;
 
             foreach (var product in _products)
@@ -110,7 +103,7 @@ namespace Хуильник
                 {
                     productToAdd = product.Key;
                     resultValue = product.Value;
-                }         
+                }
             }
 
 
@@ -121,10 +114,8 @@ namespace Хуильник
 
             if (count > resultValue)
             {
-                throw new IndexOutOfRangeException();
+                throw new InvalidOperationException();
             }
-
-            _products.Remove(toGet);
 
             return true;
         }
@@ -132,32 +123,30 @@ namespace Хуильник
 
     class Cart
     {
-        private Dictionary<Product, int> _products = new Dictionary<Product, int>();
-        private Wallet _wallet;
+        private Dictionary<Good, int> _products = new Dictionary<Good, int>();
+        private Order _order;
+        private IProductGetter _productGetter;
 
-        public event Action<Product, int, Cart> NeedToAdd;     
-
-        public Cart(Wallet wallet)
+        public Cart(Order order, IProductGetter productGetter)
         {
-            if (wallet == null)
+            if (order == null || productGetter == null)
             {
                 throw new NullReferenceException();
             }
 
-            _wallet = wallet;
+            _order = order;
+            _productGetter = productGetter;
         }
 
-        public void Add(Product toAdd, int count)
+        public void Add(Good toAdd, int count)
         {
-            NeedToAdd?.Invoke(toAdd, count, this);    
+            if (_productGetter.TryGet(toAdd, count))
+            {
+                _products.Add(toAdd, count);
+            }
         }
 
-        public void OnAdd(Product product, int count)
-        {
-            _products.Add(product, count);
-        }
-
-        public Wallet Order()
+        public Order GetOrder()
         {
             foreach (var product in _products)
             {
@@ -165,15 +154,17 @@ namespace Хуильник
                 Console.WriteLine(" " + product.Value);
             }
 
-            return _wallet;
+            _productGetter.RemoveProducts(_products);
+
+            return _order;
         }
     }
 
-    class Wallet
+    class Order
     {
         public string PayLink { get; private set; }
 
-        public Wallet(string payLink)
+        public Order(string payLink)
         {
             if (payLink == null)
             {
@@ -184,12 +175,12 @@ namespace Хуильник
         }
     }
 
-    class Product
+    class Good
     {
         private string _name;
-        
-        public Product(string name)
-        {            
+
+        public Good(string name)
+        {
             if (name == null)
             {
                 throw new NullReferenceException();
