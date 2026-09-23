@@ -12,8 +12,8 @@ namespace Хуильник
     {
         static void Main(string[] args)
         {
-            Good iPhone12 = new Good("IPhone 12");
-            Good iPhone11 = new Good("IPhone 11");
+            Product iPhone12 = new Product("IPhone 12");
+            Product iPhone11 = new Product("IPhone 11");
 
             Warehouse warehouse = new Warehouse();
 
@@ -24,7 +24,7 @@ namespace Хуильник
 
             //Вывод всех товаров на складе с их остатком
 
-            Cart cart = shop.Cart();
+            Cart cart = shop.GetCart();
             cart.Add(iPhone12, 4);
             cart.Add(iPhone11, 3); //при такой ситуации возникает ошибка так, как нет нужного количества товара на складе
 
@@ -38,8 +38,8 @@ namespace Хуильник
 
     interface IProductGetter
     {
-        bool TryGet(Good toGet, int count);
-        void RemoveProducts(Dictionary<Good, int> products);
+        bool IsHaveProduct(Product toGet, int count);
+        void RemoveProducts(Dictionary<Product, int> products);
     }
 
     class Shop
@@ -48,28 +48,20 @@ namespace Хуильник
 
         public Shop(Warehouse wareHouse)
         {
-            if (wareHouse == null)
-            {
-                throw new NullReferenceException();
-            }
-
-            _wareHouse = wareHouse;
+            _wareHouse = wareHouse ?? throw new ArgumentNullException(nameof(wareHouse));
         }
 
-        public Cart Cart()
-        {
-            Order order = new Order("рандомная ссылка");
-            Cart cart = new Cart(order, _wareHouse);
-
-            return cart;
+        public Cart GetCart()
+        {  
+            return new Cart(_wareHouse); ;
         }
     }
 
     class Warehouse : IProductGetter
     {
-        private Dictionary<Good, int> _products = new Dictionary<Good, int>();
+        private Dictionary<Product, int> _products = new Dictionary<Product, int>();
 
-        public void Delive(Good product, int count)
+        public void Delive(Product product, int count)
         {
             if (product == null)
             {
@@ -78,76 +70,103 @@ namespace Хуильник
 
             if (count < 1)
             {
-                throw new IndexOutOfRangeException();
+                throw new ArgumentOutOfRangeException();
             }
 
             _products.Add(product, count);
         }
 
-        public void RemoveProducts(Dictionary<Good, int> products)
+        public void RemoveProducts(Dictionary<Product, int> products)
         {
             foreach (var product in products)
             {
-                _products.Remove(product.Key);
+                if (_products.ContainsKey(product.Key))
+                {
+                    if (product.Value < 1)
+                    {
+                        throw new ArgumentOutOfRangeException();
+                    }
+
+                    if (_products[product.Key] - product.Value < 0)
+                    {
+                        throw new ArgumentOutOfRangeException();
+                    }
+
+                    if (_products[product.Key] - product.Value == 0)
+                    {
+                        _products.Remove(product.Key);
+                    }
+                    else
+                    {
+                        _products[product.Key] -= product.Value;
+                    }
+                }
             }
         }
 
-        public bool TryGet(Good toGet, int count)
+        public bool IsHaveProduct(Product product, int count)
         {
-            Good productToAdd = null;
-            int resultValue = -1;
-
-            foreach (var product in _products)
+            if (product == null)
             {
-                if (toGet == product.Key)
-                {
-                    productToAdd = product.Key;
-                    resultValue = product.Value;
-                }
+                throw new NullReferenceException();
             }
 
+            if (count < 1)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
 
+            if (_products.ContainsKey(product))
+            {
+                if (_products[product] >= count)
+                {
+                    return true;
+                }              
+            }
+
+            return false;
+        }
+    }
+
+    class Cart 
+    {
+        private const int MaxProducts = 5;
+        private const int MaxProductsType = 10;
+
+        private Dictionary<Product, int> _products = new Dictionary<Product, int>();
+        private Order _order;
+        private IProductGetter _productGetter;
+
+        public Cart(IProductGetter productGetter)
+        {
+            _productGetter = productGetter ?? throw new ArgumentNullException(nameof(productGetter));
+        }
+
+        public void Add(Product productToAdd, int count)
+        {
             if (productToAdd == null)
             {
                 throw new NullReferenceException();
             }
 
-            if (count > resultValue)
+            if (count < 1)
             {
-                throw new InvalidOperationException();
+                throw new ArgumentOutOfRangeException();
             }
 
-            return true;
-        }
-    }
-
-    class Cart
-    {
-        private Dictionary<Good, int> _products = new Dictionary<Good, int>();
-        private Order _order;
-        private IProductGetter _productGetter;
-
-        public Cart(Order order, IProductGetter productGetter)
-        {
-            if (order == null || productGetter == null)
+            if (_productGetter.IsHaveProduct(productToAdd, count) && _products.Count < MaxProductsType)
             {
-                throw new NullReferenceException();
-            }
-
-            _order = order;
-            _productGetter = productGetter;
-        }
-
-        public void Add(Good toAdd, int count)
-        {
-            if (_productGetter.TryGet(toAdd, count))
-            {
-                _products.Add(toAdd, count);
+                if (count < MaxProducts)
+                {
+                    _products.Add(productToAdd, count);
+                }
             }
         }
 
         public Order GetOrder()
         {
+            Order order = new Order("Рандомная ссылка");
+
             foreach (var product in _products)
             {
                 product.Key.ShowInfo();
@@ -156,7 +175,7 @@ namespace Хуильник
 
             _productGetter.RemoveProducts(_products);
 
-            return _order;
+            return order;
         }
     }
 
@@ -166,24 +185,24 @@ namespace Хуильник
 
         public Order(string payLink)
         {
-            if (payLink == null)
+            if (string.IsNullOrWhiteSpace(payLink))
             {
-                throw new NullReferenceException();
+                throw new ArgumentException();
             }
 
             PayLink = payLink;
         }
     }
 
-    class Good
+    class Product
     {
         private string _name;
 
-        public Good(string name)
+        public Product(string name)
         {
-            if (name == null)
+            if (string.IsNullOrWhiteSpace(name))
             {
-                throw new NullReferenceException();
+                throw new ArgumentException();
             }
 
             _name = name;
