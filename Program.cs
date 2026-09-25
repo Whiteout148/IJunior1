@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,205 +14,141 @@ namespace Хуильник
     {
         static void Main(string[] args)
         {
-            Product iPhone12 = new Product("IPhone 12");
-            Product iPhone11 = new Product("IPhone 11");
+            List<PathFinder> finders = new List<PathFinder>();
 
-            Warehouse warehouse = new Warehouse();
+            File file = new File(".txt");
+            finders.Add(new PathFinder(" 1 ", new FileLogWritter(file)));
+            finders.Add(new PathFinder(" 4 ", new ConsoleLogWritter()));
+            finders.Add(new PathFinder(" 8 ", new SecureLogWritter(new FileLogWritter(file))));
+            finders.Add(new PathFinder(" 8 ", new SecureLogWritter(new ConsoleLogWritter())));
+            finders.Add(new PathFinder(" Пасхалко ", new SecureLogWritter(new ConsoleLogWritter(new SecureLogWritter(new FileLogWritter(file))))));
 
-            Shop shop = new Shop(warehouse);
-
-            warehouse.Delive(iPhone12, 10);
-            warehouse.Delive(iPhone11, 1);
-
-            //Вывод всех товаров на складе с их остатком
-
-            Cart cart = shop.GetCart();
-            cart.Add(iPhone12, 4);
-            cart.Add(iPhone11, 3); //при такой ситуации возникает ошибка так, как нет нужного количества товара на складе
-
-            //Вывод всех товаров в корзине
-
-            Console.WriteLine(cart.GetOrder().PayLink);
-
-            cart.Add(iPhone12, 9); //Ошибка, после заказа со склада убираются заказанные товары
+            for (int i = 0; i < finders.Count; i++)
+            {
+                finders[i].Find();
+            }
         }
     }
 
-    interface IProductGetter
+    interface ILogger
     {
-        bool IsHaveProduct(Product toGet, int count);
-        void RemoveProducts(Dictionary<Product, int> products);
+        void WriteLog(string message);
     }
 
-    class Shop
+    class PathFinder
     {
-        private Warehouse _wareHouse;
+        private string _message;
+        private ILogger _logger;
 
-        public Shop(Warehouse wareHouse)
+        public PathFinder(string message, ILogger logger)
         {
-            _wareHouse = wareHouse ?? throw new ArgumentNullException(nameof(wareHouse));
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                throw new ArgumentNullException(message);
+            }
+
+            _logger = logger ?? throw new NullReferenceException();
+            _message = message;
         }
 
-        public Cart GetCart()
-        {  
-            return new Cart(_wareHouse); ;
+        public void Find()
+        {
+            _logger.WriteLog(_message);
         }
     }
 
-    class Warehouse : IProductGetter
+    abstract class LogWritter : ILogger 
     {
-        private Dictionary<Product, int> _products = new Dictionary<Product, int>();
+        protected ILogger Logger;
 
-        public void Delive(Product product, int count)
+        public LogWritter(ILogger logger = null)
         {
-            if (product == null)
-            {
-                throw new NullReferenceException();
-            }
-
-            if (count < 1)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
-            _products.Add(product, count);
+            Logger = logger;
         }
 
-        public void RemoveProducts(Dictionary<Product, int> products)
+        public virtual void WriteLog(string message)
         {
-            foreach (var product in products)
+            if (string.IsNullOrWhiteSpace(message))
             {
-                if (_products.ContainsKey(product.Key))
-                {
-                    if (product.Value < 1)
-                    {
-                        throw new ArgumentOutOfRangeException();
-                    }
-
-                    if (_products[product.Key] - product.Value < 0)
-                    {
-                        throw new ArgumentOutOfRangeException();
-                    }
-
-                    if (_products[product.Key] - product.Value == 0)
-                    {
-                        _products.Remove(product.Key);
-                    }
-                    else
-                    {
-                        _products[product.Key] -= product.Value;
-                    }
-                }
-            }
-        }
-
-        public bool IsHaveProduct(Product product, int count)
-        {
-            if (product == null)
-            {
-                throw new NullReferenceException();
+                throw new ArgumentNullException();
             }
 
-            if (count < 1)
+            if (Logger != null)
             {
-                throw new ArgumentOutOfRangeException();
+                Logger.WriteLog(message);
             }
-
-            if (_products.ContainsKey(product))
-            {
-                if (_products[product] >= count)
-                {
-                    return true;
-                }              
-            }
-
-            return false;
         }
     }
 
-    class Cart 
+    class FileLogWritter : LogWritter
     {
-        private const int MaxProducts = 5;
-        private const int MaxProductsType = 10;
+        private File _file;
 
-        private Dictionary<Product, int> _products = new Dictionary<Product, int>();
-        private Order _order;
-        private IProductGetter _productGetter;
-
-        public Cart(IProductGetter productGetter)
-        {
-            _productGetter = productGetter ?? throw new ArgumentNullException(nameof(productGetter));
+        public FileLogWritter(File file, ILogger logger = null) : base(logger) 
+        {           
+            _file = file ?? throw new NullReferenceException();
         }
 
-        public void Add(Product productToAdd, int count)
+        public override void WriteLog(string message)
         {
-            if (productToAdd == null)
-            {
-                throw new NullReferenceException();
-            }
-
-            if (count < 1)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
-            if (_productGetter.IsHaveProduct(productToAdd, count) && _products.Count < MaxProductsType)
-            {
-                if (count < MaxProducts)
-                {
-                    _products.Add(productToAdd, count);
-                }
-            }
-        }
-
-        public Order GetOrder()
-        {
-            Order order = new Order("Рандомная ссылка");
-
-            foreach (var product in _products)
-            {
-                product.Key.ShowInfo();
-                Console.WriteLine(" " + product.Value);
-            }
-
-            _productGetter.RemoveProducts(_products);
-
-            return order;
+            _file.WriteAllText(message);
         }
     }
 
-    class Order
+    class ConsoleLogWritter : LogWritter
+    {     
+        public ConsoleLogWritter(ILogger logger = null) : base(logger)
+        {
+
+        }
+
+        public override void WriteLog(string message)
+        {
+            Console.WriteLine(message);
+        }
+    }
+
+    class SecureLogWritter : LogWritter
     {
-        public string PayLink { get; private set; }
-
-        public Order(string payLink)
+        public SecureLogWritter(ILogger logger) : base (logger) 
         {
-            if (string.IsNullOrWhiteSpace(payLink))
+            if (logger == null)
             {
-                throw new ArgumentException();
+                throw new ArgumentNullException();
             }
+        }
 
-            PayLink = payLink;
+        public override void WriteLog(string message)
+        {         
+            if (DateTime.Now.DayOfWeek == DayOfWeek.Saturday)
+            {
+                Logger.WriteLog(message);
+            }
         }
     }
 
-    class Product
+    class File
     {
         private string _name;
 
-        public Product(string name)
+        public File(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentException();
+                throw new ArgumentNullException();
             }
 
             _name = name;
         }
 
-        public void ShowInfo()
+        public void WriteAllText(string message)
         {
-            Console.Write(_name);
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                throw new ArgumentNullException();
+            }
+
+            Console.WriteLine(_name + " " + message);
         }
     }
 }
