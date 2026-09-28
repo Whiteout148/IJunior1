@@ -1,85 +1,155 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO.Compression;
-using System.Linq;
-using System.Media;
-using System.Runtime.InteropServices;
-using System.Security.Policy;
+using System.Threading;
 
 namespace XDproject
 {
-    class Program
+    internal class Program
     {
-        static void Main()
+        static void Main(string[] args)
         {
-            MilitaryLeadership militaryLeadership = new MilitaryLeadership();
+            List<PathFinder> finders = new List<PathFinder>();
 
-            militaryLeadership.Work();
-        }
-    }
+            File file = new File(".txt");
+            finders.Add(new PathFinder(" 1 ", new FileLogWritter(file)));
+            finders.Add(new PathFinder(" 4 ", new ConsoleLogWritter()));
+            finders.Add(new PathFinder(" 8 ", new SecureLogWritter(new FileLogWritter(file), DayOfWeek.Monday)));
+            finders.Add(new PathFinder(" 8 ", new SecureLogWritter(new ConsoleLogWritter(), DayOfWeek.Monday)));
+            finders.Add(new PathFinder(" Пасхалко ", new ConsoleLogWritter(new SecureLogWritter(new FileLogWritter(file), DayOfWeek.Monday))));
 
-    class MilitaryLeadership
-    {
-        private List<Soldier> _soldiers = new List<Soldier>();
-
-        public MilitaryLeadership()
-        {
-            _soldiers.Add(new Soldier("Иван", "Лейтенант", 7, "АК-47"));
-            _soldiers.Add(new Soldier("Сергей", "Сержант", 12, "АК-74"));
-            _soldiers.Add(new Soldier("Дмитрий", "Рядовой", 8, "АК-12"));
-            _soldiers.Add(new Soldier("Владлен", "Майор", 9, "АК-15"));
-            _soldiers.Add(new Soldier("Александр", "Майор", 2, "Пистолет Макарова"));
-        }
-
-        public void Work()
-        {
-            ShowSoldiers();
-            Console.WriteLine("Нажмите на любую кнопку чтобы получить только имя и звание");
-            Console.ReadLine();
-            FilterSoldiers();
-        }
-
-        private void FilterSoldiers()
-        {
-            var filteredSoldiers = _soldiers.Select(soldier => new { Name = soldier.Name, Rank = soldier.Rank }).ToList();
-
-            for (int i = 0; i < filteredSoldiers.Count; i++)
+            for (int i = 0; i < finders.Count; i++)
             {
-                Console.WriteLine($"Имя: {filteredSoldiers[i].Name} Звание: {filteredSoldiers[i].Rank}");
-            }
-        }
-
-        private void ShowSoldiers()
-        {
-            Console.WriteLine();
-
-            for (int i = 0; i < _soldiers.Count; i++)
-            {
-                _soldiers[i].ShowInfo();
-                Console.WriteLine();
+                finders[i].Find();
             }
         }
     }
 
-    class Soldier
+    interface ILogger
     {
-        private int _serviceLive;
-        private string _gun;
+        void WriteLog(string message);
+    }
 
-        public Soldier(string name, string rank, int serviceLife, string gun)
+    class PathFinder
+    {
+        private string _message;
+        private ILogger _logger;
+
+        public PathFinder(string message, ILogger logger)
         {
-            Name = name;
-            _gun = gun;
-            _serviceLive = serviceLife;
-            Rank = rank;
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                throw new ArgumentNullException(message);
+            }
+
+            _logger = logger ?? throw new NullReferenceException();
+            _message = message;
         }
 
-        public string Name { get; private set; }
-        public string Rank { get; private set; }
-
-        public void ShowInfo()
+        public void Find()
         {
-            Console.WriteLine($"Имя: {Name} звание: {Rank} срок службы: {_serviceLive} вооружение: {_gun}");
+            _logger.WriteLog(_message);
+        }
+    }
+
+    class FileLogWritter : ILogger
+    {
+        private ILogger _logger;
+        private File _file;
+
+        public FileLogWritter(File file, ILogger logger = null)
+        {
+            _file = file ?? throw new NullReferenceException();
+            _logger = logger;
+        }
+
+        public void WriteLog(string message)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                throw new ArgumentNullException();
+            }
+
+            _file.WriteAllText(message);
+
+            if (_logger != null)
+            {
+                _logger.WriteLog(message);
+            }
+        }
+    }
+
+    class ConsoleLogWritter : ILogger
+    {
+        private ILogger _logger;
+
+        public ConsoleLogWritter(ILogger logger = null)
+        {
+            _logger = logger;
+        }
+
+        public void WriteLog(string message)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                throw new ArgumentNullException();
+            }
+
+            Console.WriteLine(message);
+
+            if (_logger != null)
+            {
+                _logger.WriteLog(message);
+            }
+        }
+    }
+
+    class SecureLogWritter : ILogger
+    {
+        private ILogger _logger;
+        private DayOfWeek _currentDay;
+
+        public SecureLogWritter(ILogger logger, DayOfWeek day)
+        {
+            _logger = logger ?? throw new NullReferenceException();
+            _currentDay = day;
+        }
+
+        public void WriteLog(string message)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                throw new ArgumentNullException();
+            }
+
+            if (DateTime.Now.DayOfWeek == _currentDay)
+            {
+                _logger.WriteLog(message);
+            }
+        }
+    }
+
+    class File
+    {
+        private string _name;
+
+        public File(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentNullException();
+            }
+
+            _name = name;
+        }
+
+        public void WriteAllText(string message)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                throw new ArgumentNullException();
+            }
+
+            Console.WriteLine(_name + " " + message);
         }
     }
 }
