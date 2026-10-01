@@ -1,155 +1,104 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 
 namespace XDproject
 {
-    internal class Program
+    class Program
     {
         static void Main(string[] args)
         {
-            List<PathFinder> finders = new List<PathFinder>();
+            Order order = new Order(42, 3);
 
-            File file = new File(".txt");
-            finders.Add(new PathFinder(" 1 ", new FileLogWritter(file)));
-            finders.Add(new PathFinder(" 4 ", new ConsoleLogWritter()));
-            finders.Add(new PathFinder(" 8 ", new SecureLogWritter(new FileLogWritter(file), DayOfWeek.Monday)));
-            finders.Add(new PathFinder(" 8 ", new SecureLogWritter(new ConsoleLogWritter(), DayOfWeek.Monday)));
-            finders.Add(new PathFinder(" Пасхалко ", new ConsoleLogWritter(new SecureLogWritter(new FileLogWritter(file), DayOfWeek.Monday))));
+            List<IPaymentSystem> systems = new List<IPaymentSystem>();
 
-            for (int i = 0; i < finders.Count; i++)
+            systems.Add(new NormalSystem());
+            systems.Add(new AmountSystem());
+            systems.Add(new KeySystem());
+
+            for (int i = 0; i < systems.Count; i++)
             {
-                finders[i].Find();
+                Console.WriteLine(systems[i].GetPayingLink(order));
             }
         }
     }
 
-    interface ILogger
+    class Order
     {
-        void WriteLog(string message);
+        public readonly int Id;
+        public readonly int Amount;
+
+        public Order(int id, int amount) => (Id, Amount) = (id, amount);
     }
 
-    class PathFinder
+    interface IPaymentSystem
     {
-        private string _message;
-        private ILogger _logger;
-
-        public PathFinder(string message, ILogger logger)
-        {
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                throw new ArgumentNullException(message);
-            }
-
-            _logger = logger ?? throw new NullReferenceException();
-            _message = message;
-        }
-
-        public void Find()
-        {
-            _logger.WriteLog(_message);
-        }
+        string GetPayingLink(Order order);
     }
 
-    class FileLogWritter : ILogger
+    class NormalSystem : IPaymentSystem
     {
-        private ILogger _logger;
-        private File _file;
+        private const string BaseLink = "pay.system1.ru/order?amount=";
 
-        public FileLogWritter(File file, ILogger logger = null)
+        public string GetPayingLink(Order order)
         {
-            _file = file ?? throw new NullReferenceException();
-            _logger = logger;
-        }
+            string id = order.Id.ToString();
 
-        public void WriteLog(string message)
-        {
-            if (string.IsNullOrWhiteSpace(message))
+            using (MD5 md5 = MD5.Create())
             {
-                throw new ArgumentNullException();
-            }
+                byte[] bytes = Encoding.UTF8.GetBytes(id);
+                byte[] hashBytes = md5.ComputeHash(bytes);
 
-            _file.WriteAllText(message);
+                string hash = BitConverter.ToString(hashBytes).ToLower();
 
-            if (_logger != null)
-            {
-                _logger.WriteLog(message);
+                return $"{BaseLink}{order.Amount}RUB&hash={hash}";
             }
         }
     }
 
-    class ConsoleLogWritter : ILogger
+    class AmountSystem : IPaymentSystem
     {
-        private ILogger _logger;
+        private const string BaseLink = "order.system2.ru/pay?hash=";
 
-        public ConsoleLogWritter(ILogger logger = null)
+        public string GetPayingLink(Order order)
         {
-            _logger = logger;
-        }
+            string data = order.Id.ToString() + order.Amount.ToString();
 
-        public void WriteLog(string message)
-        {
-            if (string.IsNullOrWhiteSpace(message))
+            using (MD5 md5 = MD5.Create())
             {
-                throw new ArgumentNullException();
-            }
+                byte[] bytes = Encoding.UTF8.GetBytes(data);
+                byte[] hashBytes = md5.ComputeHash(bytes);
 
-            Console.WriteLine(message);
+                string hash = BitConverter.ToString(hashBytes).ToLower();
 
-            if (_logger != null)
-            {
-                _logger.WriteLog(message);
+                return $"{BaseLink}{hash}";
             }
         }
     }
 
-    class SecureLogWritter : ILogger
+    class KeySystem : IPaymentSystem
     {
-        private ILogger _logger;
-        private DayOfWeek _currentDay;
+        private const string BaseLink = "system3.com/pay?amount=";
+        private readonly string _secretKey = "секретный ключ";
 
-        public SecureLogWritter(ILogger logger, DayOfWeek day)
+        public string GetPayingLink(Order order)
         {
-            _logger = logger ?? throw new NullReferenceException();
-            _currentDay = day;
-        }
+            string data = order.Amount.ToString()
+                         + order.Id.ToString()
+                         + _secretKey;
 
-        public void WriteLog(string message)
-        {
-            if (string.IsNullOrWhiteSpace(message))
+            using (SHA1 sha1 = SHA1.Create())
             {
-                throw new ArgumentNullException();
+                byte[] bytes = Encoding.UTF8.GetBytes(data);
+                byte[] hashBytes = sha1.ComputeHash(bytes);
+
+                string hash = BitConverter.ToString(hashBytes).ToLower();
+
+                return $"{BaseLink}{order.Amount}&curency=RUB&hash={hash}";
             }
-
-            if (DateTime.Now.DayOfWeek == _currentDay)
-            {
-                _logger.WriteLog(message);
-            }
-        }
-    }
-
-    class File
-    {
-        private string _name;
-
-        public File(string name)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentNullException();
-            }
-
-            _name = name;
-        }
-
-        public void WriteAllText(string message)
-        {
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                throw new ArgumentNullException();
-            }
-
-            Console.WriteLine(_name + " " + message);
         }
     }
 }
