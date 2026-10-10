@@ -1,9 +1,10 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading;
+using System.Data;
+
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace XDproject
 {
@@ -11,135 +12,225 @@ namespace XDproject
     {
         static void Main(string[] args)
         {
-            Order order = new Order(42, 3);
+            OrderForm orderForm = new OrderForm();
+            PaymentHandler paymentHandler = new PaymentHandler();
 
-            IHashService md5 = new MD5Service();
-            IHashService sha1 = new SHA1Service();
+            List<ISystemFabric> fabrics = new List<ISystemFabric>();
 
-            List<IPaymentSystem> systems = new List<IPaymentSystem>();
+            fabrics.Add(new CardFabric("MasterCard"));
+            fabrics.Add(new QiwiFabric("QIWI"));
+            fabrics.Add(new WebMoneyFabric("Web"));
 
-            systems.Add(new NormalSystem(md5));
-            systems.Add(new AmountSystem(md5));
-            systems.Add(new KeySystem(sha1));
+            Steam steam = new Steam(orderForm, paymentHandler, fabrics);
 
-            for (int i = 0; i < systems.Count; i++)
-            {
-                Console.WriteLine(systems[i].GetPayingLink(order));
-            }
+            steam.Work();
         }
     }
 
-    class Order
+    class Steam
     {
-        public readonly int Id;
-        public readonly int Amount;
+        private OrderForm _form;
+        private PaymentHandler _handler;
+        private List<ISystemFabric> _fabrics;
 
-        public Order(int id, int amount)
+        public Steam(OrderForm form, PaymentHandler handler, List<ISystemFabric> fabrics)
         {
+            if (fabrics == null || fabrics.Count < 1)
+                throw new ArgumentNullException(nameof(fabrics));
+
+            _fabrics = fabrics;
+            _form = form ?? throw new NullReferenceException();
+            _handler = handler ?? throw new NullReferenceException();
+        }
+
+        public void Work()
+        {
+            string userInput = _form.ShowForm(_fabrics.Select(fabric => fabric.Id).ToList());
+
+            if (TryGetFabric(userInput, out PaymentSystem system))
+            {
+                _handler.ShowPaymentResult(userInput, system);
+            }
+            else
+            {
+                Console.WriteLine("Такого способа оплаты нету!");
+            }
+        }
+
+        private bool TryGetFabric(string id, out PaymentSystem system)
+        {
+            for (int i = 0; i < _fabrics.Count; i++)
+            {
+                if (id.ToLower() == _fabrics[i].Id.ToLower())
+                {
+                    system = _fabrics[i].CreatePaymentSystem(id);
+
+                    return true;
+                }
+            }
+
+            system = null;
+
+            return false;
+        }
+    }
+
+    class OrderForm
+    {
+        public string ShowForm(List<string> paymentsId)
+        {
+            Console.WriteLine("Мы принимаем:\n");
+
+            for (int i = 0; i < paymentsId.Count; i++)
+            {
+                Console.Write(paymentsId[i] + ", ");
+            }
+
+            Console.WriteLine("Какое системой вы хотите совершить оплату?");
+
+            return Console.ReadLine();
+        }
+    }
+
+    class PaymentHandler
+    {
+        public void ShowPaymentResult(string systemId, PaymentSystem system)
+        {
+            if (string.IsNullOrWhiteSpace(systemId))
+                throw new ArgumentNullException(nameof(systemId));
+
+            if (system == null)
+                throw new ArgumentNullException(nameof(system));
+
+            system.Pay();
+
+            Console.WriteLine("Проверка платежа через: " + systemId);
+            Console.WriteLine("Оплата прошла успешно!");
+        }
+    }
+
+    interface ISystemFabric
+    {
+        string Id { get; }
+        PaymentSystem CreatePaymentSystem(string systemId);
+    }
+
+    abstract class PaymentSystem
+    {
+        protected string Id { get; private set; }
+
+        public PaymentSystem(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException();
+
             Id = id;
-            Amount = amount;
+        }
+
+        public abstract void Pay();
+    }
+
+    class Card : PaymentSystem
+    {
+        private const int SymbolsCount = 5;
+
+        public Card(string id) : base(id) { }
+
+        public override void Pay()
+        {
+            Console.WriteLine("Оплата через карту: " + Id);
         }
     }
 
-    interface IPaymentSystem
+    class CardFabric : ISystemFabric
     {
-        string GetPayingLink(Order order);
-    }
+        public string Id { get; private set; }
 
-    interface IHashService
-    {
-        string GetHash(string startInfo);
-    }
-
-    class MD5Service : IHashService
-    {
-        public string GetHash(string startInfo)
+        public CardFabric(string id)
         {
-            using (MD5 md5 = MD5.Create())
-            {
-                byte[] bytes = Encoding.UTF8.GetBytes(startInfo);
-                byte[] hashBytes = md5.ComputeHash(bytes);
+            if(string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException(nameof(id));
 
-                return BitConverter.ToString(hashBytes).ToLower();
-            }
+            Id = id;
+        }
+
+        public PaymentSystem CreatePaymentSystem(string systemId)
+        {
+            if (string.IsNullOrWhiteSpace(systemId))
+                throw new ArgumentNullException();
+
+            if (systemId != Id)
+                throw new InvalidOperationException();
+
+            return new Card(Id);
         }
     }
 
-    class SHA1Service : IHashService
+    class Qiwi : PaymentSystem
     {
-        public string GetHash(string startInfo)
-        {
-            using (SHA1 sha1 = SHA1.Create())
-            {
-                byte[] bytes = Encoding.UTF8.GetBytes(startInfo);
-                byte[] hashBytes = sha1.ComputeHash(bytes);
+        public Qiwi(string id) : base(id) { }
 
-                return BitConverter.ToString(hashBytes).ToLower();
-            }
+        public override void Pay()
+        {
+            Console.WriteLine("Оплата через страницу: " + Id);
         }
     }
 
-    class NormalSystem : IPaymentSystem
+    class QiwiFabric : ISystemFabric
     {
-        private const string BaseLink = "pay.system1.ru/order?amount=";
+        public string Id { get; private set; }
 
-        private readonly IHashService _hashService;
-
-        public NormalSystem(IHashService hashService)
+        public QiwiFabric(string id)
         {
-            _hashService = hashService;
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException(nameof(id));
+
+            Id = id;
         }
 
-        public string GetPayingLink(Order order)
+        public PaymentSystem CreatePaymentSystem(string systemId)
         {
-            string id = order.Id.ToString();
+            if (string.IsNullOrWhiteSpace(systemId))
+                throw new ArgumentNullException();
 
-            string hash = _hashService.GetHash(id);
+            if (systemId != Id)
+                throw new InvalidOperationException();
 
-            return $"{BaseLink}{order.Amount}RUB&hash={hash}";
+            return new Qiwi(Id);
         }
     }
 
-    class AmountSystem : IPaymentSystem
+    class WebMoney : PaymentSystem
     {
-        private const string BaseLink = "order.system2.ru/pay?hash=";
+        public WebMoney(string id) : base(id) { }
 
-        private readonly IHashService _hashService;
-
-        public AmountSystem(IHashService hashService)
+        public override void Pay()
         {
-            _hashService = hashService;
-        }
-
-        public string GetPayingLink(Order order)
-        {
-            string data = order.Id.ToString() + order.Amount.ToString();
-
-            string hash = _hashService.GetHash(data);
-
-            return $"{BaseLink}{hash}";
+            Console.WriteLine("Оплата через API: " + Id);
         }
     }
 
-    class KeySystem : IPaymentSystem
+    class WebMoneyFabric : ISystemFabric
     {
-        private const string BaseLink = "system3.com/pay?amount=";
-        private const string SecretKey = "секретный ключ";
+        public string Id { get; private set; }
 
-        private readonly IHashService _hashService;
-
-        public KeySystem(IHashService hashService)
+        public WebMoneyFabric(string id)
         {
-            _hashService = hashService;
+            if(string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException(nameof(id));
+
+            Id = id;
         }
 
-        public string GetPayingLink(Order order)
+        public PaymentSystem CreatePaymentSystem(string systemId)
         {
-            string data = order.Amount.ToString() + order.Id.ToString() + SecretKey;
+            if (string.IsNullOrWhiteSpace(systemId))
+                throw new ArgumentNullException();
 
-            string hash = _hashService.GetHash(data);
+            if (systemId != Id)
+                throw new InvalidOperationException();
 
-            return $"{BaseLink}{order.Amount}&curency=RUB&hash={hash}";
+            return new WebMoney(Id);
         }
     }
 }
